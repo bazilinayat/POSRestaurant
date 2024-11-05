@@ -1,0 +1,164 @@
+[
+  {
+    "Id": 1,
+    "MenuCategoryId": 1,
+    "Name": "Paneer Roll",
+    "Icon": "",
+    "Description": "Roll",
+    "Price": 30,
+    "Veg": true
+  },
+  {
+    "Id": 2,
+    "MenuCategoryId": 1,
+    "Name": "Mixed Veg Roll",
+    "Icon": "",
+    "Description": "Rolls",
+    "Price": 20,
+    "Veg": true
+  },
+  {
+    "Id": 3,
+    "MenuCategoryId": 2,
+    "Name": "French Fries",
+    "Icon": "",
+    "Description": "Fries",
+    "Price": 50,
+    "Veg": true
+  },
+  {
+    "Id": 4,
+    "MenuCategoryId": 2,
+    "Name": "Peri Peri Fries",
+    "Icon": "",
+    "Description": "Fries",
+    "Price": 60,
+    "Veg": true
+  },
+  {
+    "Id": 5,
+    "MenuCategoryId": 2,
+    "Name": "Nuggets",
+    "Icon": "",
+    "Description": "Nuggets",
+    "Price": 80,
+    "Veg": true
+  },
+  {
+    "Id": 6,
+    "MenuCategoryId": 3,
+    "Name": "Pav Bhaji",
+    "Icon": "",
+    "Description": "Pav Bhaji",
+    "Price": 100,
+    "Veg": true
+  },
+  {
+    "Id": 7,
+    "MenuCategoryId": 3,
+    "Name": "Chole Bhature",
+    "Icon": "",
+    "Description": "Chole Bhature",
+    "Price": 110,
+    "Veg": true
+  },
+  {
+    "Id": 8,
+    "MenuCategoryId": 4,
+    "Name": "Pulav",
+    "Icon": "",
+    "Description": "Rice",
+    "Price": 100,
+    "Veg": true
+  },
+  {
+    "Id": 9,
+    "MenuCategoryId": 4,
+    "Name": "Fried Rice",
+    "Icon": "",
+    "Description": "Rice",
+    "Price": 120,
+    "Veg": true
+  },
+  {
+    "Id": 10,
+    "MenuCategoryId": 5,
+    "Name": "Roti",
+    "Icon": "",
+    "Description": "Roti",
+    "Price": 15,
+    "Veg": true
+  },
+  {
+    "Id": 11,
+    "MenuCategoryId": 5,
+    "Name": "Butter Roti",
+    "Icon": "",
+    "Description": "Roti",
+    "Price": 25,
+    "Veg": true
+  },
+  {
+    "Id": 12,
+    "MenuCategoryId": 6,
+    "Name": "Ras Malai",
+    "Icon": "",
+    "Description": "1 Piece",
+    "Price": 20,
+    "Veg": true
+  },
+  {
+    "Id": 13,
+    "MenuCategoryId": 6,
+    "Name": "Rasgulla",
+    "Icon": "",
+    "Description": "1 Piece",
+    "Price": 20,
+    "Veg": true
+  },
+  {
+    "Id": 14,
+    "MenuCategoryId": 7,
+    "Name": "Coffee",
+    "Icon": "",
+    "Description": "Drink",
+    "Price": 35,
+    "Veg": true
+  },
+  {
+    "Id": 15,
+    "MenuCategoryId": 7,
+    "Name": "Cold Coffee",
+    "Icon": "",
+    "Description": "Drink",
+    "Price": 55,
+    "Veg": true
+  },
+  {
+    "Id": 16,
+    "MenuCategoryId": 7,
+    "Name": "Water",
+    "Icon": "",
+    "Description": "1 Litre",
+    "Price": 20,
+    "Veg": true
+  },
+  {
+    "Id": 17,
+    "MenuCategoryId": 8,
+    "Name": "Pav",
+    "Icon": "",
+    "Description": "Extra",
+    "Price": 10,
+    "Veg": true
+  },
+  {
+    "Id": 18,
+    "MenuCategoryId": 8,
+    "Name": "Bhature",
+    "Icon": "",
+    "Description": "Extra",
+    "Price": 25,
+    "Veg": true
+  }
+]

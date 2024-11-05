@@ -1,0 +1,42 @@
+[
+  {
+    "Id": 1,
+    "Name": "Starters",
+    "Icon": ""
+  },
+  {
+    "Id": 2,
+    "Name": "Snacks",
+    "Icon": ""
+  },
+  {
+    "Id": 3,
+    "Name": "Main Course",
+    "Icon": ""
+  },
+  {
+    "Id": 4,
+    "Name": "Rice",
+    "Icon": ""
+  },
+  {
+    "Id": 5,
+    "Name": "Roti",
+    "Icon": ""
+  },
+  {
+    "Id": 6,
+    "Name": "Sweets",
+    "Icon": ""
+  },
+  {
+    "Id": 7,
+    "Name": "Drinks",
+    "Icon": ""
+  },
+  {
+    "Id": 8,
+    "Name": "Extras",
+    "Icon": ""
+  }
+]
