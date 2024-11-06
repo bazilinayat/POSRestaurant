@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using POSRestaurant.Data;
+using POSRestaurant.Pages;
+using POSRestaurant.ViewModels;
 
 namespace POSRestaurant
 {
@@ -31,7 +33,9 @@ namespace POSRestaurant
     		builder.Logging.AddDebug();
 #endif
 
-            builder.Services.AddSingleton<DatabaseService>();
+            builder.Services.AddSingleton<DatabaseService>()
+                .AddSingleton<HomeViewModel>()
+                .AddSingleton<MainPage>();
 
             return builder.Build();
         }

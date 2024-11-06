@@ -2,41 +2,41 @@
   {
     "Id": 1,
     "Name": "Starters",
-    "Icon": ""
+    "Icon": "starters.png"
   },
   {
     "Id": 2,
     "Name": "Snacks",
-    "Icon": ""
+    "Icon": "nachos.png"
   },
   {
     "Id": 3,
     "Name": "Main Course",
-    "Icon": ""
+    "Icon": "thali.png"
   },
   {
     "Id": 4,
     "Name": "Rice",
-    "Icon": ""
+    "Icon": "rice.png"
   },
   {
     "Id": 5,
     "Name": "Roti",
-    "Icon": ""
+    "Icon": "roti.png"
   },
   {
     "Id": 6,
     "Name": "Sweets",
-    "Icon": ""
+    "Icon": "cupcake.png"
   },
   {
     "Id": 7,
     "Name": "Drinks",
-    "Icon": ""
+    "Icon": "drink.png"
   },
   {
     "Id": 8,
     "Name": "Extras",
-    "Icon": ""
+    "Icon": "extra.png"
   }
 ]

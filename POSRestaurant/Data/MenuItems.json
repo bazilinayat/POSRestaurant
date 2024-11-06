@@ -160,5 +160,23 @@
     "Description": "Extra",
     "Price": 25,
     "Veg": true
+  },
+  {
+    "Id": 19,
+    "MenuCategoryId": 8,
+    "Name": "Masala Pav",
+    "Icon": "",
+    "Description": "Extra",
+    "Price": 40,
+    "Veg": true
+  },
+  {
+    "Id": 20,
+    "MenuCategoryId": 8,
+    "Name": "Bhaji",
+    "Icon": "",
+    "Description": "Extra",
+    "Price": 30,
+    "Veg": true
   }
 ]

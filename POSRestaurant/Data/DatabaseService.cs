@@ -66,7 +66,7 @@ namespace POSRestaurant.Data
         public async Task<MenuCategory[]> GetMenuCategoriesAsync() =>
             await _connection.Table<MenuCategory>().ToArrayAsync();
 
-        public async Task<ItemOnMenu[]> GetMenuItemsAsync(int categoryId) =>
+        public async Task<ItemOnMenu[]> GetMenuItemsByCategoryAsync(int categoryId) =>
             await _connection.Table<ItemOnMenu>().Where(o => o.MenuCategoryId == categoryId).ToArrayAsync();
 
         /// <summary>

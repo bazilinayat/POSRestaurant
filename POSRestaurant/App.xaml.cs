@@ -7,10 +7,6 @@ namespace POSRestaurant
     /// </summary>
     public partial class App : Application
     {
-        /// <summary>
-        /// Private instance for DatabaseService object
-        /// </summary>
-        private readonly DatabaseService _databaseService;
 
         /// <summary>
         /// Constructor for the class, just starting the application
@@ -20,19 +16,13 @@ namespace POSRestaurant
         {
             InitializeComponent();
 
-            MainPage = new AppShell();
-            _databaseService = databaseService;
-        }
+            // Set AppTheme permanently to light
+            // Application.Current.UserAppTheme = AppTheme.Light;
 
-        /// <summary>
-        /// Overriden method, to seed the database
-        /// </summary>
-        protected override async void OnStart()
-        {
-            base.OnStart();
+            MainPage = new AppShell();
 
             // Initialize and Seed Database
-            await _databaseService.InitializeDatabaseAsync();
+            Task.Run(async() => await databaseService.InitializeDatabaseAsync()).GetAwaiter().GetResult();            
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using POSRestaurant.Data;
+using POSRestaurant.ViewModels;
 
 namespace POSRestaurant.Pages;
 
@@ -7,25 +8,28 @@ namespace POSRestaurant.Pages;
 /// </summary>
 public partial class MainPage : ContentPage
 {
-    int count = 0;
+    /// <summary>
+    /// DIed property to handle the HomeViewModel
+    /// </summary>
+    private readonly HomeViewModel _homeViewModel;
 
     /// <summary>
     /// Initialize MainPage
     /// </summary>
-    public MainPage()
+    /// <param name="homeViewModel">DI for HomeViewModel</param>
+    public MainPage(HomeViewModel homeViewModel)
     {
         InitializeComponent();
+        _homeViewModel = homeViewModel;
+        BindingContext = _homeViewModel;
+        Initialize();
     }
 
-    private void OnCounterClicked(object sender, EventArgs e)
+    /// <summary>
+    /// To load the initial data and add any other logic
+    /// </summary>
+    private async void Initialize()
     {
-        count++;
-
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
-        else
-            CounterBtn.Text = $"Clicked {count} times";
-
-        SemanticScreenReader.Announce(CounterBtn.Text);
+        await _homeViewModel.InitializeAsync();
     }
 }
