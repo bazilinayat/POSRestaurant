@@ -85,9 +85,15 @@
                                                  BackgroundColor="{StaticResource LightWheat}"
                                                  CornerRadius="8"
                                                  HeightRequest="25"
-                                                 WidthRequest="25"/>
+                                                 WidthRequest="25"
+                                                 Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=AddToCartCommand}"
+                                                 CommandParameter="{Binding .}"/>
                                 </FlexLayout>
                             </VerticalStackLayout>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=AddToCartCommand}"
+                                                      CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -104,10 +110,97 @@
                                VerticalOptions="Center"
                                Color="LightBlue"/>
         </Grid>
-        <Grid Grid.Column="2" BackgroundColor="{StaticResource Gray600}">
-            <VerticalStackLayout>
-                <Label Text="Current Order Items"/>
+        <Grid Grid.Column="2" 
+              BackgroundColor="{StaticResource Gray600}"
+              RowDefinitions="Auto, *, Auto"
+              Padding="10">
+            <VerticalStackLayout Grid.Row="0" 
+                                 Spacing="5">
+                <Label Text="Current Order Items"
+                       FontSize="25"
+                       FontAttributes="Bold"/>
                 <controls:CurrentDateTimeControl />
+            </VerticalStackLayout>
+            <Grid Grid.Row="1"
+                  Padding="10"
+                  BackgroundColor="{StaticResource Gray900}">
+                <CollectionView ItemsSource="{Binding CartItems}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical"
+                                           ItemSpacing="2"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:CartItemModel">
+                            <Grid>
+                                <Border Padding="5"
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="{StaticResource Gray600}">
+                                    <VerticalStackLayout Spacing="5">
+                                        <Label Text="{Binding Name}" 
+                                               FontSize="18"
+                                               FontAttributes="Bold"/>
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding Price, StringFormat='{0:C}'}"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="LightGreen"/>
+                                            <Grid Grid.Column="1"
+                                                  ColumnDefinitions="*, 2*, *"
+                                                  WidthRequest="120"
+                                                  HorizontalOptions="End">
+                                                <ImageButton Grid.Column="0"
+                                                             Source="minus_regular_24.png"
+                                                             BackgroundColor="{StaticResource LightWheat}"
+                                                             CornerRadius="8"
+                                                             HeightRequest="30"
+                                                             WidthRequest="30"
+                                                             Padding="5"
+                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=DecreaseQuantityCommand}"
+                                                             CommandParameter="{Binding .}"/>
+                                                <Label Grid.Column="1"
+                                                       Text="{Binding Quantity}"
+                                                       HeightRequest="30"
+                                                       WidthRequest="60"
+                                                       Padding="5"
+                                                       FontSize="18"
+                                                       HorizontalOptions="Center"
+                                                       HorizontalTextAlignment="Center"
+                                                       VerticalTextAlignment="Center"/>
+                                                <ImageButton Grid.Column="2"
+                                                             Source="plus_regular_24.png"
+                                                             BackgroundColor="{StaticResource LightWheat}"
+                                                             CornerRadius="8"
+                                                             HeightRequest="30"
+                                                             WidthRequest="30"
+                                                             Padding="5"
+                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=IncreaseQuantityCommand}"
+                                                             CommandParameter="{Binding .}"/>
+                                            </Grid>
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Border>
+                                <ImageButton Source="x_regular_24.png" 
+                                             HorizontalOptions="End"
+                                             VerticalOptions="Start"
+                                             CornerRadius="5"
+                                             HeightRequest="25"
+                                             WidthRequest="25"
+                                             BackgroundColor="Red"
+                                             ToolTipProperties.Text="Remove Item"
+                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=RemoveItemFromCartCommand}"
+                                             CommandParameter="{Binding .}">
+                                    <ImageButton.Shadow>
+                                        <Shadow Brush="Red"/>
+                                    </ImageButton.Shadow>
+                                </ImageButton>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+            <VerticalStackLayout Grid.Row="2">
+                
             </VerticalStackLayout>
         </Grid>
     </Grid>

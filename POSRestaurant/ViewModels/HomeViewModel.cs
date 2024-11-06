@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using POSRestaurant.Data;
 using POSRestaurant.Models;
+using System.Collections.ObjectModel;
 
 namespace POSRestaurant.ViewModels
 {
@@ -45,6 +46,11 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         [ObservableProperty]
         private MenuCategoryModel _selectedCategory;
+
+        /// <summary>
+        /// ObservableCollection for items added to cart
+        /// </summary>
+        public ObservableCollection<CartItemModel> CartItems { get; set; } = new();
 
         /// <summary>
         /// Constructor for the HomeViewModel
@@ -105,5 +111,61 @@ namespace POSRestaurant.ViewModels
 
             IsLoading = false;
         }
+
+        /// <summary>
+        /// Command to add tapped items to cart
+        /// </summary>
+        /// <param name="menuItem">MenuItem which was tapped</param>
+        [RelayCommand]
+        private void AddToCart(ItemOnMenu menuItem)
+        {
+            var cartItem = CartItems.FirstOrDefault(o => o.ItemId == menuItem.Id);
+            if (cartItem == null)
+            {
+                // Item does not exist in cart, add to cart
+                CartItems.Add(new CartItemModel()
+                {
+                    ItemId = menuItem.Id,
+                    Name = menuItem.Name,
+                    Icon = menuItem.Icon,
+                    Price = menuItem.Price,
+                    Quantity = 1
+                });
+            }
+            else
+            {
+                // Item already exists in cart, Increase quantity for this item in cart
+                cartItem.Quantity++;
+            }
+        }
+
+        /// <summary>
+        /// Command to increase item quantity
+        /// </summary>
+        /// <param name="cartItem">Item from cart to increase quantity</param>
+        [RelayCommand]
+        private void IncreaseQuantity(CartItemModel cartItem) =>
+            cartItem.Quantity++;
+
+        /// <summary>
+        /// Command to decrease item quantity
+        /// </summary>
+        /// <param name="cartItem">Item from cart to descrease quantity</param>
+        [RelayCommand]
+        private void DecreaseQuantity(CartItemModel cartItem)
+        {
+            cartItem.Quantity--;
+
+            if (cartItem.Quantity == 0)
+                CartItems.Remove(cartItem);
+        }
+
+        /// <summary>
+        /// Command to remove item from cart
+        /// </summary>
+        /// <param name="cartItem">Item from cart to remove</param>
+        [RelayCommand]
+        private void RemoveItemFromCart(CartItemModel cartItem) =>
+            CartItems.Remove(cartItem);
     }
 }
