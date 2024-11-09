@@ -33,7 +33,11 @@
             WidthRequest="20" 
             Margin="0, 0, 0, 25"
             Aspect="AspectFit"
-            HorizontalOptions="Center"></Image>
+            HorizontalOptions="Center">
+            <Image.GestureRecognizers>
+                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
+            </Image.GestureRecognizers>
+        </Image>
     </Shell.FlyoutFooter>
 
 </Shell>

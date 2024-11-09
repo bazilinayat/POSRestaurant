@@ -1,0 +1,7 @@
+{
+  "CustomerName": "NameOfCustomer",
+  "DefaultTaxPercentage": 5.5,
+  "Phone": "123456789",
+  "Email": "abc@gmail.com",
+  "WebsiteURL":  "https://google.com"
+}

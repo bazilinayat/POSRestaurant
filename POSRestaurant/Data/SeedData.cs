@@ -12,7 +12,7 @@ namespace POSRestaurant.Data
         {
             try
             {
-                using (StreamReader reader = new StreamReader("./Data/MenuCategories.json"))
+                using (StreamReader reader = new StreamReader("./MenuCategories.json"))
                 {
                     string jsontext = reader.ReadToEnd();
 
@@ -29,7 +29,7 @@ namespace POSRestaurant.Data
         {
             try
             {
-                using (StreamReader reader = new StreamReader("./Data/MenuItems.json"))
+                using (StreamReader reader = new StreamReader("./MenuItems.json"))
                 {
                     string jsontext = reader.ReadToEnd();
 

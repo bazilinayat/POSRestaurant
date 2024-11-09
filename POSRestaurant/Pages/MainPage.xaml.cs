@@ -32,4 +32,22 @@ public partial class MainPage : ContentPage
     {
         await _homeViewModel.InitializeAsync();
     }
+
+    /// <summary>
+    /// Event called when category is selected
+    /// </summary>
+    /// <param name="category">Selected Category</param>
+    private async void CategoriesListControl_OnCategorySelected(Models.MenuCategoryModel category)
+    {
+        await _homeViewModel.SelectCategoryCommand.ExecuteAsync(category.Id);
+    }
+
+    /// <summary>
+    /// Event called when menu item is selected
+    /// </summary>
+    /// <param name="category">Selected MenuItem</param>
+    private void MenuItemsListControl_OnMenuItemSelected(Data.ItemOnMenu menuItem)
+    {
+        _homeViewModel.AddToCartCommand.Execute(menuItem);
+    }
 }

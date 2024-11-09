@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using POSRestaurant.Data;
 using POSRestaurant.Pages;
+using POSRestaurant.Utility;
 using POSRestaurant.ViewModels;
 
 namespace POSRestaurant
@@ -35,7 +36,10 @@ namespace POSRestaurant
 
             builder.Services.AddSingleton<DatabaseService>()
                 .AddSingleton<HomeViewModel>()
-                .AddSingleton<MainPage>();
+                .AddSingleton<MainPage>()
+                .AddSingleton<OrdersViewModel>()
+                .AddSingleton<OrdersPage>()
+                .AddSingleton<SettingService>();
 
             return builder.Build();
         }

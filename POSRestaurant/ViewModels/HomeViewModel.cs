@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.Input;
 using POSRestaurant.Data;
 using POSRestaurant.Models;
+using POSRestaurant.Utility;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace POSRestaurant.ViewModels
 {
@@ -48,17 +50,64 @@ namespace POSRestaurant.ViewModels
         private MenuCategoryModel _selectedCategory;
 
         /// <summary>
+        /// To track the sub total of the order or KOT
+        /// Made observable for using
+        /// </summary>
+        [ObservableProperty, NotifyPropertyChangedFor(nameof(TaxAmount)), NotifyPropertyChangedFor(nameof(Total))]
+        private decimal _subTotal;
+
+        /// <summary>
+        /// To track the name for UI
+        /// Made observable for using in UI
+        /// </summary>
+        [ObservableProperty]
+        private string _name;
+
+        /// <summary>
+        /// To track the tax percentage set on UI
+        /// Made observable for using in UI
+        /// </summary>
+        [ObservableProperty, NotifyPropertyChangedFor(nameof(TaxAmount)), NotifyPropertyChangedFor(nameof(Total))]
+        private decimal _taxPercentage;
+
+        /// <summary>
+        /// To keep track of the tax amount
+        /// </summary>
+        public decimal TaxAmount => (SubTotal * TaxPercentage) / 100;
+
+        /// <summary>
+        /// To keep track of the total amount of the bill
+        /// </summary>
+        public decimal Total => SubTotal + TaxAmount;
+
+        /// <summary>
         /// ObservableCollection for items added to cart
         /// </summary>
         public ObservableCollection<CartItemModel> CartItems { get; set; } = new();
 
         /// <summary>
+        /// DIed OrdersViewModel
+        /// </summary>
+        private readonly OrdersViewModel _ordersViewModel;
+
+        /// <summary>
+        /// DIed SettingService
+        /// </summary>
+        private readonly SettingService _settingService;
+
+        /// <summary>
         /// Constructor for the HomeViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public HomeViewModel(DatabaseService databaseService)
+        public HomeViewModel(DatabaseService databaseService, OrdersViewModel ordersViewModel, SettingService settingService)
         {
             _databaseService = databaseService;
+            _ordersViewModel = ordersViewModel;
+            _settingService = settingService;
+            CartItems.CollectionChanged += CartItems_CollectionChanged;
+
+            Name = _settingService.Settings.CustomerName;
+            TaxPercentage = _settingService.Settings.DefaultTaxPercentage;
         }
 
         /// <summary>
@@ -136,6 +185,7 @@ namespace POSRestaurant.ViewModels
             {
                 // Item already exists in cart, Increase quantity for this item in cart
                 cartItem.Quantity++;
+                ReCalculateAmount();
             }
         }
 
@@ -144,8 +194,11 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="cartItem">Item from cart to increase quantity</param>
         [RelayCommand]
-        private void IncreaseQuantity(CartItemModel cartItem) =>
+        private void IncreaseQuantity(CartItemModel cartItem)
+        {
             cartItem.Quantity++;
+            ReCalculateAmount();
+        }
 
         /// <summary>
         /// Command to decrease item quantity
@@ -158,6 +211,8 @@ namespace POSRestaurant.ViewModels
 
             if (cartItem.Quantity == 0)
                 CartItems.Remove(cartItem);
+            else
+                ReCalculateAmount();
         }
 
         /// <summary>
@@ -167,5 +222,76 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private void RemoveItemFromCart(CartItemModel cartItem) =>
             CartItems.Remove(cartItem);
+
+        /// <summary>
+        /// To recalculate amount when items or quantity changes
+        /// </summary>
+        private void ReCalculateAmount()
+        {
+            SubTotal = CartItems.Sum(o => o.Amount);
+        }
+
+        /// <summary>
+        /// Event method when the ObservableCollection is changed.
+        /// </summary>
+        /// <param name="sender">ObservableCollection</param>
+        /// <param name="e">EventArgs</param>
+        /// <exception cref="NotImplementedException">ExceptionType</exception>
+        private void CartItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            ReCalculateAmount();
+        }
+
+        /// <summary>
+        /// Command to open a dialog box for accepting tax percentage
+        /// </summary>
+        /// <returns>A Task object</returns>
+        [RelayCommand]
+        private async Task TaxPercentageClickAsync()
+        {
+            var result = await Shell.Current.DisplayPromptAsync("Tax Percentage", "Enter the applicable tax percentage.", placeholder: "10", initialValue: TaxPercentage.ToString());
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+
+                if (!Decimal.TryParse(result, out decimal enteredTaxPercentage))
+                {
+                    await Shell.Current.DisplayAlert("Invalid Value", "Entered tax percentage is invalid.", "Ok");
+                    return;
+                }
+
+                TaxPercentage = enteredTaxPercentage;
+            }
+        }
+
+        /// <summary>
+        /// Command to clear all the cart items
+        /// </summary>
+        [RelayCommand]
+        private async Task ClearCart()
+        {
+            if (CartItems.Count == 0)
+                return;
+
+            if (await Shell.Current.DisplayAlert("Clear Cart?", "Do you really want to clear the cart?", "Yes", "No"))
+                CartItems.Clear();
+        }
+
+        /// <summary>
+        /// Command to place an order
+        /// </summary>
+        /// <param name="isPaidOnline">Coming from UI, which button is clicked</param>
+        /// <returns>Returns a Task Object</returns>
+        [RelayCommand]
+        private async Task PlaceOrderAsync(bool isPaidOnline)
+        {
+            IsLoading = true;
+
+            if (await _ordersViewModel.PlaceOrderAsync([.. CartItems], isPaidOnline))
+            {
+                CartItems.Clear();
+            }
+
+            IsLoading = false;
+        }
     }
 }

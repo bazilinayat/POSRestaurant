@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="POSRestaurant.Controls.MenuItemsListControl"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             x:Name="this">
+
+    <CollectionView BindingContext="{x:Reference this}"
+        ItemsSource="{Binding MenuItems}">
+        <CollectionView.ItemsLayout>
+            <GridItemsLayout Orientation="Vertical" 
+                         Span="4"
+                         HorizontalItemSpacing="10"
+                         VerticalItemSpacing="10"/>
+        </CollectionView.ItemsLayout>
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="data:ItemOnMenu">
+                <Border Padding="10"
+                    StrokeShape="RoundRectangle 10"
+                    Stroke="#DDD">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{Binding Name}" 
+                           FontAttributes="Bold"/>
+                        <FlexLayout JustifyContent="SpaceBetween">
+                            <Label Text="{Binding Price, StringFormat='{0:C}'}"
+                               FontAttributes="Bold"
+                               TextColor="LightGreen"/>
+                            <ImageButton Source="shopping_bag_regular_24.png"
+                                     BackgroundColor="{StaticResource LightWheat}"
+                                     CornerRadius="8"
+                                     HeightRequest="25"
+                                     WidthRequest="25"
+                                     Command="{Binding Source={x:RelativeSource AncestorType={x:Type controls:MenuItemsListControl}}, Path=SelectMenuItemCommand}"
+                                     CommandParameter="{Binding .}"/>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type controls:MenuItemsListControl}}, Path=SelectMenuItemCommand}"
+                                          CommandParameter="{Binding .}"/>
+                    </Border.GestureRecognizers>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentView>
