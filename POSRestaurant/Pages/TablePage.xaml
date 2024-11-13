@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             x:Class="POSRestaurant.Pages.TablePage"
+             Shell.NavBarIsVisible="True"
+             Title="Table View"
+             x:DataType="vm:TableViewModel">
+    <CollectionView ItemsSource="{Binding Tables}">
+        <CollectionView.ItemsLayout>
+            <GridItemsLayout Span="5"
+                         HorizontalItemSpacing="10"
+                         VerticalItemSpacing="10"
+                         Orientation="Vertical"/>
+        </CollectionView.ItemsLayout>
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="models:TableModel">
+                <Border Padding="10"
+                        Stroke="Brown"
+                        StrokeDashOffset="2"
+                        >
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{Binding TableNo}"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"/>
+                        <Label Text="TimeRunning"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableSelectedCommand}"
+                                              CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentPage>

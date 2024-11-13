@@ -1,5 +1,7 @@
 ﻿using POSRestaurant.Models;
+using POSRestaurant.Utility;
 using SQLite;
+using System.Linq;
 
 namespace POSRestaurant.Data
 {
@@ -14,10 +16,23 @@ namespace POSRestaurant.Data
         private readonly SQLiteAsyncConnection _connection;
 
         /// <summary>
+        /// DIed SettingService
+        /// </summary>
+        private readonly SettingService _settingService;
+
+        /// <summary>
+        /// Variable for getting initial data
+        /// </summary>
+        private readonly SeedData _seedData;
+
+        /// <summary>
         /// Class constructor, to generate database and connection
         /// </summary>
-        public DatabaseService()
+        /// <param name="settingService">DI for SettingService</param>
+        public DatabaseService(SettingService settingService)
         {
+            _settingService = settingService;
+            _seedData = new SeedData(_settingService);
             var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RestPOS.db3");
             _connection = new SQLiteAsyncConnection(dbPath, 
                 SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.SharedCache);
@@ -34,6 +49,10 @@ namespace POSRestaurant.Data
             await _connection.CreateTableAsync<Order>();
             await _connection.CreateTableAsync<OrderItem>();
 
+            await _connection.CreateTableAsync<Table>();
+            await _connection.CreateTableAsync<KOT>();
+            await _connection.CreateTableAsync<KOTItem>();
+
             await SeedDataAsync();
         }
 
@@ -48,20 +67,27 @@ namespace POSRestaurant.Data
             if (firstCategory != null)
                 return;
 
-            var categories = SeedData.GetMenuCategories();
-            var menuItems = SeedData.GetMenuItems();
+            var categories = _seedData.GetMenuCategories();
+            var menuItems = _seedData.GetMenuItems();
+            var tables = _seedData.GetTables();
 
             await _connection.InsertAllAsync(categories);
             await _connection.InsertAllAsync(menuItems);
+            await _connection.InsertAllAsync(tables);
         }
 
         /// <summary>
         /// Method to get all the categories from database
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Array of MenuCategory</returns>
         public async Task<MenuCategory[]> GetMenuCategoriesAsync() =>
             await _connection.Table<MenuCategory>().ToArrayAsync();
 
+        /// <summary>
+        /// Method to get all the MenuItems under the selected categoryId
+        /// </summary>
+        /// <param name="categoryId">Selected category id</param>
+        /// <returns>Array of ItemOnMenu</returns>
         public async Task<ItemOnMenu[]> GetMenuItemsByCategoryAsync(int categoryId) =>
             await _connection.Table<ItemOnMenu>().Where(o => o.MenuCategoryId == categoryId).ToArrayAsync();
 
@@ -74,33 +100,81 @@ namespace POSRestaurant.Data
         {
             var order = new Order()
             {
+                TableId = orderModel.TableId,
                 OrderDate = orderModel.OrderDate,
                 PaymentMode = orderModel.PaymentMode,
                 TotalItemCount = orderModel.TotalItemCount,
-                TotalPrice = orderModel.TotalPrice
+                TotalPrice = orderModel.TotalPrice,
+                OrderStatus = orderModel.OrderStatus
             };
 
             if (await _connection.InsertAsync(order) > 0)
             {
                 // Order inserted successfully, get order Id and add order items
-                foreach (var item in orderModel.Items)
-                {
-                    item.OrderId = order.Id;
-                }
-                if (await _connection.InsertAllAsync(orderModel.Items) == 0)
-                {
-                    // Order items ooperation failed
-                    // Remove the associated order
-                    await _connection.DeleteAsync(order);
-                    return "Error in inserting order items";
-                }
+                await InsertOrderKOTAsync(orderModel.KOTs, order.Id);
+                orderModel.Id = order.Id;
+                return null;
             }
             else
             {
                 return "Error in inserting the order";
             }
-            orderModel.Id = order.Id;
+        }
+
+        /// <summary>
+        /// To insert the kots in an order
+        /// </summary>
+        /// <param name="KOTs">KOTs to be added</param>
+        /// <param name="orderId">orderId, for which KOT to be added</param>
+        /// <returns>Returns Error Message or null(in case of success)</returns>
+        public async Task<string?> InsertOrderKOTAsync(KOTModel[] KOTs, long orderId)
+        {
+            foreach (var kotItem in KOTs)
+            {
+                var kot = new KOT()
+                {
+                    OrderId = orderId,
+                    KOTDateTime = kotItem.KOTDateTime,
+                    TotalItemCount = kotItem.TotalItemCount,
+                    TotalPrice = kotItem.TotalPrice
+                };
+
+                if (await _connection.InsertAsync(kot) > 0)
+                {
+                    foreach (var item in kotItem.Items)
+                    {
+                        item.KOTId = kot.Id;
+                    }
+                    if (await _connection.InsertAllAsync(kotItem.Items) == 0)
+                    {
+                        // Order items ooperation failed
+                        // Remove the associated order
+                        await DeleteOrder(orderId);
+                        return "Error in inserting order items";
+                    }
+                }
+            }
             return null;
+        }
+
+        public async Task DeleteOrder(long orderId)
+        {
+            var orderToDelete = await _connection.Table<Order>().Where(o => o.Id == orderId).FirstAsync();
+            await _connection.DeleteAsync(orderToDelete);
+        }
+
+        /// <summary>
+        /// To get the last order id
+        /// Later on can be modified for table id as well.
+        /// </summary>
+        /// <returns>The latest order id</returns>
+        public async Task<long> GetLatestOrderId()
+        {
+            var latestOrder = await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
+            if (latestOrder == null)
+                return 0;
+            else
+                return latestOrder.Id;
         }
 
         /// <summary>
@@ -117,6 +191,44 @@ namespace POSRestaurant.Data
         /// <returns>Array of items in the order</returns>
         public async Task<OrderItem[]> GetOrderItemsAsync(long orderId) =>
             await _connection.Table<OrderItem>().Where(o => o.OrderId == orderId).ToArrayAsync();
+
+        /// <summary>
+        /// Method to get all the kots from a specific order
+        /// </summary>
+        /// <param name="orderId">For which order</param>
+        /// <returns>Array of items in the order</returns>
+        public async Task<KOT[]> GetOrderKotsAsync(long orderId)
+        {
+            var kots = await _connection.Table<KOT>().Where(o => o.OrderId == orderId).ToArrayAsync();
+            foreach(var kot in kots)
+            {
+                kot.Items = await GetKotItemsAsync(kot.Id);
+            }
+            return kots;
+        }
+
+        /// <summary>
+        /// Method to get all the items from a specific Kot
+        /// </summary>
+        /// <param name="KotId">For which Kot</param>
+        /// <returns>Array of items in the Kot</returns>
+        public async Task<KOTItem[]> GetKotItemsAsync(long KotId) =>
+            await _connection.Table<KOTItem>().Where(o => o.KOTId == KotId).ToArrayAsync();        
+
+        /// <summary>
+        /// To Get menu item by name thorugh searching in database
+        /// </summary>
+        /// <param name="searchText">The item name to search</param>
+        /// <returns>Returns a array of ItemOnMenu</returns>
+        public async Task<ItemOnMenu[]> GetMenuItemBySearch(string searchText) =>
+            await _connection.Table<ItemOnMenu>().Where(o => o.Name.ToLower().Contains(searchText.ToLower())).ToArrayAsync();
+
+        /// <summary>
+        /// Method to get all the tables from database
+        /// </summary>
+        /// <returns>Array of Table</returns>
+        public async Task<Table[]> GetTablesAsync() =>
+            await _connection.Table<Table>().ToArrayAsync();
 
         /// <summary>
         /// Implementation of IAsyncDisposable interface

@@ -9,12 +9,19 @@ using System.Threading.Tasks;
 
 namespace POSRestaurant.Models
 {
+    /// <summary>
+    /// OrderModel for the UI
+    /// </summary>
     public partial class OrderModel : ObservableObject
     {
         /// <summary>
         /// Order Id
         /// </summary>
         public long Id { get; set; }
+        /// <summary>
+        /// Table Id, Order belongs to
+        /// </summary>
+        public int TableId { get; set; }
         /// <summary>
         /// DateTime of the Order
         /// </summary>
@@ -32,9 +39,13 @@ namespace POSRestaurant.Models
         /// </summary>
         public PaymentModes PaymentMode { get; set; }
         /// <summary>
+        /// To represent current order status
+        /// </summary>
+        public TableOrderStatus OrderStatus { get; set; }
+        /// <summary>
         /// Items in the current order
         /// </summary>
-        public OrderItem[] Items { get; set; }
+        public KOTModel[] KOTs { get; set; }
         /// <summary>
         /// To track the selected order
         /// </summary>

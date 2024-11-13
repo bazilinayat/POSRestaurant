@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Maui.Views;
 using POSRestaurant.Controls;
+using POSRestaurant.Pages;
 using POSRestaurant.Utility;
+using POSRestaurant.ViewModels;
 using static Microsoft.Maui.ApplicationModel.Permissions;
 
 namespace POSRestaurant
@@ -16,24 +18,32 @@ namespace POSRestaurant
         private readonly SettingService _settingService;
 
         /// <summary>
-        /// Constructor for AppShell
+        /// DI ServiceProvider to get objects
         /// </summary>
-        /// <param name="settingService">DIed SettingsService</param>
-        public AppShell(SettingService settingService)
-        {
-            InitializeComponent();
-            _settingService = settingService;
-        }
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// Event for when Help icon is clicked
+        /// DIed property to handle the ShellViewModel
         /// </summary>
-        /// <param name="sender">Image as Sender</param>
-        /// <param name="e">TappedEventArgs</param>
-        private async void TapGestureRecognizer_Tapped(object sender, TappedEventArgs e)
+        private readonly ShellViewModel _shellViewModel;
+
+        /// <summary>
+        /// Constructor for AppShell
+        /// </summary>
+        /// <param name="serviceProvider">DIed IServiceProvider</param>
+        /// <param name="shellViewModel">DIed ShellViewModel</param>
+        /// <param name="settingService">DIed SettingsService</param>
+        public AppShell(IServiceProvider serviceProvider, ShellViewModel shellViewModel, SettingService settingService)
         {
-            var helpPopup = new HelpPopup(_settingService);
-            await this.ShowPopupAsync(helpPopup);
+            InitializeComponent();
+
+            _settingService = settingService;
+            _serviceProvider = serviceProvider;
+
+            _shellViewModel = shellViewModel;
+            BindingContext = shellViewModel;
+
+            Routing.RegisterRoute("Setting", typeof(ManageMenuItemPage));
         }
     }
 }

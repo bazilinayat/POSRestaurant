@@ -1,5 +1,7 @@
 ﻿using POSRestaurant.Data;
+using POSRestaurant.Pages;
 using POSRestaurant.Utility;
+using POSRestaurant.ViewModels;
 
 namespace POSRestaurant
 {
@@ -8,19 +10,25 @@ namespace POSRestaurant
     /// </summary>
     public partial class App : Application
     {
+        /// <summary>
+        /// ServiceProvider for the DIs
+        /// </summary>
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Constructor for the class, just starting the application
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public App(DatabaseService databaseService, SettingService settingService)
+        public App(IServiceProvider serviceProvider, DatabaseService databaseService, SettingService settingService)
         {
             InitializeComponent();
 
             // Set AppTheme permanently to light
             Application.Current.UserAppTheme = AppTheme.Light;
 
-            MainPage = new AppShell(settingService);
+            var shellViewModel = serviceProvider.GetRequiredService<ShellViewModel>();
+
+            MainPage = new AppShell(serviceProvider, shellViewModel, settingService);
 
             // Initialize and Seed Database
             Task.Run(async() => await databaseService.InitializeDatabaseAsync()).GetAwaiter().GetResult();            

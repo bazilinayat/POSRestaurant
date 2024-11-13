@@ -32,5 +32,9 @@ namespace POSRestaurant.Models
         /// Website to redirect to, when developer name is clicked
         /// </summary>
         public string WebsiteURL { get; set; }
+        /// <summary>
+        /// To set the number of tables in the restaurant
+        /// </summary>
+        public int NumberOfTables { get; set; }
     }
 }

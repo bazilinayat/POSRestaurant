@@ -29,8 +29,19 @@
                                                 Categories="{Binding Categories}" 
                                                 OnCategorySelected="CategoriesListControl_OnCategorySelected" />
             </Grid>
-            <Grid Grid.Column="1">
-                <controls:MenuItemsListControl MenuItems="{Binding MenuItems}" OnMenuItemSelected="MenuItemsListControl_OnMenuItemSelected"/>
+            <Grid Grid.Column="1"
+                  RowDefinitions="Auto, *">
+                <SearchBar Grid.Row="0"
+                    BackgroundColor="{StaticResource LightWheat}"
+                           HeightRequest="25"
+                           Text="{Binding TextSearch}"
+                           SearchCommand="{Binding SearchItemsCommand}"
+                           TextChanged="SearchBar_TextChanged"
+                           CancelButtonColor="Red"
+                           HorizontalTextAlignment="Start"
+                           Placeholder="Search Items..."
+                           Margin="20"/>
+                <controls:MenuItemsListControl Grid.Row="1" MenuItems="{Binding MenuItems}" OnMenuItemSelected="MenuItemsListControl_OnMenuItemSelected"/>
                 <BoxView IsVisible="{Binding IsLoading}"
                          HorizontalOptions="Fill"
                          VerticalOptions="Fill"
@@ -59,7 +70,8 @@
             <Grid Grid.Row="1"
                   Padding="10"
                   BackgroundColor="Wheat">
-                <CollectionView ItemsSource="{Binding CartItems}">
+                <CollectionView
+                    ItemsSource="{Binding CartItems}">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical"
                                            ItemSpacing="2"/>

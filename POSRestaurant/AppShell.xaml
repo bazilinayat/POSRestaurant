@@ -5,28 +5,65 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:POSRestaurant"
     xmlns:pages="clr-namespace:POSRestaurant.Pages"
-    Shell.FlyoutBehavior="Locked"
-    Shell.FlyoutBackgroundColor="Wheat"
-    Shell.FlyoutWidth="60"
-    Title="Restaurant POS">
+    xmlns:controls="clr-namespace:POSRestaurant.Controls"
+    xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+    Title="Restaurant POS"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.TabBarBackgroundColor="Wheat"
+    x:DataType="vm:ShellViewModel">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate pages:MainPage}"
-        Icon="home_regular_24.png"
-        Route="MainPage" />
-    <ShellContent
-        Title="Orders"
-        ContentTemplate="{DataTemplate pages:OrdersPage}"
-        Icon="list_ul_regular_24.png"
-        Route="OrdersPage" />
-    <ShellContent
-        Title="Manage Menu"
-        ContentTemplate="{DataTemplate pages:ManageMenuItemPage}"
-        Icon="grid_alt_solid_24.png"
-        Route="ManageMenuItemPage" />
+    <Shell.TitleView>
+        <Grid HeightRequest="45" ColumnDefinitions="Auto,*,Auto" Padding="10" VerticalOptions="Center">
+            <!-- Left: Application Logo -->
+            <Image Source="logo.png" HeightRequest="40" WidthRequest="40" Grid.Column="0" />
 
-    <Shell.FlyoutFooter>
+            <!-- Center: Welcome Text -->
+            <Label Text="Welcome to application_name" 
+                   FontSize="20" 
+                   VerticalOptions="Center" 
+                   HorizontalOptions="Center" 
+                   Grid.Column="1" 
+                   TextColor="Black" />
+
+            <!-- Right: Navigation Icons -->
+            <HorizontalStackLayout Spacing="15" Grid.Column="2" HorizontalOptions="End">
+                <ImageButton Source="grid_alt_solid_24.png" Command="{Binding NavigateToOrdersPageCommand}" />
+                <ImageButton Source="setting.png" Command="{Binding NavigateToSettingsCommand}" />
+                <ImageButton Source="phone_solid_24.png" Command="{Binding SupportCommandCommand}"/>
+            </HorizontalStackLayout>
+        </Grid>
+    </Shell.TitleView>
+    
+    <TabBar>
+        <ShellContent
+    Title="TablesPage Page"
+    ContentTemplate="{DataTemplate pages:TablePage}"
+    Icon="grid_alt_solid_24.png"
+    Route="TablePage" />
+        <ShellContent
+    Title="Home"
+    ContentTemplate="{DataTemplate pages:MainPage}"
+    Icon="home_regular_24.png"
+    Route="MainPage" />
+        <ShellContent
+    Title="Orders"
+    ContentTemplate="{DataTemplate pages:OrdersPage}"
+    Icon="list_ul_regular_24.png"
+    Route="OrdersPage" />
+        <ShellContent
+    Title="Manage Menu"
+    ContentTemplate="{DataTemplate pages:ManageMenuItemPage}"
+    Icon="grid_alt_solid_24.png"
+    Route="ManageMenuItemPage" />
+        <ShellContent
+    Title="Testing Page"
+    ContentTemplate="{DataTemplate pages:Testing}"
+    Icon="grid_alt_solid_24.png"
+    Route="Testing" />
+    </TabBar>
+    
+
+    <!--<Shell.FlyoutFooter>
         <Image
             Source="phone_solid_24.png"
             HeightRequest="20" 
@@ -38,6 +75,6 @@
                 <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
             </Image.GestureRecognizers>
         </Image>
-    </Shell.FlyoutFooter>
+    </Shell.FlyoutFooter>-->
 
 </Shell>

@@ -25,7 +25,7 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid ColumnDefinitions=".75*, .25*">
+    <Grid ColumnDefinitions=".60*, .40*">
         <Grid Grid.Column="0"
               Padding="15"
               RowDefinitions="Auto, Auto, *" 
@@ -36,32 +36,35 @@
                    Text="Orders"/>
             <Grid Grid.Row="1">
                 <Grid RowDefinitions="30, *">
-                    <Grid ColumnDefinitions="*, *, *, *, *, *"
+                    <Grid ColumnDefinitions="*, *, *, *, *, *, *"
                           BackgroundColor="Blue">
                         <Label Grid.Column="0"
                                Text="Order Id"
                                Padding="5, 0, 0, 0"
                                Style="{StaticResource th}"/>
                         <Label Grid.Column="1"
-                               Text="Order Date"
+                               Text="Table Id"
                                Style="{StaticResource th}"/>
                         <Label Grid.Column="2"
-                               Text="No. of Items"
+                               Text="Order Date"
                                Style="{StaticResource th}"/>
                         <Label Grid.Column="3"
-                               Text="Amount Paid"
+                               Text="No. of Items"
                                Style="{StaticResource th}"/>
                         <Label Grid.Column="4"
-                               Text="Payment Mode"
+                               Text="Order Status"
                                Style="{StaticResource th}"/>
                         <Label Grid.Column="5"
+                               Text="Payment Mode"
+                               Style="{StaticResource th}"/>
+                        <Label Grid.Column="6"
                                Style="{StaticResource th}"/>
                     </Grid>
                     <CollectionView Grid.Row="1"
                                     ItemsSource="{Binding Orders}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:OrderModel">
-                                <Grid ColumnDefinitions="*, *, *, *, *, *"
+                                <Grid ColumnDefinitions="*, *, *, *, *, *, *"
                                       RowDefinitions="*, Auto">
                                     <Grid.Triggers>
                                         <DataTrigger TargetType="Grid" Binding="{Binding IsSelected}" Value="True">
@@ -73,18 +76,21 @@
                                            Padding="5, 0, 0, 0"
                                            Style="{StaticResource td}"/>
                                     <Label Grid.Column="1"
-                                           Text="{Binding OrderDate}"
+                                           Text="{Binding TableId}"
                                            Style="{StaticResource td}"/>
                                     <Label Grid.Column="2"
-                                           Text="{Binding TotalItemCount, StringFormat='{0} Item(s)'}"
+                                           Text="{Binding OrderDate}"
                                            Style="{StaticResource td}"/>
                                     <Label Grid.Column="3"
-                                           Text="{Binding TotalPrice, StringFormat='{0:C}'}"
+                                           Text="{Binding TotalItemCount, StringFormat='{0} Item(s)'}"
                                            Style="{StaticResource td}"/>
                                     <Label Grid.Column="4"
+                                           Text="{Binding OrderStatus}"
+                                           Style="{StaticResource td}"/>
+                                    <Label Grid.Column="5"
                                            Text="{Binding PaymentMode}"
                                            Style="{StaticResource td}"/>
-                                    <Button Grid.Column="5"
+                                    <Button Grid.Column="6"
                                             Text="View Items"
                                             BackgroundColor="DarkOliveGreen"
                                             HeightRequest="25"
@@ -142,43 +148,66 @@
             <ContentView Grid.Row="1"
                          BackgroundColor="Wheat"
                          Padding="10">
-                <CollectionView ItemsSource="{Binding OrderItems}">
+                <CollectionView ItemsSource="{Binding OrderKOTs}">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical"
                                            ItemSpacing="2"/>
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="data:OrderItem">
+                        <DataTemplate x:DataType="models:KOTModel">
                             <Grid>
                                 <Border Padding="5"
                                         StrokeShape="RoundRectangle 10"
                                         BackgroundColor="{StaticResource LightWheat}">
-                                    <VerticalStackLayout Spacing="5">
-                                        <Label Text="{Binding Name}" 
-                                               FontSize="18"
-                                               FontAttributes="Bold"/>
-                                        <Grid ColumnDefinitions="Auto, *">
-                                            <HorizontalStackLayout>
-                                                <Label Text="{Binding Quantity}"
-                                                       FontSize="15"
-                                                       TextColor="MediumSeaGreen"/>
-                                                <Label Text="x"
-                                                       FontSize="15"
-                                                       TextColor="MediumSeaGreen"/>
-                                                <Label Text="{Binding Price, StringFormat='{0:C}'}"
-                                                       FontSize="15"
-                                                       TextColor="MediumSeaGreen"/>
-                                            </HorizontalStackLayout>
-                                            <Label Grid.Column="1"
-                                                   Text="{Binding Amount, StringFormat='{0:C}'}"
-                                                   TextColor="MediumSeaGreen"
-                                                   FontAttributes="Bold"
-                                                   Margin="0, 0, 5, 0"
-                                                   Padding="5"
-                                                   FontSize="15"
-                                                   HorizontalOptions="End"/>
-                                        </Grid>
-                                    </VerticalStackLayout>
+                                    <Grid RowDefinitions="Auto, *">
+                                        <HorizontalStackLayout Grid.Row="0" Spacing="5">
+                                            <Label Text="{Binding Id, StringFormat='Id: {0}'}" />
+                                            <Label Text="{Binding TotalItemCount, StringFormat='Items: {0}'}" />
+                                            <Label Text="{Binding TotalPrice, StringFormat='Total: {0:C}'}" />
+                                        </HorizontalStackLayout>
+                                        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}">
+                                            <CollectionView.ItemsLayout>
+                                                <LinearItemsLayout Orientation="Vertical"
+                                                                   ItemSpacing="2"/>
+                                            </CollectionView.ItemsLayout>
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate x:DataType="data:KOTItem">
+                                                    <Grid>
+                                                        <Border Padding="5"
+                                                                StrokeShape="RoundRectangle 10"
+                                                                BackgroundColor="{StaticResource LightWheat}">
+                                                            <VerticalStackLayout Grid.Row="1" Spacing="5">
+                                                                <Label Text="{Binding Name}" 
+                                                                       FontSize="18"
+                                                                       FontAttributes="Bold"/>
+                                                                <Grid ColumnDefinitions="Auto, *">
+                                                                    <HorizontalStackLayout>
+                                                                        <Label Text="{Binding Quantity}"
+                                                                               FontSize="15"
+                                                                               TextColor="MediumSeaGreen"/>
+                                                                        <Label Text="x"
+                                                                                FontSize="15"
+                                                                                TextColor="MediumSeaGreen"/>
+                                                                        <Label Text="{Binding Price, StringFormat='{0:C}'}"
+                                                                                FontSize="15"
+                                                                                TextColor="MediumSeaGreen"/>
+                                                                    </HorizontalStackLayout>
+                                                                    <Label Grid.Column="1"
+                                                                           Text="{Binding Amount, StringFormat='{0:C}'}"
+                                                                           TextColor="MediumSeaGreen"
+                                                                           FontAttributes="Bold"
+                                                                           Margin="0, 0, 5, 0"
+                                                                           Padding="5"
+                                                                           FontSize="15"
+                                                                           HorizontalOptions="End"/>
+                                                                </Grid>
+                                                            </VerticalStackLayout>
+                                                        </Border>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+                                    </Grid>
                                 </Border>
                             </Grid>
                         </DataTemplate>

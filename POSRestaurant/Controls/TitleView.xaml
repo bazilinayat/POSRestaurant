@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="POSRestaurant.Controls.TitleView">
+    <Shell.TitleView>
+        <Grid BackgroundColor="LightBlue" Padding="10" ColumnDefinitions="Auto,*,Auto">
+
+            <!-- Application Logo/Image on the Left -->
+            <Image Source="home_regular_24.png" WidthRequest="50" HeightRequest="50" HorizontalOptions="Start"/>
+
+            <!-- Spacing between Logo and Icons -->
+            <Label Grid.Column="1"/>
+
+            <!-- Icons on the Right Side -->
+            <HorizontalStackLayout Grid.Column="2" Spacing="15" HorizontalOptions="End">
+                <ImageButton Source="list_ul_regular_24.png" WidthRequest="30" HeightRequest="30" />
+                <ImageButton Source="list_ul_regular_24.png" WidthRequest="30" HeightRequest="30" />
+                <ImageButton Source="list_ul_regular_24.png" WidthRequest="30" HeightRequest="30"/>
+                <ImageButton Source="phone_solid_24.png" WidthRequest="30" HeightRequest="30" />
+                <ImageButton Source="x_regular_24.png" WidthRequest="30" HeightRequest="30" />
+            </HorizontalStackLayout>
+        </Grid>
+    </Shell.TitleView>
+</ContentView>

@@ -5,7 +5,7 @@ namespace POSRestaurant.Data
     /// <summary>
     /// Order Entity for SQLite
     /// </summary>
-    public class Order
+    public class KOT
     {
         /// <summary>
         /// Order Id
@@ -14,13 +14,13 @@ namespace POSRestaurant.Data
         [PrimaryKey, AutoIncrement]
         public long Id { get; set; }
         /// <summary>
-        /// Table Id, Order belongs to
+        /// Order Id, KOT belongs to
         /// </summary>
-        public int TableId { get; set; }
+        public long OrderId { get; set; }
         /// <summary>
         /// DateTime of the Order
         /// </summary>
-        public DateTime OrderDate { get; set; }
+        public DateTime KOTDateTime { get; set; }
         /// <summary>
         /// Total number of items of the order
         /// </summary>
@@ -30,12 +30,9 @@ namespace POSRestaurant.Data
         /// </summary>
         public decimal TotalPrice { get; set; }
         /// <summary>
-        /// PaymentMode, which was used to pay
+        /// To manage getting the kot items quickly
         /// </summary>
-        public PaymentModes PaymentMode { get; set; }
-        /// <summary>
-        /// To represent current order status
-        /// </summary>
-        public TableOrderStatus OrderStatus { get; set; }
+        [Ignore]
+        public KOTItem[] Items { get; set; }
     }
 }

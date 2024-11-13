@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using POSRestaurant.Utility;
+using System.Text.Json;
 
 namespace POSRestaurant.Data
 {
@@ -6,9 +7,27 @@ namespace POSRestaurant.Data
     /// Class for initial data for application
     /// Menu data should come from menu.json file
     /// </summary>
-    public static class SeedData
+    public class SeedData
     {
-        public static List<MenuCategory> GetMenuCategories()
+        /// <summary>
+        /// DIed SettingService
+        /// </summary>
+        private readonly SettingService _settingService;
+
+        /// <summary>
+        /// Constructor for the SeedingData
+        /// </summary>
+        /// <param name="settingService">DI for SettingService</param>
+        public SeedData(SettingService settingService)
+        {
+            _settingService = settingService;
+        }
+
+        /// <summary>
+        /// Read MenuCategories from json file for initial data
+        /// </summary>
+        /// <returns>Returns a List of MenuCategory</returns>
+        public List<MenuCategory> GetMenuCategories()
         {
             try
             {
@@ -25,7 +44,11 @@ namespace POSRestaurant.Data
             }
         }
 
-        public static List<ItemOnMenu> GetMenuItems()
+        /// <summary>
+        /// Read MenuCategoryItems from json file for initial data
+        /// </summary>
+        /// <returns>Returns a List of ItemOnMenu</returns>
+        public List<ItemOnMenu> GetMenuItems()
         {
             try
             {
@@ -40,6 +63,20 @@ namespace POSRestaurant.Data
             {
                 return new List<ItemOnMenu>();
             }
+        }
+
+        public List<Table> GetTables()
+        {
+            List<Table> tables = new List<Table>();
+            for (int i = 1; i <= 10; i++)
+            {
+                tables.Add(new Table
+                {
+                    TableNo = i
+                });
+            }
+
+            return tables;
         }
     }
 }

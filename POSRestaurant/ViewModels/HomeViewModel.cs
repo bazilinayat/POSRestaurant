@@ -96,9 +96,17 @@ namespace POSRestaurant.ViewModels
         private readonly SettingService _settingService;
 
         /// <summary>
+        /// ObservableProperty for the SearchBox, to search for items
+        /// </summary>
+        [ObservableProperty]
+        private string _textSearch;
+
+        /// <summary>
         /// Constructor for the HomeViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
+        /// <param name="ordersViewModel">DI for OrdersViewModel</param>
+        /// <param name="settingService">DI for SettingService</param>
         public HomeViewModel(DatabaseService databaseService, OrdersViewModel ordersViewModel, SettingService settingService)
         {
             _databaseService = databaseService;
@@ -286,12 +294,40 @@ namespace POSRestaurant.ViewModels
         {
             IsLoading = true;
 
-            if (await _ordersViewModel.PlaceOrderAsync([.. CartItems], isPaidOnline))
+            var tableModel = new TableModel
+            {
+                Id = 1,
+                Status = TableOrderStatus.Running,
+                TableNo = 1,
+            };
+
+            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel))
             {
                 CartItems.Clear();
             }
 
             IsLoading = false;
+        }
+
+        /// <summary>
+        /// Command to be called when search box changes
+        /// </summary>
+        /// <param name="textSearch">Query to search</param>
+        [RelayCommand]
+        private void SearchItems(string? textSearch)
+        {
+            if (string.IsNullOrWhiteSpace(textSearch) || textSearch.Length < 3)
+                return;
+
+            Task.Run(async () =>
+            {
+                var result = await _databaseService.GetMenuItemBySearch(textSearch);
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    MenuItems = result;
+                });
+            });
         }
     }
 }

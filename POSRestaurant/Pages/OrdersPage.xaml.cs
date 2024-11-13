@@ -15,6 +15,7 @@ public partial class OrdersPage : ContentPage
     /// <summary>
     /// Initialize OrdersPage
     /// </summary>
+    /// <param name="ordersViewModel">DI for OrdersViewModel</param>
     public OrdersPage(OrdersViewModel ordersViewModel)
 	{
 		InitializeComponent();

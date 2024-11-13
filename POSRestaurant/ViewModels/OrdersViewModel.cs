@@ -1,15 +1,9 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Controls;
 using POSRestaurant.Data;
 using POSRestaurant.Models;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace POSRestaurant.ViewModels
 {
@@ -41,6 +35,14 @@ namespace POSRestaurant.ViewModels
         private OrderItem[] _orderItems = [];
 
         /// <summary>
+        /// To store the order items of selected order
+        /// </summary>
+        [ObservableProperty]
+        private KOTModel[] _orderKOTs = [];
+
+        private int TableId = 1;
+
+        /// <summary>
         /// To check if ViewModel is already initialized
         /// </summary>
         private bool _isInitialized;
@@ -60,38 +62,38 @@ namespace POSRestaurant.ViewModels
         /// <param name="cartItems">List of items in the cart</param>
         /// <param name="isPaidOnline">True if paid online, False if paid cash</param>
         /// <returns>Returns true if successful, false otherwise</returns>
-        public async Task<bool> PlaceOrderAsync(CartItemModel[] cartItems, bool isPaidOnline)
-        {
-            var orderItems = cartItems.Select(o => new OrderItem
-            {
-                Icom = o.Icon,
-                ItemId = o.ItemId,
-                Name = o.Name,
-                Price = o.Price,
-                Quantity = o.Quantity
-            }).ToArray();
+        //public async Task<bool> PlaceOrderAsync(CartItemModel[] cartItems, bool isPaidOnline)
+        //{
+        //    var orderItems = cartItems.Select(o => new OrderItem
+        //    {
+        //        Icom = o.Icon,
+        //        ItemId = o.ItemId,
+        //        Name = o.Name,
+        //        Price = o.Price,
+        //        Quantity = o.Quantity
+        //    }).ToArray();
 
-            var orderModel = new OrderModel
-            {
-                OrderDate = DateTime.Now,
-                PaymentMode = isPaidOnline ? PaymentModes.Online : PaymentModes.Cash,
-                TotalItemCount = cartItems.Length,
-                TotalPrice = cartItems.Sum(x => x.Price),
-                Items = orderItems
-            };
+        //    var orderModel = new OrderModel
+        //    {
+        //        OrderDate = DateTime.Now,
+        //        PaymentMode = isPaidOnline ? PaymentModes.Online : PaymentModes.Cash,
+        //        TotalItemCount = cartItems.Length,
+        //        TotalPrice = cartItems.Sum(x => x.Price),
+        //        KOTs = orderItems
+        //    };
 
-            var errorMessage = await _databaseService.PlaceOrderAsync(orderModel);
+        //    var errorMessage = await _databaseService.PlaceOrderAsync(orderModel);
 
-            if (errorMessage != null)
-            {
-                await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
-                return false;
-            }
+        //    if (errorMessage != null)
+        //    {
+        //        await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
+        //        return false;
+        //    }
 
-            Orders.Add(orderModel);
-            await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
-            return true;
-        }
+        //    Orders.Add(orderModel);
+        //    await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
+        //    return true;
+        //}
 
         /// <summary>
         /// Initialize the ViewModel
@@ -109,10 +111,12 @@ namespace POSRestaurant.ViewModels
             var orders = dbOrders.Select(o => new OrderModel
             {
                 Id = o.Id,
+                TableId = o.TableId,
                 OrderDate = o.OrderDate,
                 TotalItemCount = o.TotalItemCount,
                 TotalPrice = o.TotalPrice,
-                PaymentMode = o.PaymentMode
+                PaymentMode = o.PaymentMode,
+                OrderStatus = o.OrderStatus,
             });
 
             foreach (var order in orders)
@@ -149,7 +153,17 @@ namespace POSRestaurant.ViewModels
 
             IsLoading = true;
             orderModel.IsSelected = true;
-            OrderItems = await _databaseService.GetOrderItemsAsync(orderModel.Id);
+            //OrderItems = await _databaseService.GetOrderItemsAsync(orderModel.Id);
+
+            OrderKOTs = (await _databaseService.GetOrderKotsAsync(orderModel.Id))
+                            .Select(KOTModel.FromEntity)
+                            .ToArray();
+
+            foreach (var kot in OrderKOTs)
+            {
+                kot.Items = await _databaseService.GetKotItemsAsync(kot.Id);
+            }
+
             IsLoading = false;
         }
 
@@ -162,7 +176,86 @@ namespace POSRestaurant.ViewModels
             if (OrderItems.Length == 0)
                 return;
 
+            foreach (var order in Orders)
+            {
+                order.IsSelected = false;
+            }
+
             OrderItems = [];
         }
+
+        #region KOT Flow
+
+        /// <summary>
+        /// Command to place an order
+        /// </summary>
+        /// <param name="cartItems">List of items in the cart</param>
+        /// <returns>Returns true if successful, false otherwise</returns>
+        public async Task<bool> PlaceKOTAsync(CartItemModel[] cartItems, TableModel tableModel)
+        {
+            var kotItems = cartItems.Select(o => new KOTItem
+            {
+                Icom = o.Icon,
+                ItemId = o.ItemId,
+                Name = o.Name,
+                Price = o.Price,
+                Quantity = o.Quantity
+            }).ToArray();
+
+            var kotModel = new KOTModel
+            {
+                KOTDateTime = DateTime.Now,
+                TotalItemCount = cartItems.Length,
+                TotalPrice = cartItems.Sum(x => x.Price),
+                Items = kotItems
+            };
+
+            List<KOTModel> kots = new List<KOTModel>();
+            kots.Add(kotModel);
+
+            var latestOrderId = await _databaseService.GetLatestOrderId();
+
+            string? errorMessage;
+
+            if (latestOrderId != 0)
+            {
+                // existing order, add kot
+                errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), latestOrderId);
+
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
+                    return false;
+                }
+            }
+            else
+            {
+                // new order, place order
+                var orderModel = new OrderModel
+                {
+                    TableId = TableId,
+                    OrderDate = DateTime.Now,
+                    TotalItemCount = kots.Sum(x => x.TotalItemCount),
+                    TotalPrice = kots.Sum(x => x.TotalPrice),
+                    KOTs = kots.ToArray(),
+                    OrderStatus = TableOrderStatus.Running
+                };
+
+                errorMessage = await _databaseService.PlaceOrderAsync(orderModel);
+
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
+                    return false;
+                }
+
+                Orders.Add(orderModel);
+            }
+
+            await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
+            return true;
+        }
+
+        #endregion
     }
 }

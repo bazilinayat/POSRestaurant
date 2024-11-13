@@ -50,4 +50,14 @@ public partial class MainPage : ContentPage
     {
         _homeViewModel.AddToCartCommand.Execute(menuItem);
     }
+
+    /// <summary>
+    /// Event called when SearchBox text changes, this is used to search for items
+    /// </summary>
+    /// <param name="sender">SearchBox as sender</param>
+    /// <param name="e">EventArgs</param>
+    private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _homeViewModel.SearchItemsCommand.Execute(e.NewTextValue);
+    }
 }

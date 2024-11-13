@@ -26,6 +26,11 @@ namespace POSRestaurant.Models
         [ObservableProperty]
         private bool _isSelected;
 
+        /// <summary>
+        /// To make object of MenuCategoryModel
+        /// </summary>
+        /// <param name="entity">MenuCategory Object</param>
+        /// <returns>Returns a MenuCategoryModel object</returns>
         public static MenuCategoryModel FromEntity(MenuCategory entity) =>
             new ()
             {
