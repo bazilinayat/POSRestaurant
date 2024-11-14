@@ -33,7 +33,7 @@ namespace POSRestaurant.Data
         {
             _settingService = settingService;
             _seedData = new SeedData(_settingService);
-            var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RestPOS.db3");
+            var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data",  "RestPOS.db3");
             _connection = new SQLiteAsyncConnection(dbPath, 
                 SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.SharedCache);
         }
@@ -110,8 +110,32 @@ namespace POSRestaurant.Data
 
             if (await _connection.InsertAsync(order) > 0)
             {
-                // Order inserted successfully, get order Id and add order items
-                await InsertOrderKOTAsync(orderModel.KOTs, order.Id);
+                // Order inserted successfully, add kots
+                foreach (var kotItem in orderModel.KOTs)
+                {
+                    var kot = new KOT()
+                    {
+                        OrderId = order.Id,
+                        KOTDateTime = kotItem.KOTDateTime,
+                        TotalItemCount = kotItem.TotalItemCount,
+                        TotalPrice = kotItem.TotalPrice
+                    };
+
+                    if (await _connection.InsertAsync(kot) > 0)
+                    {
+                        foreach (var item in kotItem.Items)
+                        {
+                            item.KOTId = kot.Id;
+                        }
+                        if (await _connection.InsertAllAsync(kotItem.Items) == 0)
+                        {
+                            // Order items ooperation failed
+                            // Remove the associated order
+                            await DeleteOrderAsync(order);
+                            return "Error in inserting order items";
+                        }
+                    }
+                }
                 orderModel.Id = order.Id;
                 return null;
             }
@@ -125,15 +149,16 @@ namespace POSRestaurant.Data
         /// To insert the kots in an order
         /// </summary>
         /// <param name="KOTs">KOTs to be added</param>
-        /// <param name="orderId">orderId, for which KOT to be added</param>
+        /// <param name="latestOrder">Latest order, for which KOT to be added</param>
         /// <returns>Returns Error Message or null(in case of success)</returns>
-        public async Task<string?> InsertOrderKOTAsync(KOTModel[] KOTs, long orderId)
+        public async Task<string?> InsertOrderKOTAsync(KOTModel[] KOTs, Order latestOrder)
         {
+            // First we add the kot for the order
             foreach (var kotItem in KOTs)
             {
                 var kot = new KOT()
                 {
-                    OrderId = orderId,
+                    OrderId = latestOrder.Id,
                     KOTDateTime = kotItem.KOTDateTime,
                     TotalItemCount = kotItem.TotalItemCount,
                     TotalPrice = kotItem.TotalPrice
@@ -147,35 +172,37 @@ namespace POSRestaurant.Data
                     }
                     if (await _connection.InsertAllAsync(kotItem.Items) == 0)
                     {
-                        // Order items ooperation failed
-                        // Remove the associated order
-                        await DeleteOrder(orderId);
                         return "Error in inserting order items";
                     }
+
+                    // Update the order details, for each kot
+                    latestOrder.TotalPrice += kotItem.TotalPrice;
+                    latestOrder.TotalItemCount += kotItem.TotalItemCount;
+                    latestOrder.OrderDate = DateTime.Now;
                 }
             }
+
+            // Update the order object with latest details
+            await _connection.UpdateAsync(latestOrder);
+
             return null;
         }
 
-        public async Task DeleteOrder(long orderId)
-        {
-            var orderToDelete = await _connection.Table<Order>().Where(o => o.Id == orderId).FirstAsync();
-            await _connection.DeleteAsync(orderToDelete);
-        }
+        /// <summary>
+        /// Delete order based on given OrderId
+        /// </summary>
+        /// <param name="order">Order to delete</param>
+        /// <returns>Returns a Task object</returns>
+        public async Task DeleteOrderAsync(Order order) =>
+            await _connection.DeleteAsync(order);
 
         /// <summary>
         /// To get the last order id
         /// Later on can be modified for table id as well.
         /// </summary>
         /// <returns>The latest order id</returns>
-        public async Task<long> GetLatestOrderId()
-        {
-            var latestOrder = await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
-            if (latestOrder == null)
-                return 0;
-            else
-                return latestOrder.Id;
-        }
+        public async Task<Order> GetLatestOrderId() =>
+            await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
 
         /// <summary>
         /// Get a array of all the orders, if needed, you can apply paging here

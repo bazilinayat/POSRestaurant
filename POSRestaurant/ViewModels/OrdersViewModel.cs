@@ -107,6 +107,18 @@ namespace POSRestaurant.ViewModels
             _isInitialized = true;
             IsLoading = true;
 
+            await GetOrdersAsync();
+
+            IsLoading = false;
+        }
+
+        /// <summary>
+        /// To clear the orders list and add new or updated orders
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        private async ValueTask GetOrdersAsync()
+        {
+            Orders.Clear();
             var dbOrders = await _databaseService.GetOrdersAsync();
             var orders = dbOrders.Select(o => new OrderModel
             {
@@ -123,7 +135,6 @@ namespace POSRestaurant.ViewModels
             {
                 Orders.Add(order);
             }
-            IsLoading = false;
         }
 
         /// <summary>
@@ -213,20 +224,22 @@ namespace POSRestaurant.ViewModels
             List<KOTModel> kots = new List<KOTModel>();
             kots.Add(kotModel);
 
-            var latestOrderId = await _databaseService.GetLatestOrderId();
+            var latestOrder = await _databaseService.GetLatestOrderId();
 
             string? errorMessage;
 
-            if (latestOrderId != 0)
+            if (latestOrder != null)
             {
                 // existing order, add kot
-                errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), latestOrderId);
+                errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), latestOrder);
 
                 if (errorMessage != null)
                 {
                     await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
                     return false;
                 }
+
+                await GetOrdersAsync();
             }
             else
             {
