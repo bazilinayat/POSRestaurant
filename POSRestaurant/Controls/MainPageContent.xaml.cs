@@ -1,32 +1,31 @@
-﻿using POSRestaurant.Data;
+using POSRestaurant.Models;
 using POSRestaurant.ViewModels;
 
-namespace POSRestaurant.Pages;
+namespace POSRestaurant.Controls;
 
 /// <summary>
-/// MainPage of the Application
+/// Class for Main Content
 /// </summary>
-public partial class MainPage : ContentPage
+public partial class MainPageContent : ContentView
 {
     /// <summary>
     /// DIed property to handle the HomeViewModel
     /// </summary>
-    private readonly HomeViewModel _homeViewModel;
-
-    public MainPage()
-    {
-        InitializeComponent();
-    }
+    public HomeViewModel _homeViewModel;
 
     /// <summary>
-    /// Initialize MainPage
+    /// DIed TableModel for table info and update
     /// </summary>
-    /// <param name="homeViewModel">DI for HomeViewModel</param>
-    public MainPage(HomeViewModel homeViewModel) : this()
-    {
+    private readonly TableModel _tableModel;
+
+    public MainPageContent(HomeViewModel homeViewModel, TableModel tableModel)
+	{
         InitializeComponent();
         _homeViewModel = homeViewModel;
         BindingContext = _homeViewModel;
+
+        _tableModel = tableModel;
+
         Initialize();
     }
 
@@ -64,5 +63,15 @@ public partial class MainPage : ContentPage
     private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
     {
         _homeViewModel.SearchItemsCommand.Execute(e.NewTextValue);
+    }
+
+    /// <summary>
+    /// When place order button is clicked
+    /// </summary>
+    /// <param name="sender">Sender</param>
+    /// <param name="e">EventArgs</param>
+    private void Button_Clicked(object sender, EventArgs e)
+    {
+        _homeViewModel.PlaceOrderCommand.Execute(_tableModel);
     }
 }

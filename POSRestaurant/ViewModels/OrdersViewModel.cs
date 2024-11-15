@@ -40,8 +40,6 @@ namespace POSRestaurant.ViewModels
         [ObservableProperty]
         private KOTModel[] _orderKOTs = [];
 
-        private int TableId = 1;
-
         /// <summary>
         /// To check if ViewModel is already initialized
         /// </summary>
@@ -224,7 +222,7 @@ namespace POSRestaurant.ViewModels
             List<KOTModel> kots = new List<KOTModel>();
             kots.Add(kotModel);
 
-            var latestOrder = await _databaseService.GetLatestOrderId();
+            var latestOrder = await _databaseService.GetLatestOrderIdByTableId(tableModel.Id);
 
             string? errorMessage;
 
@@ -246,7 +244,7 @@ namespace POSRestaurant.ViewModels
                 // new order, place order
                 var orderModel = new OrderModel
                 {
-                    TableId = TableId,
+                    TableId = tableModel.Id,
                     OrderDate = DateTime.Now,
                     TotalItemCount = kots.Sum(x => x.TotalItemCount),
                     TotalPrice = kots.Sum(x => x.TotalPrice),

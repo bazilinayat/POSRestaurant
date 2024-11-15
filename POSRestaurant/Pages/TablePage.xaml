@@ -9,32 +9,36 @@
              Shell.NavBarIsVisible="True"
              Title="Table View"
              x:DataType="vm:TableViewModel">
-    <CollectionView ItemsSource="{Binding Tables}">
-        <CollectionView.ItemsLayout>
-            <GridItemsLayout Span="5"
-                         HorizontalItemSpacing="10"
-                         VerticalItemSpacing="10"
-                         Orientation="Vertical"/>
-        </CollectionView.ItemsLayout>
-        <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="models:TableModel">
-                <Border Padding="10"
-                        Stroke="Brown"
-                        StrokeDashOffset="2"
-                        >
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="{Binding TableNo}"
-                               FontAttributes="Bold"
-                               HorizontalOptions="Center"/>
-                        <Label Text="TimeRunning"
-                               HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableSelectedCommand}"
-                                              CommandParameter="{Binding .}" />
-                    </Border.GestureRecognizers>
-                </Border>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+
+    <Grid RowDefinitions="Auto, *">
+        <Label Grid.Row="0" Text="Welcome my friend, Welcome!!" />
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Tables}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Span="5"
+                     HorizontalItemSpacing="10"
+                     VerticalItemSpacing="10"
+                     Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:TableModel">
+                    <Border Padding="10"
+                    Stroke="Brown"
+                    StrokeDashOffset="2"
+                    >
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="{Binding TableNo}"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+                            <Label Text="TimeRunning"
+                           HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableSelectedCommand}"
+                                          CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
 </ContentPage>

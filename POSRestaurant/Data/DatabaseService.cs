@@ -205,6 +205,14 @@ namespace POSRestaurant.Data
             await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
 
         /// <summary>
+        /// To get the last order id for given table id
+        /// Later on can be modified for table id as well.
+        /// </summary>
+        /// <returns>The latest order id</returns>
+        public async Task<Order> GetLatestOrderIdByTableId(int tableId) =>
+            await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running && o.TableId == tableId).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
+
+        /// <summary>
         /// Get a array of all the orders, if needed, you can apply paging here
         /// </summary>
         /// <returns>Array of orders</returns>

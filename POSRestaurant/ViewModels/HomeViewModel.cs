@@ -290,16 +290,9 @@ namespace POSRestaurant.ViewModels
         /// <param name="isPaidOnline">Coming from UI, which button is clicked</param>
         /// <returns>Returns a Task Object</returns>
         [RelayCommand]
-        private async Task PlaceOrderAsync(bool isPaidOnline)
+        private async Task PlaceOrderAsync(TableModel tableModel)
         {
             IsLoading = true;
-
-            var tableModel = new TableModel
-            {
-                Id = 1,
-                Status = TableOrderStatus.Running,
-                TableNo = 1,
-            };
 
             if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel))
             {

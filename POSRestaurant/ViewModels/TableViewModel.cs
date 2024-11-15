@@ -1,6 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls;
+using POSRestaurant.Controls;
 using POSRestaurant.Data;
 using POSRestaurant.Models;
 using POSRestaurant.Pages;
@@ -46,6 +49,11 @@ namespace POSRestaurant.ViewModels
         /// DIed OrdersViewModel
         /// </summary>
         private readonly OrdersViewModel _ordersViewModel;
+        
+        /// <summary>
+        /// DIed HomeViewModel
+        /// </summary>
+        private readonly HomeViewModel _homeViewModel;
 
         /// <summary>
         /// DIed SettingService
@@ -53,16 +61,9 @@ namespace POSRestaurant.ViewModels
         private readonly SettingService _settingService;
 
         /// <summary>
-        /// DIed HomeViewModel
-        /// </summary>
-        private readonly HomeViewModel _homeViewModel;
-
-        public ICommand NavigateToProfileCommand { get; }
-        public ICommand NavigateToSettingsCommand { get; }
-
-        /// <summary>
         /// Constructor for the TablesViewModel
         /// </summary>
+        /// <param name="serviceProvider">DI for IServiceProvider</param>
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="homeViewModel">DI for HomeViewModel</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
@@ -70,27 +71,10 @@ namespace POSRestaurant.ViewModels
         public TableViewModel(IServiceProvider serviceProvider, DatabaseService databaseService, HomeViewModel homeViewModel, OrdersViewModel ordersViewModel, SettingService settingService)
         {
             _serviceProvider = serviceProvider;
-
             _databaseService = databaseService;
-            _homeViewModel = homeViewModel;
             _ordersViewModel = ordersViewModel;
+            _homeViewModel = homeViewModel;
             _settingService = settingService;
-
-            NavigateToProfileCommand = new Command(async () => await NavigateToProfile());
-            NavigateToSettingsCommand = new Command(async () => await NavigateToSettings());
-        }
-
-        private async Task NavigateToProfile()
-        {
-            // Navigate to ProfilePage
-            var tabv = _serviceProvider.GetRequiredService<OrdersViewModel>();
-            await Application.Current.MainPage.Navigation.PushAsync(new OrdersPage(tabv));
-        }
-
-        private async Task NavigateToSettings()
-        {
-            // Navigate to SettingsPage
-            await Application.Current.MainPage.Navigation.PushAsync(new ManageMenuItemPage());
         }
 
         /// <summary>
@@ -107,17 +91,27 @@ namespace POSRestaurant.ViewModels
 
             IsLoading = true;
 
+            await GetTablesAsync();
+
+            IsLoading = false;
+        }
+
+        /// <summary>
+        /// To get or update the table details
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        public async ValueTask GetTablesAsync()
+        {
             Tables = (await _databaseService.GetTablesAsync())
                             .Select(TableModel.FromEntity)
                             .ToArray();
-
-            IsLoading = false;
         }
 
         [RelayCommand]
         private async Task TableSelected(TableModel tableModel)
         {
-
+            var helpPopup = new MainPagePopup(_homeViewModel, tableModel);
+            await Shell.Current.ShowPopupAsync(helpPopup);
         }
     }
 }

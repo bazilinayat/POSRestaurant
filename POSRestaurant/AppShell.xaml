@@ -41,11 +41,6 @@
     Icon="grid_alt_solid_24.png"
     Route="TablePage" />
         <ShellContent
-    Title="Home"
-    ContentTemplate="{DataTemplate pages:MainPage}"
-    Icon="home_regular_24.png"
-    Route="MainPage" />
-        <ShellContent
     Title="Orders"
     ContentTemplate="{DataTemplate pages:OrdersPage}"
     Icon="list_ul_regular_24.png"
