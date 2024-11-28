@@ -36,13 +36,17 @@ namespace POSRestaurant
 
             builder.Services.AddSingleton<DatabaseService>()
                 .AddSingleton<SettingService>()
-                .AddSingleton<ShellViewModel>()
-                .AddSingleton<HomeViewModel>()
+                
                 .AddSingleton<MainPage>()
-                .AddSingleton<OrdersViewModel>()
                 .AddSingleton<OrdersPage>()
                 .AddSingleton<TablePage>()
-                .AddSingleton<TableViewModel>();
+                .AddSingleton<ManageMenuItemPage>()
+                
+                .AddSingleton<ShellViewModel>()
+                .AddSingleton<HomeViewModel>()
+                .AddSingleton<OrdersViewModel>()
+                .AddSingleton<TableViewModel>()
+                .AddSingleton<ManageMenuItemViewModel>();
 
             return builder.Build();
         }

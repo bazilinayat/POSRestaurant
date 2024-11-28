@@ -13,16 +13,11 @@ public partial class MainPage : ContentPage
     /// </summary>
     private readonly HomeViewModel _homeViewModel;
 
-    public MainPage()
-    {
-        InitializeComponent();
-    }
-
     /// <summary>
     /// Initialize MainPage
     /// </summary>
     /// <param name="homeViewModel">DI for HomeViewModel</param>
-    public MainPage(HomeViewModel homeViewModel) : this()
+    public MainPage(HomeViewModel homeViewModel)
     {
         InitializeComponent();
         _homeViewModel = homeViewModel;

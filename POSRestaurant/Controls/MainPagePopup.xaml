@@ -9,5 +9,4 @@
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
              CanBeDismissedByTappingOutsideOfPopup="True"
              x:DataType="vm:HomeViewModel">
-
 </toolkit:Popup>

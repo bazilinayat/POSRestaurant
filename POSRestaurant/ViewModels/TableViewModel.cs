@@ -1,8 +1,10 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using CommunityToolkit.Maui.Converters;
+using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Shapes;
 using POSRestaurant.Controls;
 using POSRestaurant.Data;
 using POSRestaurant.Models;
@@ -102,11 +104,54 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task Object</returns>
         public async ValueTask GetTablesAsync()
         {
-            Tables = (await _databaseService.GetTablesAsync())
+            var tables = (await _databaseService.GetTablesAsync())
                             .Select(TableModel.FromEntity)
-                            .ToArray();
+                            .ToList();
+
+            Tables = tables.ToArray();
+
+            TransformTables(tables);
         }
 
+        /// <summary>
+        /// To be called each time we get the tables from database
+        /// This will transform and modify the data in table list, to be used for the UI
+        /// </summary>
+        /// <param name="tables">List of TableModel</param>
+        private void TransformTables(List<TableModel> tables)
+        {
+            foreach(var table in tables)
+            {
+                switch(table.Status)
+                {
+                    case TableOrderStatus.NoOrder:
+                        // Used to reset everything
+                        table.BorderColour = "Brown";
+                        table.ActionButtonImageIcon = "check_circle_regular_24.png";
+                        table.ActionButtonEnabled = false;
+                        break;
+                    case TableOrderStatus.Running:
+                        table.BorderColour = "Yellow";
+                        table.ActionButtonImageIcon = "invoice.png";
+                        table.ActionButtonEnabled = true;
+                        break;
+                    case TableOrderStatus.Printed:
+                        table.BorderColour = "Green";
+                        table.ActionButtonImageIcon = "diskette.png";
+                        table.ActionButtonEnabled = true;
+                        break;
+                    case TableOrderStatus.Paid:
+                        table.BorderColour = "Green";
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// When a table is selected, show menu popup
+        /// </summary>
+        /// <param name="tableModel">TableModel for selected table</param>
+        /// <returns>Returns a Task Object</returns>
         [RelayCommand]
         private async Task TableSelected(TableModel tableModel)
         {

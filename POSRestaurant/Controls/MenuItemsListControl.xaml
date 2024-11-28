@@ -28,7 +28,7 @@
                             <Label Text="{Binding Price, StringFormat='{0:C}'}"
                                FontAttributes="Bold"
                                TextColor="LightGreen"/>
-                            <ImageButton Source="shopping_bag_regular_24.png"
+                            <ImageButton Source="{Binding Source={x:Reference this}, Path=ActionIcon}"
                                      BackgroundColor="{StaticResource LightWheat}"
                                      CornerRadius="8"
                                      HeightRequest="25"

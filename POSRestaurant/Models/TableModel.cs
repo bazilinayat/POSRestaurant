@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using POSRestaurant.Data;
-using SQLite;
 
 namespace POSRestaurant.Models
 {
@@ -10,7 +9,6 @@ namespace POSRestaurant.Models
         /// Table Id
         /// Primary key, autoincrement
         /// </summary>
-        [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         /// <summary>
         /// Table number, Id could be different, we can't say
@@ -23,7 +21,20 @@ namespace POSRestaurant.Models
         /// <summary>
         /// To represent status of the table
         /// </summary>
-        public TableOrderStatus Status { get; set; }
+        public TableOrderStatus Status { get; set; } = TableOrderStatus.NoOrder;
+        /// <summary>
+        /// To set the colour of the table border as per the TableOrderStatus
+        /// </summary>
+        public string BorderColour { get; set; } = "Brown";
+        /// <summary>
+        /// As per the Status, the action to be taken will change
+        /// Should display different images for each action
+        /// </summary>
+        public string ActionButtonImageIcon { get; set; } = "";
+        /// <summary>
+        /// The action button will enabled in certain conditions only
+        /// </summary>
+        public bool ActionButtonEnabled { get; set; }
         /// <summary>
         /// Will keep track for how long the table was running
         /// </summary>

@@ -21,22 +21,25 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:TableModel">
-                    <Border Padding="10"
-                    Stroke="Brown"
-                    StrokeDashOffset="2"
-                    >
-                        <VerticalStackLayout Spacing="10">
-                            <Label Text="{Binding TableNo}"
-                           FontAttributes="Bold"
-                           HorizontalOptions="Center"/>
-                            <Label Text="TimeRunning"
-                           HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableSelectedCommand}"
-                                          CommandParameter="{Binding .}" />
-                        </Border.GestureRecognizers>
-                    </Border>
+                    <VerticalStackLayout Spacing="5">
+                        <Border Padding="10"
+                        Stroke="{Binding BorderColour}"
+                        StrokeDashOffset="2"
+                        >
+                            <VerticalStackLayout Spacing="10">
+                                <Label Text="{Binding TableNo}"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"/>
+                                <Label Text="TimeRunning"
+                               HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableSelectedCommand}"
+                                              CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                        <ImageButton Source="check_circle_regular_24.png" IsEnabled="False" HeightRequest="25" WidthRequest="25" />
+                    </VerticalStackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

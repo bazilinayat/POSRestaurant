@@ -266,6 +266,60 @@ namespace POSRestaurant.Data
             await _connection.Table<Table>().ToArrayAsync();
 
         /// <summary>
+        /// To get the categorie(s) the menu item belongs to
+        /// </summary>
+        /// <param name="menuItemId">Item Id</param>
+        /// <returns>MenuCategory Array</returns>
+        public async Task<MenuCategory> GetCategoryOfMenuItem(int menuItemId)
+        {
+            var itemOnMenu = await _connection.Table<ItemOnMenu>().Where(o => o.Id == menuItemId).FirstOrDefaultAsync();
+
+            return await _connection.Table<MenuCategory>().Where(o => o.Id == itemOnMenu.MenuCategoryId).FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Delete MenuItem from the database
+        /// </summary>
+        /// <param name="item">Item to delete</param>
+        /// <returns>Returns the number of rows deleted</returns>
+        public async Task<int> DeleteMenuItemAsync(ItemOnMenu item)
+        {
+            return await _connection.DeleteAsync(item);
+        }
+
+        /// <summary>
+        /// To save the menu item in database
+        /// </summary>
+        /// <param name="itemModel">Item to be saved</param>
+        /// <returns>Error Message String</returns>
+        public async Task<string?> SaveMenuItemAsync(ItemOnMenuModel itemModel)
+        {
+            ItemOnMenu menuItem = new ItemOnMenu
+            {
+                Id = itemModel.Id,
+                Name = itemModel.Name,
+                Description = itemModel.Description,
+                MenuCategoryId = itemModel.Category.Id,
+                Price = itemModel.Price,
+            };
+
+            if (menuItem.Id == 0)
+            {
+                if (await _connection.InsertAsync(menuItem) > 0)
+                    return null;
+
+                return "Error in saving menu item";
+            }
+            else
+            {
+                if (await _connection.UpdateAsync(menuItem) > 0)
+                    return null;
+
+                return "Error in updating menu item";
+            }
+        }
+
+        /// <summary>
         /// Implementation of IAsyncDisposable interface
         /// </summary>
         /// <returns>Returns a Task object</returns>
