@@ -107,10 +107,10 @@
 	  <MauiXaml Update="Pages\OrdersPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\TablePage.xaml">
+	  <MauiXaml Update="Pages\OrderViewPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\Testing.xaml">
+	  <MauiXaml Update="Pages\TablePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

@@ -23,9 +23,8 @@
                 <DataTemplate x:DataType="models:TableModel">
                     <VerticalStackLayout Spacing="5">
                         <Border Padding="10"
-                        Stroke="{Binding BorderColour}"
-                        StrokeDashOffset="2"
-                        >
+                                Stroke="{Binding BorderColour}"
+                                StrokeDashOffset="2">
                             <VerticalStackLayout Spacing="10">
                                 <Label Text="{Binding TableNo}"
                                FontAttributes="Bold"
@@ -38,7 +37,12 @@
                                               CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
                         </Border>
-                        <ImageButton Source="check_circle_regular_24.png" IsEnabled="False" HeightRequest="25" WidthRequest="25" />
+                        <ImageButton Source="{Binding ActionButtonImageIcon}" 
+                                     IsEnabled="{Binding ActionButtonEnabled}" 
+                                     HeightRequest="25" 
+                                     WidthRequest="25"
+                                     Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableActionButtonCommand}"
+                                     CommandParameter="{Binding .}" />
                     </VerticalStackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

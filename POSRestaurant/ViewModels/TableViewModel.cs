@@ -2,9 +2,11 @@
 using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Controls;
 using POSRestaurant.Data;
 using POSRestaurant.Models;
@@ -17,7 +19,7 @@ namespace POSRestaurant.ViewModels
     /// <summary>
     /// ViewModel For Table Page
     /// </summary>
-    public partial class TableViewModel : ObservableObject
+    public partial class TableViewModel : ObservableObject, IRecipient<TableChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -77,6 +79,9 @@ namespace POSRestaurant.ViewModels
             _ordersViewModel = ordersViewModel;
             _homeViewModel = homeViewModel;
             _settingService = settingService;
+
+            // Registering for listetning to the WeakReferenceMessenger for item change
+            WeakReferenceMessenger.Default.Register<TableChangedMessage>(this);
         }
 
         /// <summary>
@@ -106,9 +111,7 @@ namespace POSRestaurant.ViewModels
         {
             var tables = (await _databaseService.GetTablesAsync())
                             .Select(TableModel.FromEntity)
-                            .ToList();
-
-            Tables = tables.ToArray();
+                            .ToArray();
 
             TransformTables(tables);
         }
@@ -118,7 +121,7 @@ namespace POSRestaurant.ViewModels
         /// This will transform and modify the data in table list, to be used for the UI
         /// </summary>
         /// <param name="tables">List of TableModel</param>
-        private void TransformTables(List<TableModel> tables)
+        private void TransformTables(TableModel[] tables)
         {
             foreach(var table in tables)
             {
@@ -126,25 +129,27 @@ namespace POSRestaurant.ViewModels
                 {
                     case TableOrderStatus.NoOrder:
                         // Used to reset everything
-                        table.BorderColour = "Brown";
+                        table.BorderColour = Colors.Brown;
                         table.ActionButtonImageIcon = "check_circle_regular_24.png";
                         table.ActionButtonEnabled = false;
                         break;
                     case TableOrderStatus.Running:
-                        table.BorderColour = "Yellow";
+                        table.BorderColour = Colors.Yellow;
                         table.ActionButtonImageIcon = "invoice.png";
                         table.ActionButtonEnabled = true;
                         break;
                     case TableOrderStatus.Printed:
-                        table.BorderColour = "Green";
+                        table.BorderColour = Colors.Green;
                         table.ActionButtonImageIcon = "diskette.png";
                         table.ActionButtonEnabled = true;
                         break;
                     case TableOrderStatus.Paid:
-                        table.BorderColour = "Green";
+                        table.BorderColour = Colors.Green;
                         break;
                 }
             }
+
+            Tables = [.. tables];
         }
 
         /// <summary>
@@ -155,8 +160,45 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task TableSelected(TableModel tableModel)
         {
-            var helpPopup = new MainPagePopup(_homeViewModel, tableModel);
-            await Shell.Current.ShowPopupAsync(helpPopup);
+            await Application.Current.MainPage.Navigation.PushAsync(new MainPage(_homeViewModel, tableModel));
+        }
+
+        /// <summary>
+        /// To receive the table change message coming from different places
+        /// </summary>
+        /// <param name="tableChangedMessage">Table details changed</param>
+        public void Receive(TableChangedMessage tableChangedMessage)
+        {
+            var tableModel = tableChangedMessage.Value;
+            for(int i = 0; i < Tables.Length; i++)
+            {
+                if (Tables[i].Id == tableModel.Id)
+                {
+                    Tables[i] = tableModel;
+                }
+            }
+
+            TransformTables(Tables);
+        }
+
+        /// <summary>
+        /// When the action button for a table is clicked
+        /// Action will depend on RunningOrderId and Status
+        /// </summary>
+        /// <param name="tableModel">TableModel for selected table</param>
+        /// <returns>Returns a Task Object</returns>
+        [RelayCommand]
+        private async Task TableActionButton(TableModel tableModel)
+        {
+            switch (tableModel.Status)
+            {
+                case TableOrderStatus.Running: // To view the whole order, with KOTs
+                    var vovm = _serviceProvider.GetRequiredService<ViewOrderViewModel>();
+                    await Application.Current.MainPage.Navigation.PushAsync(new OrderViewPage(vovm, _ordersViewModel, tableModel));
+                    break;
+                case TableOrderStatus.Printed: // To show popup, for marking as paid
+                    break;
+            }
         }
     }
 }

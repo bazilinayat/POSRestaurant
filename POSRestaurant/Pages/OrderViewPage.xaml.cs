@@ -1,18 +1,17 @@
-using CommunityToolkit.Maui.Views;
 using POSRestaurant.Models;
 using POSRestaurant.ViewModels;
 
-namespace POSRestaurant.Controls;
+namespace POSRestaurant.Pages;
 
 /// <summary>
-/// Class for Main Content
+/// Page where order can be viewed with kots
 /// </summary>
-public partial class MainPageContent : ContentView
+public partial class OrderViewPage : ContentPage
 {
     /// <summary>
     /// DIed property to handle the HomeViewModel
     /// </summary>
-    public HomeViewModel _homeViewModel;
+    private readonly ViewOrderViewModel _viewOrderViewModel;
 
     /// <summary>
     /// DIed TableModel for table info and update
@@ -20,25 +19,26 @@ public partial class MainPageContent : ContentView
     private readonly TableModel _tableModel;
 
     /// <summary>
-    /// To interact with the popup where this content is showed
+    /// DIed TableModel for table info and update
     /// </summary>
-    private readonly Popup _popup;
+    private readonly OrdersViewModel _orderViewModel;
 
     /// <summary>
-    /// Contructor for the MainPage for binding and init
+    /// Initialize OrderViewPage
     /// </summary>
-    /// <param name="popup">Popup where this content is showed</param>
-    /// <param name="homeViewModel">HomeViewModel for the content page and handle actions</param>
+    /// <param name="viewOrderViewModel">ViewOrderViewModel for the content page and handle actions</param>
+    /// <param name="orderViewModel">OrderViewModel for order related queries</param>
     /// <param name="tableModel">TableViewModel to add table details with orders</param>
-    public MainPageContent(Popup popup, HomeViewModel homeViewModel, TableModel tableModel)
+    public OrderViewPage(ViewOrderViewModel viewOrderViewModel, OrdersViewModel orderViewModel, TableModel tableModel)
 	{
         InitializeComponent();
-        _homeViewModel = homeViewModel;
-        BindingContext = _homeViewModel;
+        _viewOrderViewModel = viewOrderViewModel;
 
-        _popup = popup;
+        _viewOrderViewModel.TableModel = tableModel;
+        BindingContext = _viewOrderViewModel;
 
         _tableModel = tableModel;
+        _orderViewModel = orderViewModel;
 
         Initialize();
     }
@@ -48,7 +48,7 @@ public partial class MainPageContent : ContentView
     /// </summary>
     private async void Initialize()
     {
-        await _homeViewModel.InitializeAsync();
+        await _viewOrderViewModel.InitializeAsync();
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public partial class MainPageContent : ContentView
     /// <param name="category">Selected Category</param>
     private async void CategoriesListControl_OnCategorySelected(Models.MenuCategoryModel category)
     {
-        await _homeViewModel.SelectCategoryCommand.ExecuteAsync(category.Id);
+        await _viewOrderViewModel.SelectCategoryCommand.ExecuteAsync(category.Id);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public partial class MainPageContent : ContentView
     /// <param name="category">Selected MenuItem</param>
     private void MenuItemsListControl_OnMenuItemSelected(Data.ItemOnMenu menuItem)
     {
-        _homeViewModel.AddToCartCommand.Execute(menuItem);
+        _viewOrderViewModel.AddToCartCommand.Execute(menuItem);
     }
 
     /// <summary>
@@ -76,17 +76,7 @@ public partial class MainPageContent : ContentView
     /// <param name="e">EventArgs</param>
     private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
     {
-        _homeViewModel.SearchItemsCommand.Execute(e.NewTextValue);
-    }
-
-    /// <summary>
-    /// When place order button is clicked
-    /// </summary>
-    /// <param name="sender">Sender</param>
-    /// <param name="e">EventArgs</param>
-    private void PlaceOrder_Clicked(object sender, EventArgs e)
-    {
-        _homeViewModel.PlaceOrderCommand.Execute(_tableModel);
+        _viewOrderViewModel.SearchItemsCommand.Execute(e.NewTextValue);
     }
 
     /// <summary>
@@ -94,8 +84,8 @@ public partial class MainPageContent : ContentView
     /// </summary>
     /// <param name="sender">Sender</param>
     /// <param name="e">EventArgs</param>
-    private void CancelButton_Clicked(object sender, EventArgs e)
+    private async void CancelButton_Clicked(object sender, EventArgs e)
     {
-        _popup.Close();
+        await Application.Current.MainPage.Navigation.PopAsync();
     }
 }

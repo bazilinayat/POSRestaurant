@@ -14,6 +14,10 @@ namespace POSRestaurant.Data
         [PrimaryKey, AutoIncrement]
         public long Id { get; set; }
         /// <summary>
+        /// To keep track of the number of KOTs in a order
+        /// </summary>
+        public int KOTNumber { get; set; }
+        /// <summary>
         /// Order Id, KOT belongs to
         /// </summary>
         public long OrderId { get; set; }

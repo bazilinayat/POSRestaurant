@@ -7,6 +7,5 @@
              xmlns:data="clr-namespace:POSRestaurant.Data"
              xmlns:models="clr-namespace:POSRestaurant.Models"
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
-             CanBeDismissedByTappingOutsideOfPopup="True"
-             x:DataType="vm:HomeViewModel">
+             CanBeDismissedByTappingOutsideOfPopup="True">
 </toolkit:Popup>

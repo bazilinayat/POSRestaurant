@@ -20,6 +20,10 @@ namespace POSRestaurant.Models
         /// </summary>
         public long Id { get; set; }
         /// <summary>
+        /// To keep track of the number of KOTs in the order
+        /// </summary>
+        public int KOTNumber { get; set; }
+        /// <summary>
         /// Order Id, KOT belongs to
         /// </summary>
         public long OrderId { get; set; }
@@ -49,6 +53,7 @@ namespace POSRestaurant.Models
             new()
             {
                 Id = entity.Id,
+                KOTNumber = entity.KOTNumber,
                 OrderId = entity.OrderId,
                 KOTDateTime = entity.KOTDateTime,
                 TotalItemCount = entity.TotalItemCount,

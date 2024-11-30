@@ -27,12 +27,6 @@ public partial class TablePage : ContentPage
         _tableViewModel = tableViewModel;
         BindingContext = _tableViewModel;
         Initialize();
-
-        NavigationPage.SetHasBackButton(this, false);
-        var bb = new BackButtonBehavior();
-        bb.IsEnabled = false;
-        bb.IsVisible = false;
-        Shell.SetBackButtonBehavior(this, bb);
     }
         
     /// <summary>

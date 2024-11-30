@@ -19,7 +19,7 @@ public partial class MainPagePopup : Popup
 	{
 		InitializeComponent();
 
-        Content = new MainPageContent(homeViewModel, tableModel);
+        Content = new MainPageContent(this, homeViewModel, tableModel);
     }
 
 }

@@ -1,6 +1,7 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.Models;
 using POSRestaurant.Utility;
@@ -79,30 +80,37 @@ namespace POSRestaurant.ViewModels
         {
             if (_isInitialized)
                 return;
+            await GetSetRequiredValues();
+        }
 
-            _isInitialized = true;
-
+        /// <summary>
+        /// To reset the screen for this page
+        /// </summary>
+        /// <returns></returns>
+        private async Task GetSetRequiredValues()
+        {
             IsLoading = true;
 
             Categories = (await _databaseService.GetMenuCategoriesAsync())
                             .Select(MenuCategoryModel.FromEntity)
                             .ToArray();
 
-            Categories[0].IsSelected = true;
-
-            SelectedCategory = Categories[0];
+            if (!_isInitialized)
+            {
+                Categories[0].IsSelected = true;
+                SelectedCategory = Categories[0];
+            }
+            else
+            {
+                var category = Categories.FirstOrDefault(o => o.Id == SelectedCategory.Id);
+                category.IsSelected = true;
+            }
 
             MenuItems = await _databaseService.GetMenuItemsByCategoryAsync(SelectedCategory.Id);
 
-            var newItem = new ItemOnMenu
-            {
-                Name = "Add New Item"
-            };
-            var newArray = new ItemOnMenu[MenuItems.Length + 1];
-            newArray[0] = newItem;
-            Array.Copy(MenuItems, 0, newArray, 1, MenuItems.Length);
-            MenuItems = newArray;
+            AddNewItemMenuItem();
 
+            _isInitialized = true;
             IsLoading = false;
         }
 
@@ -128,14 +136,7 @@ namespace POSRestaurant.ViewModels
 
             MenuItems = await _databaseService.GetMenuItemsByCategoryAsync(SelectedCategory.Id);
 
-            var newItem = new ItemOnMenu
-            {
-                Name = "Add New Item"
-            };
-            var newArray = new ItemOnMenu[MenuItems.Length + 1];
-            newArray[0] = newItem;
-            Array.Copy(MenuItems, 0, newArray, 1, MenuItems.Length);
-            MenuItems = newArray;
+            AddNewItemMenuItem();
 
             IsLoading = false;
         }
@@ -204,6 +205,19 @@ namespace POSRestaurant.ViewModels
             else
             {
                 await Shell.Current.DisplayAlert("Successful", "Item save successfully", "OK");
+
+                await GetSetRequiredValues();
+
+                /* Sending the new item, changed item to WeakReferenceMessager
+                 * This is the publishing part
+                 */
+                WeakReferenceMessenger.Default.Send(MenuItemChangedMessage.From(new ItemOnMenuChangeModel
+                {
+                    IsDeleted = false,
+                    ItemModel = item
+                }));
+
+                Cancel();
             }
 
             IsLoading = false;
@@ -228,7 +242,35 @@ namespace POSRestaurant.ViewModels
             if (await _databaseService.DeleteMenuItemAsync(menuItem) > 0)
             {
                 await Shell.Current.DisplayAlert("Successful", $"{item.Name} deleted successfully", "OK");
+
+                await GetSetRequiredValues();
+
+                /* Sending the new item, changed item to WeakReferenceMessager
+                 * This is the publishing part
+                 */
+                WeakReferenceMessenger.Default.Send(MenuItemChangedMessage.From(new ItemOnMenuChangeModel
+                {
+                    IsDeleted = true,
+                    ItemModel = item
+                }));
+
+                Cancel();
             }
+        }
+
+        /// <summary>
+        /// To add a new option in menu items for add item
+        /// </summary>
+        private void AddNewItemMenuItem()
+        {
+            var newItem = new ItemOnMenu
+            {
+                Name = "Add New Item"
+            };
+            var newArray = new ItemOnMenu[MenuItems.Length + 1];
+            newArray[0] = newItem;
+            Array.Copy(MenuItems, 0, newArray, 1, MenuItems.Length);
+            MenuItems = newArray;
         }
     }
 }

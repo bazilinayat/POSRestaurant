@@ -1,76 +1,77 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
              xmlns:data="clr-namespace:POSRestaurant.Data"
              xmlns:models="clr-namespace:POSRestaurant.Models"
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
-             x:Class="POSRestaurant.Pages.MainPage"
+             x:Class="POSRestaurant.Pages.OrderViewPage"
              Shell.NavBarIsVisible="False"
-             x:DataType="vm:HomeViewModel">
+             x:DataType="vm:ViewOrderViewModel">
 
-    <Grid ColumnDefinitions=".75*, .25*">
+    <Grid ColumnDefinitions=".60*, .40*">
         <Grid Grid.Column="0"
-            ColumnDefinitions="Auto, *">
+        ColumnDefinitions="Auto, *">
             <Grid Grid.Column="0"
-                  RowDefinitions="Auto, *" 
-                  RowSpacing="10"
-                  BackgroundColor="{StaticResource LightWheat}">
+              RowDefinitions="Auto, *" 
+              RowSpacing="10"
+              BackgroundColor="{StaticResource LightWheat}">
                 <Label Grid.Row="0" Text="{Binding Name, StringFormat='Hello, {0}'}"/>
 
                 <controls:CategoriesListControl Grid.Row="1" 
-                                                Categories="{Binding Categories}" 
-                                                OnCategorySelected="CategoriesListControl_OnCategorySelected" />
+                                            Categories="{Binding Categories}" 
+                                            OnCategorySelected="CategoriesListControl_OnCategorySelected" />
             </Grid>
             <Grid Grid.Column="1"
-                  RowDefinitions="Auto, *">
+              RowDefinitions="Auto, *">
                 <SearchBar Grid.Row="0"
-                    BackgroundColor="{StaticResource LightWheat}"
-                           HeightRequest="25"
-                           Text="{Binding TextSearch}"
-                           SearchCommand="{Binding SearchItemsCommand}"
-                           TextChanged="SearchBar_TextChanged"
-                           CancelButtonColor="Red"
-                           HorizontalTextAlignment="Start"
-                           Placeholder="Search Items..."
-                           Margin="20"/>
+                BackgroundColor="{StaticResource LightWheat}"
+                       HeightRequest="25"
+                       Text="{Binding TextSearch}"
+                       SearchCommand="{Binding SearchItemsCommand}"
+                       TextChanged="SearchBar_TextChanged"
+                       CancelButtonColor="Red"
+                       HorizontalTextAlignment="Start"
+                       Placeholder="Search Items..."
+                       Margin="20"/>
                 <controls:MenuItemsListControl Grid.Row="1" MenuItems="{Binding MenuItems}" OnMenuItemSelected="MenuItemsListControl_OnMenuItemSelected"/>
                 <BoxView IsVisible="{Binding IsLoading}"
-                         HorizontalOptions="Fill"
-                         VerticalOptions="Fill"
-                         Color="{StaticResource LightWheat}"
-                         Opacity="0.3"/>
+                     HorizontalOptions="Fill"
+                     VerticalOptions="Fill"
+                     Color="{StaticResource LightWheat}"
+                     Opacity="0.3"/>
                 <ActivityIndicator IsRunning="{Binding IsLoading}" 
-                                   HeightRequest="25" 
-                                   WidthRequest="25" 
-                                   HorizontalOptions="Center" 
-                                   VerticalOptions="Center"
-                                   Color="LightBlue"/>
+                               HeightRequest="25" 
+                               WidthRequest="25" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center"
+                               Color="LightBlue"/>
             </Grid>
         </Grid>
         <Grid Grid.Column="1" 
-              BackgroundColor="{StaticResource LightWheat}"
-              RowDefinitions="Auto, *, Auto"
-              Padding="0, 10">
+          BackgroundColor="{StaticResource LightWheat}"
+          RowDefinitions="Auto, *, Auto"
+          Padding="0, 10">
             <VerticalStackLayout Grid.Row="0" 
-                                 Spacing="5"
-                                 Padding="10, 0">
-                <Label Text="Current Order Items"
-                       FontSize="25"
-                       FontAttributes="Bold"/>
-                <controls:CurrentDateTimeControl />
+                             Spacing="5"
+                             Padding="10, 0">
+                <Label Text="Order Items"
+                   FontSize="25"
+                   FontAttributes="Bold"/>
+                <Label Text="{Binding OrderModel.Id, StringFormat='Order Id - {0}'}" />
+                <Label Text="{Binding OrderModel.OrderDate, StringFormat='DateTime - {0}'}" />
             </VerticalStackLayout>
             <Grid Grid.Row="1"
-                  Padding="10"
-                  BackgroundColor="Wheat">
+              Padding="10"
+              BackgroundColor="Wheat">
                 <CollectionView
-                    ItemsSource="{Binding CartItems}">
+                ItemsSource="{Binding OrderItems}">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical"
                                            ItemSpacing="2"/>
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:CartItemModel">
+                        <DataTemplate x:DataType="models:KOTItemModel">
                             <Grid>
                                 <Border Padding="5"
                                         StrokeShape="RoundRectangle 10"
@@ -96,7 +97,7 @@
                                                              HeightRequest="30"
                                                              WidthRequest="30"
                                                              Padding="5"
-                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=DecreaseQuantityCommand}"
+                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=DecreaseQuantityCommand}"
                                                              CommandParameter="{Binding .}"/>
                                                 <Label Grid.Column="1"
                                                        Text="{Binding Quantity}"
@@ -114,7 +115,7 @@
                                                              HeightRequest="30"
                                                              WidthRequest="30"
                                                              Padding="5"
-                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=IncreaseQuantityCommand}"
+                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=IncreaseQuantityCommand}"
                                                              CommandParameter="{Binding .}"/>
                                             </Grid>
                                         </Grid>
@@ -128,7 +129,7 @@
                                              WidthRequest="25"
                                              BackgroundColor="Red"
                                              ToolTipProperties.Text="Remove Item"
-                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=RemoveItemFromCartCommand}"
+                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=RemoveItemFromCartCommand}"
                                              CommandParameter="{Binding .}">
                                     <ImageButton.Shadow>
                                         <Shadow Brush="Red"/>
@@ -140,7 +141,7 @@
                 </CollectionView>
             </Grid>
             <VerticalStackLayout Grid.Row="2"
-                                 Padding="15, 10, 15, 0">
+                             Padding="15, 10, 15, 0">
                 <Border BackgroundColor="white"
                         Padding="10"
                         StrokeShape="RoundRectangle 10"
@@ -148,7 +149,7 @@
                     <Border.Shadow>
                         <Shadow Brush="red"/>
                     </Border.Shadow>
-                    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto"
+                    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
                           ColumnDefinitions="2*, 3*"
                           RowSpacing="8">
                         <Label Grid.Row="0"
@@ -204,37 +205,28 @@
                               ColumnDefinitions="Auto, *, Auto, Auto"
                               ColumnSpacing="10">
                             <Button Grid.Column="0"
-                                    Text="X"
+                                    Text="Cancel"
                                     HorizontalOptions="Start"
                                     VerticalOptions="Center"
                                     CornerRadius="5"
                                     MinimumHeightRequest="25"
                                     MinimumWidthRequest="25"
                                     BackgroundColor="Red"
-                                    Command="{Binding ClearCartCommand}"/>
+                                    Clicked="CancelButton_Clicked"/>
                             <Button Grid.Column="2"
-                                    Text="Cash"
+                                    Text="Save &amp; Print"
                                     HorizontalOptions="End"
                                     VerticalOptions="Center"
                                     CornerRadius="5"
                                     MinimumHeightRequest="25"
                                     MinimumWidthRequest="25"
                                     BackgroundColor="MediumSeaGreen"
-                                    Clicked="PlaceOrder_Clicked">
+                                    Command="{Binding SaveAndPrintCommand}">
                             </Button>
-
                         </Grid>
-                        <Button Grid.Row="6"
-                                Text="Cancel"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center"
-                                CornerRadius="5"
-                                BackgroundColor="Red"
-                                Clicked="CancelButton_Clicked" />
                     </Grid>
                 </Border>
             </VerticalStackLayout>
         </Grid>
     </Grid>
-
 </ContentPage>

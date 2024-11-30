@@ -25,7 +25,7 @@ namespace POSRestaurant.Models
         /// <summary>
         /// To set the colour of the table border as per the TableOrderStatus
         /// </summary>
-        public string BorderColour { get; set; } = "Brown";
+        public Color BorderColour { get; set; }
         /// <summary>
         /// As per the Status, the action to be taken will change
         /// Should display different images for each action

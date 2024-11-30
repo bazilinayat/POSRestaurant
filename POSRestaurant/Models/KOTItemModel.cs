@@ -1,17 +1,21 @@
-﻿using POSRestaurant.Models;
-using SQLite;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using POSRestaurant.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace POSRestaurant.Data
+namespace POSRestaurant.Models
 {
     /// <summary>
-    /// OrderItem Entity for SQLite
+    /// Class to keep track of the records in order
     /// </summary>
-    public class KOTItem
+    public partial class KOTItemModel : ObservableObject
     {
         /// <summary>
-        /// OrderItem Id
+        /// Item Id in the cart
         /// </summary>
-        [PrimaryKey, AutoIncrement]
         public long Id { get; set; }
         /// <summary>
         /// OrderId to which this item belongs to
@@ -22,33 +26,34 @@ namespace POSRestaurant.Data
         /// </summary>
         public int ItemId { get; set; }
         /// <summary>
-        /// MenuCategoryItem Name
+        /// Name of the item in the cart
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// MenuCategoryItem Icon
+        /// Icon for the item in the cart
         /// </summary>
         public string Icon { get; set; }
         /// <summary>
-        /// MenuCategoryItem Price
+        /// Price for the item in the cart
         /// </summary>
         public decimal Price { get; set; }
         /// <summary>
-        /// Quantity of MenuCategoryItem in the Order
+        /// Quantity of the item added to cart
+        /// To be changed from UI
         /// </summary>
-        public int Quantity { get; set; }
+        [ObservableProperty, NotifyPropertyChangedFor(nameof(Amount))]
+        public int _quantity;
         /// <summary>
-        /// Item amount calculated - Q * P
-        /// Ignored, not to be put in DB
+        /// Total amount for the item added to cart
         /// </summary>
-        [Ignore]
-        public decimal Amount => Quantity * Price;
+        public decimal Amount => Price * Quantity;
+
         /// <summary>
-        /// To make object of KOTItem
+        /// To make object of MenuCategoryModel
         /// </summary>
-        /// <param name="entity">KOTItemModel Object</param>
-        /// <returns>Returns a KOTItem object</returns>
-        public static KOTItem FromEntity(KOTItemModel entity) =>
+        /// <param name="entity">MenuCategory Object</param>
+        /// <returns>Returns a MenuCategoryModel object</returns>
+        public static KOTItemModel FromEntity(KOTItem entity) =>
             new()
             {
                 Id = entity.Id,

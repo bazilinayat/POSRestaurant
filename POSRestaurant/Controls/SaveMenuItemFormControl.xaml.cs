@@ -92,6 +92,12 @@ public partial class SaveMenuItemFormControl : ContentView
     private async Task SaveMenuItem()
     {
         // Validation
+
+        if (Item.Category == null)
+        {
+            await ErrorAlertAsync("Select a category for changes");
+            return;
+        }
         
         if (string.IsNullOrEmpty(Item.Name) || string.IsNullOrWhiteSpace(Item.Description))
         {

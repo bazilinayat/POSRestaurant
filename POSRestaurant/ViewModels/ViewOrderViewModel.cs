@@ -1,20 +1,27 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Maui.Controls;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.Models;
 using POSRestaurant.Utility;
+using SixLabors.ImageSharp;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Reflection;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace POSRestaurant.ViewModels
 {
     /// <summary>
-    /// ViewModel for Home Page
+    /// ViewModel for OrderView Page
     /// </summary>
-    public partial class HomeViewModel : ObservableObject, IRecipient<MenuItemChangedMessage>
+    public partial class ViewOrderViewModel : ObservableObject
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -53,6 +60,12 @@ namespace POSRestaurant.ViewModels
         private MenuCategoryModel _selectedCategory;
 
         /// <summary>
+        /// To store the order items of selected order
+        /// </summary>
+        [ObservableProperty]
+        private KOTModel[] _orderKOTs = [];
+
+        /// <summary>
         /// To track the sub total of the order or KOT
         /// Made observable for using
         /// </summary>
@@ -86,7 +99,7 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// ObservableCollection for items added to cart
         /// </summary>
-        public ObservableCollection<CartItemModel> CartItems { get; set; } = new();
+        public ObservableCollection<KOTItemModel> OrderItems { get; set; } = new();
 
         /// <summary>
         /// DIed OrdersViewModel
@@ -105,23 +118,45 @@ namespace POSRestaurant.ViewModels
         private string _textSearch;
 
         /// <summary>
+        /// To see if there are any changes done in the order
+        /// </summary>
+        private bool IsUpdated = false;
+
+        /// <summary>
+        /// To keep track of the changes done to the KOT items
+        /// </summary>
+        private List<KOTItemModel> _removedItems = new();
+
+        /// <summary>
+        /// To keep track of the updated KOTItems
+        /// </summary>
+        private List<long> _updatedKOTItemIds = new();
+
+        /// <summary>
+        /// To use for order details
+        /// </summary>
+        public TableModel TableModel { get; set; }
+
+        /// <summary>
+        /// To store the order details
+        /// </summary>
+        public OrderModel OrderModel { get; set; }
+
+        /// <summary>
         /// Constructor for the HomeViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public HomeViewModel(DatabaseService databaseService, OrdersViewModel ordersViewModel, SettingService settingService)
+        public ViewOrderViewModel(DatabaseService databaseService, OrdersViewModel ordersViewModel, SettingService settingService)
         {
             _databaseService = databaseService;
             _ordersViewModel = ordersViewModel;
             _settingService = settingService;
-            CartItems.CollectionChanged += CartItems_CollectionChanged;
+            OrderItems.CollectionChanged += CartItems_CollectionChanged;
 
             Name = _settingService.Settings.CustomerName;
             TaxPercentage = _settingService.Settings.DefaultTaxPercentage;
-
-            // Registering for listetning to the WeakReferenceMessenger for item change
-            WeakReferenceMessenger.Default.Register<MenuItemChangedMessage>(this);
         }
 
         /// <summary>
@@ -131,12 +166,9 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            //if (_isInitialized)
-            //    return;
-
-            _isInitialized = true;
-
             IsLoading = true;
+
+            OrderItems.Clear();
 
             Categories = (await _databaseService.GetMenuCategoriesAsync())
                             .Select(MenuCategoryModel.FromEntity)
@@ -147,7 +179,53 @@ namespace POSRestaurant.ViewModels
 
             MenuItems = await _databaseService.GetMenuItemsByCategoryAsync(SelectedCategory.Id);
 
-            CartItems.Clear();
+            await GetOrderDetailsAsync();
+            await GetOrderKOTsAsync();
+
+            IsLoading = false;
+        }
+
+        /// <summary>
+        /// Get order details
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        private async Task GetOrderDetailsAsync()
+        {
+            var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
+
+            OrderModel = new OrderModel
+            {
+                Id = order.Id,
+                TableId = order.TableId,
+                OrderDate = order.OrderDate,
+                TotalItemCount = order.TotalItemCount,
+                TotalPrice = order.TotalPrice,
+                PaymentMode = order.PaymentMode,
+                OrderStatus = order.OrderStatus,
+            };
+        }
+
+        /// <summary>
+        /// Command to get the items of selected order
+        /// </summary>
+        /// <returns>Returns Task Object</returns>
+        private async Task GetOrderKOTsAsync()
+        {
+            IsLoading = true;
+
+            OrderKOTs = (await _databaseService.GetOrderKotsAsync(OrderModel.Id))
+                            .Select(KOTModel.FromEntity)
+                            .ToArray();
+
+            foreach (var kot in OrderKOTs)
+            {
+                var items = (await _databaseService.GetKotItemsAsync(kot.Id))
+                            .Select(KOTItemModel.FromEntity)
+                            .ToList();
+
+                foreach (var item in items)
+                    OrderItems.Add(item);
+            }
 
             IsLoading = false;
         }
@@ -184,12 +262,13 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private void AddToCart(ItemOnMenu menuItem)
         {
-            var cartItem = CartItems.FirstOrDefault(o => o.ItemId == menuItem.Id);
+            var cartItem = OrderItems.FirstOrDefault(o => o.ItemId == menuItem.Id);
             if (cartItem == null)
             {
                 // Item does not exist in cart, add to cart
-                CartItems.Add(new CartItemModel()
+                OrderItems.Add(new KOTItemModel()
                 {
+                    Id = 0,
                     ItemId = menuItem.Id,
                     Name = menuItem.Name,
                     Icon = menuItem.Icon,
@@ -202,6 +281,8 @@ namespace POSRestaurant.ViewModels
                 // Item already exists in cart, Increase quantity for this item in cart
                 cartItem.Quantity++;
                 ReCalculateAmount();
+                _updatedKOTItemIds.Add(cartItem.Id);
+                IsUpdated = true;
             }
         }
 
@@ -210,10 +291,12 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="cartItem">Item from cart to increase quantity</param>
         [RelayCommand]
-        private void IncreaseQuantity(CartItemModel cartItem)
+        private void IncreaseQuantity(KOTItemModel cartItem)
         {
             cartItem.Quantity++;
             ReCalculateAmount();
+            _updatedKOTItemIds.Add(cartItem.Id);
+            IsUpdated = true;
         }
 
         /// <summary>
@@ -221,14 +304,22 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="cartItem">Item from cart to descrease quantity</param>
         [RelayCommand]
-        private void DecreaseQuantity(CartItemModel cartItem)
+        private void DecreaseQuantity(KOTItemModel cartItem)
         {
             cartItem.Quantity--;
 
             if (cartItem.Quantity == 0)
-                CartItems.Remove(cartItem);
+            {
+                OrderItems.Remove(cartItem);
+                _removedItems.Add(cartItem);
+            }
             else
+            {
+                _updatedKOTItemIds.Add(cartItem.Id);
                 ReCalculateAmount();
+            }
+
+            IsUpdated = true;
         }
 
         /// <summary>
@@ -236,15 +327,18 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="cartItem">Item from cart to remove</param>
         [RelayCommand]
-        private void RemoveItemFromCart(CartItemModel cartItem) =>
-            CartItems.Remove(cartItem);
+        private void RemoveItemFromCart(KOTItemModel cartItem)
+        {
+            OrderItems.Remove(cartItem);
+            _removedItems.Remove(cartItem);
+        }
 
         /// <summary>
         /// To recalculate amount when items or quantity changes
         /// </summary>
         private void ReCalculateAmount()
         {
-            SubTotal = CartItems.Sum(o => o.Amount);
+            SubTotal = OrderItems.Sum(o => o.Amount);
         }
 
         /// <summary>
@@ -277,42 +371,7 @@ namespace POSRestaurant.ViewModels
 
                 TaxPercentage = enteredTaxPercentage;
             }
-        }
-
-        /// <summary>
-        /// Command to clear all the cart items
-        /// </summary>
-        [RelayCommand]
-        private async Task ClearCart()
-        {
-            if (CartItems.Count == 0)
-                return;
-
-            if (await Shell.Current.DisplayAlert("Clear Cart?", "Do you really want to clear the cart?", "Yes", "No"))
-                CartItems.Clear();
-        }
-
-        /// <summary>
-        /// Command to place an order
-        /// </summary>
-        /// <param name="isPaidOnline">Coming from UI, which button is clicked</param>
-        /// <returns>Returns a Task Object</returns>
-        [RelayCommand]
-        private async Task PlaceOrderAsync(TableModel tableModel)
-        {
-            IsLoading = true;
-
-            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel))
-            {
-                CartItems.Clear();
-
-                // Push for change in table info
-                WeakReferenceMessenger.Default.Send(TableChangedMessage.From(tableModel));
-            }
-
-            IsLoading = false;
-
-            await Application.Current.MainPage.Navigation.PopAsync();
+            IsUpdated = true;
         }
 
         /// <summary>
@@ -337,48 +396,72 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
-        /// Implemented interface IRecipient
+        /// Command to handle SaveAndPrint click
+        /// This will update the order if necessary
+        /// And save the order and print the receipt
         /// </summary>
-        /// <param name="message">ItemOnMenuModel published from other parts of the application</param>
-        public void Receive(MenuItemChangedMessage message)
+        /// <returns></returns>
+        [RelayCommand]
+        private async void SaveAndPrint()
         {
-            var changedItem = message.Value;
-            var menuItem = changedItem.ItemModel;
-            bool isDeleted = changedItem.IsDeleted;
+            /*
+             * Here we must first update all the kot items in database
+             * For KOT items, with id = 0, which means newly added items, create a new kot
+             * Then update the corresponding kots, with new item number and total price
+             * Then update the corresponding order, with new item number and total price
+             * After all the oprerations, print the receipt
+             */
 
-            if (menuItem != null)
+            // Remove the KOTItems from DB and recalculate total
+            var toDelete = _removedItems.GroupBy(o => o.KOTId).ToDictionary(group => group.Key, group => group.Select(KOTItem.FromEntity).ToArray());
+
+            if (toDelete.Count > 0)
             {
-                // This menu item is on the screen right now
+                var errorMessage = await _databaseService.DeleteKOTItemsAndUpdateKOT(toDelete, TableModel.RunningOrderId);
 
-                // check if this item still has a mapping to selected category
-                // can be used for delete part
-                if (isDeleted && menuItem.Category.Id == SelectedCategory.Id)
-                {
-                    // this item is deleted, should not be displayed here anymore
-                    // remove this item from the current UI menu items list
-                    MenuItems = [.. MenuItems.Where(m => m.Id != menuItem.Id)];
-                }
-
-                // update details of existing item on the screen
-                menuItem.Price = menuItem.Price;
-                menuItem.Name = menuItem.Name;
-                menuItem.Description = menuItem.Description;
-                MenuItems = [.. MenuItems];
+                if (string.IsNullOrWhiteSpace(errorMessage))
+                    await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
             }
-            else
+
+            // Update OrderItems => KOTItemModel, where KOTItemId != 0
+            var toUpdate = OrderItems.Where(o => o.Id != 0 && _updatedKOTItemIds.Contains(o.Id)).GroupBy(o => o.KOTId).ToDictionary(group => group.Key, group => group.Select(KOTItem.FromEntity).ToArray());
+
+            if (toUpdate.Count > 0)
             {
-                // model is newly added
-                // add this menu item to current UI menu items list
-                var item = new ItemOnMenu
+                var errorMessage = await _databaseService.UpdateKOTItemsAndKOT(toUpdate, TableModel.RunningOrderId);
+
+                if (string.IsNullOrWhiteSpace(errorMessage))
+                    await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
+            }
+
+            // Add new KOT items if needed
+            KOTItem[] toAdd = OrderItems.Where(o => o.Id == 0).Select(KOTItem.FromEntity).ToArray();
+
+            if (toAdd.Length > 0)
+            {
+                var lastKOTNumber = await _databaseService.GetLastKOTNumberForOrderId(TableModel.RunningOrderId);
+
+                var kotModel = new KOTModel
                 {
-                    Id = menuItem.Id,
-                    Description = menuItem.Description,
-                    Name = menuItem.Name,
-                    Price = menuItem.Price,
-                    MenuCategoryId = menuItem.Category.Id
+                    KOTNumber = lastKOTNumber + 1,
+                    KOTDateTime = DateTime.Now,
+                    TotalItemCount = toAdd.Length,
+                    TotalPrice = toAdd.Sum(x => x.Price),
+                    Items = toAdd
                 };
-                MenuItems = [.. MenuItems, item];
+                List<KOTModel> kots = new List<KOTModel>();
+                kots.Add(kotModel);
+
+                var errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), TableModel.RunningOrderId);
+
+                if (string.IsNullOrWhiteSpace(errorMessage))
+                    await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
             }
+
+            // TODO : Printing the receipt
+
+
+            await Application.Current.MainPage.Navigation.PopAsync();
         }
     }
 }

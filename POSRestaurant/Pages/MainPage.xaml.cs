@@ -1,10 +1,12 @@
-﻿using POSRestaurant.Data;
+﻿using Microsoft.Maui.Controls;
+using POSRestaurant.Data;
+using POSRestaurant.Models;
 using POSRestaurant.ViewModels;
 
 namespace POSRestaurant.Pages;
 
 /// <summary>
-/// MainPage of the Application
+/// Page where the order will be placed
 /// </summary>
 public partial class MainPage : ContentPage
 {
@@ -14,14 +16,23 @@ public partial class MainPage : ContentPage
     private readonly HomeViewModel _homeViewModel;
 
     /// <summary>
+    /// DIed TableModel for table info and update
+    /// </summary>
+    private readonly TableModel _tableModel;
+
+    /// <summary>
     /// Initialize MainPage
     /// </summary>
-    /// <param name="homeViewModel">DI for HomeViewModel</param>
-    public MainPage(HomeViewModel homeViewModel)
+    /// <param name="homeViewModel">HomeViewModel for the content page and handle actions</param>
+    /// <param name="tableModel">TableViewModel to add table details with orders</param>
+    public MainPage(HomeViewModel homeViewModel, TableModel tableModel)
     {
         InitializeComponent();
         _homeViewModel = homeViewModel;
         BindingContext = _homeViewModel;
+
+        _tableModel = tableModel;
+
         Initialize();
     }
 
@@ -52,6 +63,16 @@ public partial class MainPage : ContentPage
     }
 
     /// <summary>
+    /// When place order button is clicked
+    /// </summary>
+    /// <param name="sender">Sender</param>
+    /// <param name="e">EventArgs</param>
+    private void PlaceOrder_Clicked(object sender, EventArgs e)
+    {
+        _homeViewModel.PlaceOrderCommand.Execute(_tableModel);
+    }
+
+    /// <summary>
     /// Event called when SearchBox text changes, this is used to search for items
     /// </summary>
     /// <param name="sender">SearchBox as sender</param>
@@ -59,5 +80,15 @@ public partial class MainPage : ContentPage
     private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
     {
         _homeViewModel.SearchItemsCommand.Execute(e.NewTextValue);
+    }
+
+    /// <summary>
+    /// When cancel button is clicked
+    /// </summary>
+    /// <param name="sender">Sender</param>
+    /// <param name="e">EventArgs</param>
+    private async void CancelButton_Clicked(object sender, EventArgs e)
+    {
+        await Application.Current.MainPage.Navigation.PopAsync();
     }
 }

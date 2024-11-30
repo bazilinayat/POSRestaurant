@@ -116,6 +116,7 @@ namespace POSRestaurant.Data
                     var kot = new KOT()
                     {
                         OrderId = order.Id,
+                        KOTNumber = 1,
                         KOTDateTime = kotItem.KOTDateTime,
                         TotalItemCount = kotItem.TotalItemCount,
                         TotalPrice = kotItem.TotalPrice
@@ -149,16 +150,19 @@ namespace POSRestaurant.Data
         /// To insert the kots in an order
         /// </summary>
         /// <param name="KOTs">KOTs to be added</param>
-        /// <param name="latestOrder">Latest order, for which KOT to be added</param>
+        /// <param name="runningOrderId">Running order Id for the selected table, for which KOT to be added</param>
         /// <returns>Returns Error Message or null(in case of success)</returns>
-        public async Task<string?> InsertOrderKOTAsync(KOTModel[] KOTs, Order latestOrder)
+        public async Task<string?> InsertOrderKOTAsync(KOTModel[] KOTs, long runningOrderId)
         {
+            var orderModel = await GetOrderById(runningOrderId);
+
             // First we add the kot for the order
             foreach (var kotItem in KOTs)
             {
                 var kot = new KOT()
                 {
-                    OrderId = latestOrder.Id,
+                    OrderId = runningOrderId,
+                    KOTNumber = kotItem.KOTNumber,
                     KOTDateTime = kotItem.KOTDateTime,
                     TotalItemCount = kotItem.TotalItemCount,
                     TotalPrice = kotItem.TotalPrice
@@ -176,14 +180,14 @@ namespace POSRestaurant.Data
                     }
 
                     // Update the order details, for each kot
-                    latestOrder.TotalPrice += kotItem.TotalPrice;
-                    latestOrder.TotalItemCount += kotItem.TotalItemCount;
-                    latestOrder.OrderDate = DateTime.Now;
+                    orderModel.TotalPrice += kotItem.TotalPrice;
+                    orderModel.TotalItemCount += kotItem.TotalItemCount;
+                    orderModel.OrderDate = DateTime.Now;
                 }
             }
 
             // Update the order object with latest details
-            await _connection.UpdateAsync(latestOrder);
+            await _connection.UpdateAsync(orderModel);
 
             return null;
         }
@@ -203,6 +207,14 @@ namespace POSRestaurant.Data
         /// <returns>The latest order id</returns>
         public async Task<Order> GetLatestOrderId() =>
             await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
+
+        /// <summary>
+        /// To get the order as per the given order id
+        /// </summary>
+        /// <param name="orderId">order id for the selected table</param>
+        /// <returns>Returns a Order Object</returns>
+        public async Task<Order> GetOrderById(long orderId) =>
+            await _connection.Table<Order>().FirstOrDefaultAsync(o => o.Id == orderId);
 
         /// <summary>
         /// To get the last order id for given table id
@@ -317,6 +329,169 @@ namespace POSRestaurant.Data
 
                 return "Error in updating menu item";
             }
+        }
+
+        /// <summary>
+        /// To get the last KOT number for orderId, so we can number the new kots properly
+        /// </summary>
+        /// <param name="orderId">Order Id</param>
+        /// <returns>Returns the last KOT Number</returns>
+        public async Task<int> GetLastKOTNumberForOrderId(long orderId)
+        {
+            var kot = await _connection.Table<KOT>().Where(o => o.OrderId == orderId).OrderByDescending(o => o.KOTNumber).FirstOrDefaultAsync();
+            if (kot == null)
+                return 0;
+            else
+                return kot.KOTNumber;
+        }
+
+        /// <summary>
+        /// To get the KOT from database
+        /// </summary>
+        /// <param name="KOTId">KOTId of the KOT to get</param>
+        /// <returns>KOT Object</returns>
+        public async Task<KOT> GetKOTAsync(long KOTId) =>
+            await _connection.Table<KOT>().FirstOrDefaultAsync(o => o.Id == KOTId);
+
+        /// <summary>
+        /// To delete the kotitems and update there corresponding KOTs as well
+        /// </summary>
+        /// <param name="recordsToDelete">Dictionary of KOTid and KOTItems to delete and Update</param>
+        /// <param name="runningOrderId">Order to update for KOTs</param>
+        /// <returns>Error Message or null on success</returns>
+        public async Task<string?> DeleteKOTItemsAndUpdateKOT(Dictionary<long, KOTItem[]> recordsToDelete, long runningOrderId)
+        {
+            string errorMesasge = null;
+
+            await _connection.RunInTransactionAsync(async (db) =>
+            {
+                foreach (var record in recordsToDelete)
+                {
+                    int deleted = 0;
+                    foreach (var item in record.Value)
+                    {
+                        deleted += db.Delete(item);
+                    }
+                    if (deleted > 0)
+                    {
+                        var kotToUpdate =  await GetKOTAsync(record.Key);
+
+                        var kotItems = await GetKotItemsAsync(record.Key);
+
+                        if (kotItems.Length == 0)
+                        {
+                            db.Delete(kotToUpdate);
+                        }
+                        else
+                        {
+                            kotToUpdate.TotalItemCount = 0;
+                            kotToUpdate.TotalPrice = 0;
+                            for (int i = 0; i < kotItems.Length; i++)
+                            {
+                                kotToUpdate.TotalItemCount += kotItems[i].Quantity;
+                                kotToUpdate.TotalPrice += kotItems[i].Amount;
+                            }
+
+                            if (db.Update(kotToUpdate) == 0)
+                            {
+                                errorMesasge = "Error in updating Order";
+                                throw new Exception("Error update KOT");
+                            }
+                        }
+
+                        var orderModel = await GetOrderById(runningOrderId);
+                        orderModel.TotalPrice = 0;
+                        orderModel.TotalItemCount = 0;
+                        orderModel.OrderDate = DateTime.Now;
+
+                        var kots = await GetOrderKotsAsync(runningOrderId);
+
+                        for (int i = 0; i < kots.Length; i++)
+                        {
+                            orderModel.TotalPrice += kots[i].TotalPrice;
+                            orderModel.TotalItemCount += kots[i].TotalItemCount;
+                        }
+
+                        if (db.Update(orderModel) == 0)
+                        {
+                            errorMesasge = "Error in updating Order";
+                            throw new Exception("Error update Order");
+                        } 
+                    }
+                }
+            });
+
+            return errorMesasge;
+        }
+
+        /// <summary>
+        /// To update the kotitems and update there corresponding KOTs as well
+        /// </summary>
+        /// <param name="recordsToUpdate">Dictionary of KOTid and KOTItems to update</param>
+        /// <param name="runningOrderId">Order to update for KOTs</param>
+        /// <returns>Error Message or null on success</returns>
+        public async Task<string?> UpdateKOTItemsAndKOT(Dictionary<long, KOTItem[]> recordsToUpdate, long runningOrderId)
+        {
+            string errorMesasge = null;
+
+            await _connection.RunInTransactionAsync(async(db) =>
+            {
+                foreach (var record in recordsToUpdate)
+                {
+                    int updated = 0;
+                    foreach (var item in record.Value)
+                    {
+                        updated += db.Update(item);
+                    }
+                    if (updated > 0)
+                    {
+                        var kotToUpdate = await GetKOTAsync(record.Key);
+                        kotToUpdate.TotalItemCount = 0;
+                        kotToUpdate.TotalPrice = 0;
+
+                        var kotItems = await GetKotItemsAsync(record.Key);
+
+                        for (int i = 0; i < kotItems.Length; i++)
+                        {
+                            kotToUpdate.TotalItemCount += kotItems[i].Quantity;
+                            kotToUpdate.TotalPrice += kotItems[i].Amount;
+                        }
+
+                        if (db.Update(kotToUpdate) == 0)
+                        {
+                            errorMesasge = "Error in updating Order";
+                            throw new Exception("Error update KOT");
+                        }
+
+                        var orderModel = await GetOrderById(runningOrderId);
+                        orderModel.TotalPrice = 0;
+                        orderModel.TotalItemCount = 0;
+                        orderModel.OrderDate = DateTime.Now;
+
+                        var kots = await GetOrderKotsAsync(runningOrderId);
+
+                        for (int i = 0; i < kots.Length; i++)
+                        {
+                            orderModel.TotalPrice += kots[i].TotalPrice;
+                            orderModel.TotalItemCount += kots[i].TotalItemCount;
+                        }
+
+                        if (db.Update(orderModel) == 0)
+                        {
+                            errorMesasge = "Error in updating Order";
+                            throw new Exception("Error update Order");
+                        }
+                    }
+                    else
+                    {
+                        errorMesasge = "Error in updating Order";
+                    }
+
+                }
+            });
+
+            
+            return errorMesasge;
         }
 
         /// <summary>
