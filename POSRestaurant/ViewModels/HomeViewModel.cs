@@ -1,15 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Behaviors;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
+using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Utility;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
 
 namespace POSRestaurant.ViewModels
 {
@@ -154,9 +155,56 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
+        /// List of waiters to be assigned to the order
+        /// </summary>
+        [ObservableProperty]
+        public StaffModel[] _waiters;
+
+        /// <summary>
+        /// To manage the selected waiter for the order
+        /// </summary>
+        private StaffModel _selectedWaiter;
+
+        /// <summary>
+        /// To manage the selection of waiter on main page
+        /// Should be assigned by code as well
+        /// </summary>
+        public StaffModel SelectedWaiter
+        {
+            get => _selectedWaiter;
+            set
+            {
+                if (_selectedWaiter != value)
+                {
+                    _selectedWaiter = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
         /// To handle the property changed event for the radio button switch
         /// </summary>
         public event PropertyChangedEventHandler OrderTypePropertyChanged;
+
+        /// <summary>
+        /// Called when OrderType is changed
+        /// </summary>
+        /// <param name="orderType">Selected OrderType name</param>
+        protected virtual void OnOrderTypeChanged([CallerMemberName] string orderType = null)
+        {
+            OrderTypePropertyChanged?.Invoke(this, new PropertyChangedEventArgs(orderType));
+        }
+
+        /// <summary>
+        /// To handle the property changed event for the waiter selected
+        /// </summary>
+        public event PropertyChangedEventHandler WaiterPropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string waiter = null)
+        {
+            WaiterPropertyChanged?.Invoke(this, new PropertyChangedEventArgs(waiter));
+        }
 
         /// <summary>
         /// Constructor for the HomeViewModel
@@ -181,11 +229,6 @@ namespace POSRestaurant.ViewModels
             SelectedOrderType = 1; // Default to "Dine In"
         }
 
-        protected virtual void OnOrderTypeChanged([CallerMemberName] string orderType = null)
-        {
-            OrderTypePropertyChanged?.Invoke(this, new PropertyChangedEventArgs(orderType));
-        }
-
         /// <summary>
         /// Initialize the ViewModel
         /// Fetch data and assign
@@ -205,6 +248,8 @@ namespace POSRestaurant.ViewModels
                 OrderTypeEnable = false;
                 NumberOfPeopleEnable = false;
                 NumberOfPeople = tableModel.NumberOfPeople;
+                SelectedOrderType = (int)tableModel.OrderType;
+                SelectedWaiter = tableModel.Waiter;
             }
             else
             {
@@ -222,6 +267,10 @@ namespace POSRestaurant.ViewModels
             SelectedCategory = Categories[0];
 
             MenuItems = await _databaseService.GetMenuItemsByCategoryAsync(SelectedCategory.Id);
+
+            Waiters = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Waiter))
+                            .Select(StaffModel.FromEntity)
+                            .ToArray(); ;
 
             CartItems.Clear();
 
@@ -399,9 +448,14 @@ namespace POSRestaurant.ViewModels
         {
             IsLoading = true;
 
-            tableModel.NumberOfPeople = NumberOfPeople;
+            if (tableModel.RunningOrderId == 0)
+            {
+                tableModel.OrderType = OrderType;
+                tableModel.Waiter = SelectedWaiter;
+                tableModel.NumberOfPeople = NumberOfPeople;
+            }
 
-            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel, OrderType))
+            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel, OrderType, SelectedWaiter))
             {
                 CartItems.Clear();
 

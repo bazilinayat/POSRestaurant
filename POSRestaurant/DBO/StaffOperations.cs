@@ -37,6 +37,14 @@ namespace POSRestaurant.DBO
             await _connection.Table<Staff>().Where(o => o.Role == role).ToArrayAsync();
 
         /// <summary>
+        /// Get the staff member as per the id given
+        /// </summary>
+        /// <param name="Id">Id to be searched</param>
+        /// <returns>A array of Staff members</returns>
+        public async Task<Staff> GetStaffBasedOnId(int Id) =>
+            await _connection.Table<Staff>().FirstOrDefaultAsync(o => o.Id == Id);
+
+        /// <summary>
         /// Get all the staff members
         /// </summary>
         /// <returns>A array of Staff members</returns>

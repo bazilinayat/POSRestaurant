@@ -93,7 +93,12 @@
                                          Command="{Binding IncreaseNumberOfPeopleCommand}"/>
                         </HorizontalStackLayout>
                         <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center">
-                            
+                            <Label Text="Waiter" FontSize="16" VerticalOptions="Center"/>
+                            <Picker ItemsSource="{Binding Waiters}"
+                                    SelectedItem="{Binding SelectedWaiter, Mode=TwoWay}"
+                                    ItemDisplayBinding="{Binding Name}"
+                                    BackgroundColor="LightYellow">
+                            </Picker>
                         </HorizontalStackLayout>
                     </Grid>
                 </Border>

@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Controls;
 using POSRestaurant.Data;
+using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using System.Collections.ObjectModel;
 
@@ -163,7 +163,7 @@ namespace POSRestaurant.ViewModels
         /// <param name="tableModel">Table for which we are putting the order</param>
         /// <param name="orderType">OrderType coming from UI</param>
         /// <returns>Returns true if successful, false otherwise</returns>
-        public async Task<bool> PlaceKOTAsync(CartItemModel[] cartItems, TableModel tableModel, OrderTypes orderType)
+        public async Task<bool> PlaceKOTAsync(CartItemModel[] cartItems, TableModel tableModel, OrderTypes orderType, StaffModel selectedWaiter)
         {
             var kotItems = cartItems.Select(o => new KOTItem
             {
@@ -222,7 +222,9 @@ namespace POSRestaurant.ViewModels
                     KOTs = kots.ToArray(),
                     OrderStatus = TableOrderStatus.Running,
                     OrderNumber = lastOrderNumber + 1,
-                    OrderType = orderType
+                    OrderType = orderType,
+                    NumberOfPeople = tableModel.NumberOfPeople,
+                    WaiterId = selectedWaiter.Id,
                 };
 
                 errorMessage = await _databaseService.PlaceOrderAsync(orderModel);

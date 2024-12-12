@@ -1,18 +1,12 @@
-﻿using CommunityToolkit.Maui.Converters;
-using CommunityToolkit.Maui.Views;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Controls.Shapes;
 using POSRestaurant.ChangedMessages;
-using POSRestaurant.Controls;
 using POSRestaurant.Data;
+using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Pages;
 using POSRestaurant.Utility;
-using System.Windows.Input;
 
 namespace POSRestaurant.ViewModels
 {

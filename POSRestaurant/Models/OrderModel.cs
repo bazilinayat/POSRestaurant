@@ -55,6 +55,10 @@ namespace POSRestaurant.Models
         /// </summary>
         public int NumberOfPeople { get; set; }
         /// <summary>
+        /// Id of the staff waiter who handled the order and table
+        /// </summary>
+        public int WaiterId { get; set; }
+        /// <summary>
         /// Items in the current order
         /// </summary>
         public KOTModel[] KOTs { get; set; }

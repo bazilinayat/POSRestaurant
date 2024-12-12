@@ -1,7 +1,8 @@
-﻿using POSRestaurant.Utility;
+﻿using POSRestaurant.Data;
+using POSRestaurant.Utility;
 using System.Text.Json;
 
-namespace POSRestaurant.Data
+namespace POSRestaurant.DBO
 {
     /// <summary>
     /// Class for initial data for application

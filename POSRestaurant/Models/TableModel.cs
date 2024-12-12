@@ -40,9 +40,17 @@ namespace POSRestaurant.Models
         /// </summary>
         public TimeOnly RunningTime { get; set; }
         /// <summary>
+        /// To represent the type of order this is
+        /// </summary>
+        public OrderTypes OrderType { get; set; }
+        /// <summary>
         /// Number of people sitting on the table
         /// </summary>
         public int NumberOfPeople { get; set; }
+        /// <summary>
+        /// Id of the staff waiter who handled the order and table
+        /// </summary>
+        public StaffModel Waiter { get; set; }
         /// <summary>
         /// To track the selected order
         /// </summary>

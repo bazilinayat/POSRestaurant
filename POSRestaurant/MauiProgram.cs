@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
-using POSRestaurant.Data;
+using POSRestaurant.DBO;
 using POSRestaurant.Pages;
 using POSRestaurant.Utility;
 using POSRestaurant.ViewModels;

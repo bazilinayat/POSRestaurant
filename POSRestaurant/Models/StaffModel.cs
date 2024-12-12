@@ -29,5 +29,18 @@ namespace POSRestaurant.Models
         /// </summary>
         [ObservableProperty]
         private bool _isSelected;
+        /// <summary>
+        /// To make object of StaffModel
+        /// </summary>
+        /// <param name="entity">Staff Object</param>
+        /// <returns>Returns a StaffModel object</returns>
+        public static StaffModel FromEntity(Staff entity) =>
+            new()
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                PhoneNumber = entity.PhoneNumber,
+                Role = entity.Role,
+            };
     }
 }

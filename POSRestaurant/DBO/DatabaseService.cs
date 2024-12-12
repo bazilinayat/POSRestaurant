@@ -1,10 +1,9 @@
-﻿using POSRestaurant.DBO;
+﻿using POSRestaurant.Data;
 using POSRestaurant.Models;
 using POSRestaurant.Utility;
 using SQLite;
-using System.Linq;
 
-namespace POSRestaurant.Data
+namespace POSRestaurant.DBO
 {
     /// <summary>
     /// Class to connect and talk to our database

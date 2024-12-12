@@ -1,5 +1,4 @@
-﻿using POSRestaurant.Data;
-using POSRestaurant.Pages;
+﻿using POSRestaurant.DBO;
 using POSRestaurant.Utility;
 using POSRestaurant.ViewModels;
 
