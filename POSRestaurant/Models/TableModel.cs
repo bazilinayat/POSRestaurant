@@ -40,6 +40,10 @@ namespace POSRestaurant.Models
         /// </summary>
         public TimeOnly RunningTime { get; set; }
         /// <summary>
+        /// Number of people sitting on the table
+        /// </summary>
+        public int NumberOfPeople { get; set; }
+        /// <summary>
         /// To track the selected order
         /// </summary>
         [ObservableProperty]

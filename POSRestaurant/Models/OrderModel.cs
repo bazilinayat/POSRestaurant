@@ -19,6 +19,10 @@ namespace POSRestaurant.Models
         /// </summary>
         public long Id { get; set; }
         /// <summary>
+        /// OrderNumber each day will start from 1
+        /// </summary>
+        public long OrderNumber { get; set; }
+        /// <summary>
         /// Table Id, Order belongs to
         /// </summary>
         public int TableId { get; set; }
@@ -42,6 +46,14 @@ namespace POSRestaurant.Models
         /// To represent current order status
         /// </summary>
         public TableOrderStatus OrderStatus { get; set; }
+        /// <summary>
+        /// To represent the type of order this is
+        /// </summary>
+        public OrderTypes OrderType { get; set; }
+        /// <summary>
+        /// Number of people sitting on the table
+        /// </summary>
+        public int NumberOfPeople { get; set; }
         /// <summary>
         /// Items in the current order
         /// </summary>

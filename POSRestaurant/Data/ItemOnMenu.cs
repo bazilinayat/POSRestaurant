@@ -35,5 +35,9 @@ namespace POSRestaurant.Data
         /// Menu Category Item Price
         /// </summary>
         public decimal Price { get; set; }
+        /// <summary>
+        /// Shortcode for the menu item for quick search
+        /// </summary>
+        public string ShortCode { get; set; }
     }
 }

@@ -5,9 +5,16 @@
              xmlns:data="clr-namespace:POSRestaurant.Data"
              xmlns:models="clr-namespace:POSRestaurant.Models"
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
              x:Class="POSRestaurant.Pages.MainPage"
-             Shell.NavBarIsVisible="False"
+             Shell.NavBarIsVisible="True"
              x:DataType="vm:HomeViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid ColumnDefinitions=".75*, .25*">
         <Grid Grid.Column="0"
@@ -23,7 +30,7 @@
                                                 OnCategorySelected="CategoriesListControl_OnCategorySelected" />
             </Grid>
             <Grid Grid.Column="1"
-                  RowDefinitions="Auto, *">
+                  RowDefinitions="Auto, *, Auto">
                 <SearchBar Grid.Row="0"
                     BackgroundColor="{StaticResource LightWheat}"
                            HeightRequest="25"
@@ -35,6 +42,61 @@
                            Placeholder="Search Items..."
                            Margin="20"/>
                 <controls:MenuItemsListControl Grid.Row="1" MenuItems="{Binding MenuItems}" OnMenuItemSelected="MenuItemsListControl_OnMenuItemSelected"/>
+                <Border Grid.Row="2" 
+                        Padding="5"
+                        Stroke="Black"
+                        StrokeShape="RoundRectangle 10"
+                        IsEnabled="{Binding OrderTypeEnable}"
+                        BackgroundColor="Wheat">
+                    <Grid ColumnDefinitions="0.33*, 0.33*, 0.33*">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
+                            <RadioButton GroupName="OrderType" Content="Dine In" 
+                                         IsChecked="{Binding SelectedOrderType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
+                                <RadioButton.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CheckOrderTypeCommand}" CommandParameter="1" />
+                                </RadioButton.GestureRecognizers>
+                            </RadioButton>
+                            <RadioButton GroupName="OrderType" Content="Pickup"
+                                         IsChecked="{Binding SelectedOrderType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
+                                <RadioButton.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CheckOrderTypeCommand}" CommandParameter="2" />
+                                </RadioButton.GestureRecognizers>
+                            </RadioButton>
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                            <Label Text="Number of People" FontSize="16" VerticalOptions="Center"/>
+                            <ImageButton 
+                                         Source="minus_regular_24.png"
+                                         BackgroundColor="LightYellow"
+                                         CornerRadius="8"
+                                         HeightRequest="30"
+                                         WidthRequest="30"
+                                         Padding="5"
+                                         Command="{Binding DecreaseNumberOfPeopleCommand}"/>
+                            <Label 
+                                   Text="{Binding NumberOfPeople}"
+                                   HeightRequest="30"
+                                   WidthRequest="60"
+                                   Padding="5"
+                                   FontSize="18"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center"/>
+                            <ImageButton
+                                         Source="plus_regular_24.png"
+                                         BackgroundColor="LightYellow"
+                                         CornerRadius="8"
+                                         HeightRequest="30"
+                                         WidthRequest="30"
+                                         Padding="5"
+                                         Command="{Binding IncreaseNumberOfPeopleCommand}"/>
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center">
+                            
+                        </HorizontalStackLayout>
+                    </Grid>
+                </Border>
                 <BoxView IsVisible="{Binding IsLoading}"
                          HorizontalOptions="Fill"
                          VerticalOptions="Fill"

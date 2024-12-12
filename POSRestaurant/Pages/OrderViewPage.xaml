@@ -6,7 +6,7 @@
              xmlns:models="clr-namespace:POSRestaurant.Models"
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
              x:Class="POSRestaurant.Pages.OrderViewPage"
-             Shell.NavBarIsVisible="False"
+             Shell.NavBarIsVisible="True"
              x:DataType="vm:ViewOrderViewModel">
 
     <Grid ColumnDefinitions=".60*, .40*">

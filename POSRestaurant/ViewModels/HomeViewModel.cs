@@ -7,7 +7,9 @@ using POSRestaurant.Models;
 using POSRestaurant.Utility;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Reflection;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace POSRestaurant.ViewModels
 {
@@ -84,6 +86,25 @@ namespace POSRestaurant.ViewModels
         public decimal Total => SubTotal + TaxAmount;
 
         /// <summary>
+        /// To track the order type on UI
+        /// Made observable for using in UI
+        /// </summary>
+        [ObservableProperty]
+        private OrderTypes _orderType = OrderTypes.DineIn;
+
+        /// <summary>
+        /// To enable or disable the OrderType selection
+        /// </summary>
+        [ObservableProperty]
+        private bool _orderTypeEnable = true;
+        
+        /// <summary>
+        /// To enable or disable the OrderType selection
+        /// </summary>
+        [ObservableProperty]
+        private bool _numberOfPeopleEnable = true;
+
+        /// <summary>
         /// ObservableCollection for items added to cart
         /// </summary>
         public ObservableCollection<CartItemModel> CartItems { get; set; } = new();
@@ -105,6 +126,39 @@ namespace POSRestaurant.ViewModels
         private string _textSearch;
 
         /// <summary>
+        /// To keep track of the number of peopl sitting on a table
+        /// </summary>
+        [ObservableProperty]
+        public int _numberOfPeople = 1;
+
+        /// <summary>
+        /// To manage the selected order type on main page
+        /// </summary>
+        private int _selectedOrderType;
+
+        /// <summary>
+        /// To manage the selected order type on main page
+        /// Should be handled by code as well
+        /// </summary>
+        public int SelectedOrderType
+        {
+            get => _selectedOrderType;
+            set
+            {
+                if (_selectedOrderType != value)
+                {
+                    _selectedOrderType = value;
+                    OnOrderTypeChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// To handle the property changed event for the radio button switch
+        /// </summary>
+        public event PropertyChangedEventHandler OrderTypePropertyChanged;
+
+        /// <summary>
         /// Constructor for the HomeViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
@@ -122,6 +176,14 @@ namespace POSRestaurant.ViewModels
 
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<MenuItemChangedMessage>(this);
+
+            // Set the initial selection
+            SelectedOrderType = 1; // Default to "Dine In"
+        }
+
+        protected virtual void OnOrderTypeChanged([CallerMemberName] string orderType = null)
+        {
+            OrderTypePropertyChanged?.Invoke(this, new PropertyChangedEventArgs(orderType));
         }
 
         /// <summary>
@@ -129,7 +191,7 @@ namespace POSRestaurant.ViewModels
         /// Fetch data and assign
         /// </summary>
         /// <returns>Returns a Task object</returns>
-        public async ValueTask InitializeAsync()
+        public async ValueTask InitializeAsync(TableModel tableModel)
         {
             //if (_isInitialized)
             //    return;
@@ -137,6 +199,20 @@ namespace POSRestaurant.ViewModels
             _isInitialized = true;
 
             IsLoading = true;
+
+            if (tableModel.Status != TableOrderStatus.NoOrder)
+            {
+                OrderTypeEnable = false;
+                NumberOfPeopleEnable = false;
+                NumberOfPeople = tableModel.NumberOfPeople;
+            }
+            else
+            {
+                OrderTypeEnable = true;
+                NumberOfPeopleEnable = true;
+                NumberOfPeople = 1;
+                SelectedOrderType = 1;
+            }
 
             Categories = (await _databaseService.GetMenuCategoriesAsync())
                             .Select(MenuCategoryModel.FromEntity)
@@ -293,6 +369,27 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
+        /// Command to change the order type
+        /// </summary>
+        /// <param name="orderTypeNumber"></param>
+        /// <returns>Returns a task object</returns>
+        [RelayCommand]
+        private void CheckOrderType(string orderTypeNumber)
+        {
+            SelectedOrderType = Convert.ToInt32(orderTypeNumber);
+
+            switch (Convert.ToInt32(orderTypeNumber))
+            {
+                case (int)OrderTypes.DineIn:
+                    OrderType = OrderTypes.DineIn;
+                    break;
+                case (int)OrderTypes.Pickup:
+                    OrderType = OrderTypes.Pickup;
+                    break;
+            }
+        }
+
+        /// <summary>
         /// Command to place an order
         /// </summary>
         /// <param name="isPaidOnline">Coming from UI, which button is clicked</param>
@@ -302,7 +399,9 @@ namespace POSRestaurant.ViewModels
         {
             IsLoading = true;
 
-            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel))
+            tableModel.NumberOfPeople = NumberOfPeople;
+
+            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel, OrderType))
             {
                 CartItems.Clear();
 
@@ -379,6 +478,27 @@ namespace POSRestaurant.ViewModels
                 };
                 MenuItems = [.. MenuItems, item];
             }
+        }
+
+        /// <summary>
+        /// Command to increase number of people
+        /// </summary>
+        [RelayCommand]
+        private void IncreaseNumberOfPeople()
+        {
+            NumberOfPeople += 1;
+        }
+
+        /// <summary>
+        /// Command to decrease number of people
+        /// </summary>
+        [RelayCommand]
+        private void DecreaseNumberOfPeople()
+        {
+            if (NumberOfPeople - 1 < 1)
+                return;
+            
+            NumberOfPeople -= 1;
         }
     }
 }

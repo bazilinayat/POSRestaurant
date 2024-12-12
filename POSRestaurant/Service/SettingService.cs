@@ -11,7 +11,7 @@ namespace POSRestaurant.Utility
     /// <summary>
     /// To Keep track of the settings, taken from some config
     /// </summary>
-    public class SettingService : IDisposable
+    public class SettingService
     {
         /// <summary>
         /// To see if settings is initialized
@@ -46,11 +46,6 @@ namespace POSRestaurant.Utility
             {
                 Settings = null;
             }
-        }
-
-        public void Dispose()
-        {
-            // TODO: Dispose something
         }
     }
 }

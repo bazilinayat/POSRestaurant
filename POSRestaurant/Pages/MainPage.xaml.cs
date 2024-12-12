@@ -41,7 +41,7 @@ public partial class MainPage : ContentPage
     /// </summary>
     private async void Initialize()
     {
-        await _homeViewModel.InitializeAsync();
+        await _homeViewModel.InitializeAsync(_tableModel);
     }
 
     /// <summary>

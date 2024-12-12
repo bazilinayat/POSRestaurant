@@ -1,4 +1,5 @@
-﻿using POSRestaurant.Models;
+﻿using POSRestaurant.DBO;
+using POSRestaurant.Models;
 using POSRestaurant.Utility;
 using SQLite;
 using System.Linq;
@@ -26,6 +27,11 @@ namespace POSRestaurant.Data
         private readonly SeedData _seedData;
 
         /// <summary>
+        /// To handle calls to staff operations in the db
+        /// </summary>
+        public StaffOperations StaffOperaiotns;
+
+        /// <summary>
         /// Class constructor, to generate database and connection
         /// </summary>
         /// <param name="settingService">DI for SettingService</param>
@@ -36,6 +42,8 @@ namespace POSRestaurant.Data
             var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data",  "RestPOS.db3");
             _connection = new SQLiteAsyncConnection(dbPath, 
                 SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.SharedCache);
+
+            StaffOperaiotns = new StaffOperations(_connection);
         }
 
         /// <summary>
@@ -52,6 +60,8 @@ namespace POSRestaurant.Data
             await _connection.CreateTableAsync<Table>();
             await _connection.CreateTableAsync<KOT>();
             await _connection.CreateTableAsync<KOTItem>();
+
+            await _connection.CreateTableAsync<Staff>();
 
             await SeedDataAsync();
         }
@@ -105,7 +115,9 @@ namespace POSRestaurant.Data
                 PaymentMode = orderModel.PaymentMode,
                 TotalItemCount = orderModel.TotalItemCount,
                 TotalPrice = orderModel.TotalPrice,
-                OrderStatus = orderModel.OrderStatus
+                OrderStatus = orderModel.OrderStatus,
+                OrderNumber = orderModel.OrderNumber,
+                OrderType = orderModel.OrderType,
             };
 
             if (await _connection.InsertAsync(order) > 0)
@@ -268,7 +280,7 @@ namespace POSRestaurant.Data
         /// <param name="searchText">The item name to search</param>
         /// <returns>Returns a array of ItemOnMenu</returns>
         public async Task<ItemOnMenu[]> GetMenuItemBySearch(string searchText) =>
-            await _connection.Table<ItemOnMenu>().Where(o => o.Name.ToLower().Contains(searchText.ToLower())).ToArrayAsync();
+            await _connection.Table<ItemOnMenu>().Where(o => o.ShortCode.Contains(searchText)).ToArrayAsync();
 
         /// <summary>
         /// Method to get all the tables from database
@@ -492,6 +504,21 @@ namespace POSRestaurant.Data
 
             
             return errorMesasge;
+        }
+
+        /// <summary>
+        /// Get the latest ordernumber from today
+        /// </summary>
+        /// <returns>Return the last ordernumber</returns>
+        public async Task<long> GetLastestOrderNumberForToday()
+        {
+            var yesterday = DateTime.Today.AddDays(-1);
+            var tomorrow = DateTime.Today.AddDays(1);
+            var latestOrder = await _connection.Table<Order>().FirstOrDefaultAsync(y => y.OrderDate > yesterday && y.OrderDate < tomorrow);
+            if (latestOrder != null) 
+                return latestOrder.OrderNumber;
+            else
+                return 0;
         }
 
         /// <summary>

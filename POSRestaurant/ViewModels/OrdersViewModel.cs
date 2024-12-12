@@ -46,7 +46,7 @@ namespace POSRestaurant.ViewModels
         private bool _isInitialized;
 
         /// <summary>
-        /// Constructor for the HomeViewModel
+        /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
         public OrdersViewModel(DatabaseService databaseService)
@@ -160,8 +160,10 @@ namespace POSRestaurant.ViewModels
         /// Command to place an order
         /// </summary>
         /// <param name="cartItems">List of items in the cart</param>
+        /// <param name="tableModel">Table for which we are putting the order</param>
+        /// <param name="orderType">OrderType coming from UI</param>
         /// <returns>Returns true if successful, false otherwise</returns>
-        public async Task<bool> PlaceKOTAsync(CartItemModel[] cartItems, TableModel tableModel)
+        public async Task<bool> PlaceKOTAsync(CartItemModel[] cartItems, TableModel tableModel, OrderTypes orderType)
         {
             var kotItems = cartItems.Select(o => new KOTItem
             {
@@ -208,6 +210,8 @@ namespace POSRestaurant.ViewModels
             }
             else
             {
+                var lastOrderNumber = await _databaseService.GetLastestOrderNumberForToday();
+
                 // new order, place order
                 var orderModel = new OrderModel
                 {
@@ -216,7 +220,9 @@ namespace POSRestaurant.ViewModels
                     TotalItemCount = kots.Sum(x => x.TotalItemCount),
                     TotalPrice = kots.Sum(x => x.TotalPrice),
                     KOTs = kots.ToArray(),
-                    OrderStatus = TableOrderStatus.Running
+                    OrderStatus = TableOrderStatus.Running,
+                    OrderNumber = lastOrderNumber + 1,
+                    OrderType = orderType
                 };
 
                 errorMessage = await _databaseService.PlaceOrderAsync(orderModel);

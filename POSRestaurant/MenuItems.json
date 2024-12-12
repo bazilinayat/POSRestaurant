@@ -6,7 +6,8 @@
     "Icon": "",
     "Description": "Roll",
     "Price": 30,
-    "Veg": true
+    "Veg": true,
+    "ShortCode":  "101"
   },
   {
     "Id": 2,
@@ -15,7 +16,8 @@
     "Icon": "",
     "Description": "Rolls",
     "Price": 20,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "102"
   },
   {
     "Id": 3,
@@ -24,7 +26,8 @@
     "Icon": "",
     "Description": "Fries",
     "Price": 50,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "201"
   },
   {
     "Id": 4,
@@ -33,7 +36,8 @@
     "Icon": "",
     "Description": "Fries",
     "Price": 60,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "202"
   },
   {
     "Id": 5,
@@ -42,7 +46,8 @@
     "Icon": "",
     "Description": "Nuggets",
     "Price": 80,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "203"
   },
   {
     "Id": 6,
@@ -51,7 +56,8 @@
     "Icon": "",
     "Description": "Pav Bhaji",
     "Price": 100,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "301"
   },
   {
     "Id": 7,
@@ -60,7 +66,8 @@
     "Icon": "",
     "Description": "Chole Bhature",
     "Price": 110,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "302"
   },
   {
     "Id": 8,
@@ -69,7 +76,8 @@
     "Icon": "",
     "Description": "Rice",
     "Price": 100,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "401"
   },
   {
     "Id": 9,
@@ -78,7 +86,8 @@
     "Icon": "",
     "Description": "Rice",
     "Price": 120,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "402"
   },
   {
     "Id": 10,
@@ -87,7 +96,8 @@
     "Icon": "",
     "Description": "Roti",
     "Price": 15,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "501"
   },
   {
     "Id": 11,
@@ -96,7 +106,8 @@
     "Icon": "",
     "Description": "Roti",
     "Price": 25,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "502"
   },
   {
     "Id": 12,
@@ -105,7 +116,8 @@
     "Icon": "",
     "Description": "1 Piece",
     "Price": 20,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "601"
   },
   {
     "Id": 13,
@@ -114,7 +126,8 @@
     "Icon": "",
     "Description": "1 Piece",
     "Price": 20,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "602"
   },
   {
     "Id": 14,
@@ -123,7 +136,8 @@
     "Icon": "",
     "Description": "Drink",
     "Price": 35,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "701"
   },
   {
     "Id": 15,
@@ -132,7 +146,8 @@
     "Icon": "",
     "Description": "Drink",
     "Price": 55,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "702"
   },
   {
     "Id": 16,
@@ -141,7 +156,8 @@
     "Icon": "",
     "Description": "1 Litre",
     "Price": 20,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "703"
   },
   {
     "Id": 17,
@@ -150,7 +166,8 @@
     "Icon": "",
     "Description": "Extra",
     "Price": 10,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "801"
   },
   {
     "Id": 18,
@@ -159,7 +176,8 @@
     "Icon": "",
     "Description": "Extra",
     "Price": 25,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "802"
   },
   {
     "Id": 19,
@@ -168,7 +186,8 @@
     "Icon": "",
     "Description": "Extra",
     "Price": 40,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "803"
   },
   {
     "Id": 20,
@@ -177,6 +196,7 @@
     "Icon": "",
     "Description": "Extra",
     "Price": 30,
-    "Veg": true
+    "Veg": true,
+    "ShortCode": "804"
   }
 ]

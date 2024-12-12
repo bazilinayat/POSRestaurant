@@ -65,10 +65,14 @@ namespace POSRestaurant.Data
             }
         }
 
+        /// <summary>
+        /// Setting the number of table in the database
+        /// </summary>
+        /// <returns></returns>
         public List<Table> GetTables()
         {
             List<Table> tables = new List<Table>();
-            for (int i = 1; i <= 10; i++)
+            for (int i = 1; i <= _settingService.Settings.NumberOfTables; i++)
             {
                 tables.Add(new Table
                 {

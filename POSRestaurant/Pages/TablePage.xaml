@@ -29,6 +29,11 @@
                                 <Label Text="{Binding TableNo}"
                                FontAttributes="Bold"
                                HorizontalOptions="Center"/>
+                                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                                    <Image Source="user_regular_24.png" HeightRequest="25" WidthRequest="25"/>
+                                    <Label Text="{Binding NumberOfPeople}" HorizontalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                
                                 <Label Text="TimeRunning"
                                HorizontalOptions="Center"/>
                             </VerticalStackLayout>
