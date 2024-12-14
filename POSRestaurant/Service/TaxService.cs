@@ -1,5 +1,7 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -15,23 +17,16 @@ namespace POSRestaurant.Service
     public class TaxService
     {
         /// <summary>
-        /// To see if settings is initialized
+        /// To handle tax calculation as per Indian laws
         /// </summary>
-        private bool _isInitialized;
+        public TaxServiceIndia IndianTaxService;
 
         /// <summary>
-        /// Tax settings to be taken from DB
+        /// Class constructor, to generate initialize the different tax services
         /// </summary>
-        //public readonly TaxModel TaxToApply;
-
-        /// <summary>
-        /// Constructor to set settings object
-        /// </summary>
-        public decimal SettingService(decimal subTotal)
+        public TaxService()
         {
-            decimal totalAfterTax = 0;
-
-            return totalAfterTax;
+            IndianTaxService = new TaxServiceIndia();
         }
     }
 }

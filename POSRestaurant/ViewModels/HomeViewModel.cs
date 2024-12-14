@@ -149,6 +149,15 @@ namespace POSRestaurant.ViewModels
                 if (_selectedOrderType != value)
                 {
                     _selectedOrderType = value;
+                    switch (Convert.ToInt32(_selectedOrderType))
+                    {
+                        case (int)OrderTypes.DineIn:
+                            OrderType = OrderTypes.DineIn;
+                            break;
+                        case (int)OrderTypes.Pickup:
+                            OrderType = OrderTypes.Pickup;
+                            break;
+                    }
                     OnOrderTypeChanged();
                 }
             }
@@ -236,13 +245,6 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync(TableModel tableModel)
         {
-            //if (_isInitialized)
-            //    return;
-
-            _isInitialized = true;
-
-            IsLoading = true;
-
             if (tableModel.Status != TableOrderStatus.NoOrder)
             {
                 OrderTypeEnable = false;
@@ -258,6 +260,13 @@ namespace POSRestaurant.ViewModels
                 NumberOfPeople = 1;
                 SelectedOrderType = 1;
             }
+
+            if (_isInitialized)
+                return;
+
+            _isInitialized = true;
+
+            IsLoading = true;
 
             Categories = (await _databaseService.GetMenuCategoriesAsync())
                             .Select(MenuCategoryModel.FromEntity)
@@ -418,27 +427,6 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
-        /// Command to change the order type
-        /// </summary>
-        /// <param name="orderTypeNumber"></param>
-        /// <returns>Returns a task object</returns>
-        [RelayCommand]
-        private void CheckOrderType(string orderTypeNumber)
-        {
-            SelectedOrderType = Convert.ToInt32(orderTypeNumber);
-
-            switch (Convert.ToInt32(orderTypeNumber))
-            {
-                case (int)OrderTypes.DineIn:
-                    OrderType = OrderTypes.DineIn;
-                    break;
-                case (int)OrderTypes.Pickup:
-                    OrderType = OrderTypes.Pickup;
-                    break;
-            }
-        }
-
-        /// <summary>
         /// Command to place an order
         /// </summary>
         /// <param name="isPaidOnline">Coming from UI, which button is clicked</param>
@@ -446,6 +434,19 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task PlaceOrderAsync(TableModel tableModel)
         {
+            if (NumberOfPeople == 0)
+            {
+                await Shell.Current.DisplayAlert("Order Error", "Number of people should be greater than 0.", "Ok");
+                return;
+            }
+
+            if (SelectedWaiter == null)
+            {
+                await Shell.Current.DisplayAlert("Order Error", "Assign a waiter to the order.", "Ok");
+                return;
+            }
+
+
             IsLoading = true;
 
             if (tableModel.RunningOrderId == 0)

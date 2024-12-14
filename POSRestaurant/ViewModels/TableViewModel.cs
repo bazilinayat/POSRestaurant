@@ -129,6 +129,11 @@ namespace POSRestaurant.ViewModels
                         break;
                     case TableOrderStatus.Running:
                         table.BorderColour = Colors.Yellow;
+                        table.ActionButtonImageIcon = "eye.png";
+                        table.ActionButtonEnabled = true;
+                        break;
+                    case TableOrderStatus.Confirmed:
+                        table.BorderColour = Colors.Orange;
                         table.ActionButtonImageIcon = "invoice.png";
                         table.ActionButtonEnabled = true;
                         break;
@@ -154,6 +159,9 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task TableSelected(TableModel tableModel)
         {
+            if (tableModel.Status == TableOrderStatus.Confirmed || tableModel.Status == TableOrderStatus.Printed)
+                return;
+
             await Application.Current.MainPage.Navigation.PushAsync(new MainPage(_homeViewModel, tableModel));
         }
 
@@ -189,6 +197,10 @@ namespace POSRestaurant.ViewModels
                 case TableOrderStatus.Running: // To view the whole order, with KOTs
                     var vovm = _serviceProvider.GetRequiredService<ViewOrderViewModel>();
                     await Application.Current.MainPage.Navigation.PushAsync(new OrderViewPage(vovm, _ordersViewModel, tableModel));
+                    break;
+                case TableOrderStatus.Confirmed:
+                    var billvm = _serviceProvider.GetRequiredService<BillViewModel>();
+                    await Application.Current.MainPage.Navigation.PushAsync(new BillPage(billvm, tableModel));
                     break;
                 case TableOrderStatus.Printed: // To show popup, for marking as paid
                     break;

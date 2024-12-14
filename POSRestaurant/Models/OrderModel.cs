@@ -51,6 +51,26 @@ namespace POSRestaurant.Models
         /// </summary>
         public OrderTypes OrderType { get; set; }
         /// <summary>
+        /// To represent the type of order this is
+        /// </summary>
+        public string OrderTypeString
+        {
+            get
+            {
+                switch(OrderType)
+                {
+                    case OrderTypes.Online:
+                        return "Online";
+                    case OrderTypes.DineIn:
+                        return "Dine In";
+                    case OrderTypes.Pickup:
+                        return "Pickup";
+                    default:
+                        return "Error";
+                }
+            }
+        }
+        /// <summary>
         /// Number of people sitting on the table
         /// </summary>
         public int NumberOfPeople { get; set; }

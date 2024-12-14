@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using POSRestaurant.DBO;
 using POSRestaurant.Pages;
+using POSRestaurant.Service;
 using POSRestaurant.Utility;
 using POSRestaurant.ViewModels;
 
@@ -36,6 +37,7 @@ namespace POSRestaurant
 
             builder.Services.AddSingleton<DatabaseService>()
                 .AddSingleton<SettingService>()
+                .AddSingleton<TaxService>()
                 
                 .AddSingleton<MainPage>()
                 .AddSingleton<OrdersPage>()
@@ -43,6 +45,7 @@ namespace POSRestaurant
                 .AddSingleton<ManageMenuItemPage>()
                 .AddSingleton<OrderViewPage>()
                 .AddSingleton<StaffManagementPage>()
+                .AddSingleton<BillPage>()
                 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<HomeViewModel>()
@@ -50,7 +53,8 @@ namespace POSRestaurant
                 .AddSingleton<TableViewModel>()
                 .AddSingleton<ManageMenuItemViewModel>()
                 .AddSingleton<ViewOrderViewModel>()
-                .AddSingleton<StaffManagementViewModel>();
+                .AddSingleton<StaffManagementViewModel>()
+                .AddSingleton<BillViewModel>();
 
             return builder.Build();
         }

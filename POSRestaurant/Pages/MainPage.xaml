@@ -52,15 +52,9 @@
                         <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
                             <RadioButton GroupName="OrderType" Content="Dine In" 
                                          IsChecked="{Binding SelectedOrderType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
-                                <RadioButton.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding CheckOrderTypeCommand}" CommandParameter="1" />
-                                </RadioButton.GestureRecognizers>
                             </RadioButton>
                             <RadioButton GroupName="OrderType" Content="Pickup"
                                          IsChecked="{Binding SelectedOrderType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
-                                <RadioButton.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding CheckOrderTypeCommand}" CommandParameter="2" />
-                                </RadioButton.GestureRecognizers>
                             </RadioButton>
                         </HorizontalStackLayout>
 

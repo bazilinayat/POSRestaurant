@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
@@ -410,7 +412,7 @@ namespace POSRestaurant.ViewModels
             {
                 var errorMessage = await _databaseService.DeleteKOTItemsAndUpdateKOT(toDelete, TableModel.RunningOrderId);
 
-                if (string.IsNullOrWhiteSpace(errorMessage))
+                if (errorMessage != null)
                     await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
             }
 
@@ -421,7 +423,7 @@ namespace POSRestaurant.ViewModels
             {
                 var errorMessage = await _databaseService.UpdateKOTItemsAndKOT(toUpdate, TableModel.RunningOrderId);
 
-                if (string.IsNullOrWhiteSpace(errorMessage))
+                if (errorMessage != null)
                     await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
             }
 
@@ -445,12 +447,13 @@ namespace POSRestaurant.ViewModels
 
                 var errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), TableModel.RunningOrderId);
 
-                if (string.IsNullOrWhiteSpace(errorMessage))
+                if (errorMessage != null)
                     await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
             }
 
-            // TODO : Printing the receipt
-
+            TableModel.Status = TableOrderStatus.Confirmed;
+            // Push for change in table info
+            WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
 
             await Application.Current.MainPage.Navigation.PopAsync();
         }

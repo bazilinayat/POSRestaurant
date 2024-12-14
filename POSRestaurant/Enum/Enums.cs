@@ -33,14 +33,18 @@
         /// </summary>
         Running = 1,
         /// <summary>
-        /// Used to indicate order is printed
-        /// No changes will be made in system now
+        /// Used to indicate order is confirmed
+        /// No changes will be made in order from system now
         /// </summary>
-        Printed = 2,
+        Confirmed = 2,
+        /// <summary>
+        /// Used to indicate order is printed
+        /// </summary>
+        Printed = 3,
         /// <summary>
         /// Used to indicate order is paid
         /// </summary>
-        Paid = 3
+        Paid = 4
     }
 
     /// <summary>

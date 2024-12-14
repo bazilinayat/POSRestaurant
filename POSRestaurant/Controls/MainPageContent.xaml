@@ -41,19 +41,7 @@
                             Padding="5"
                             StrokeShape="RoundRectangle 10"
                             BackgroundColor="Black">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="This is radios" />
-                            <RadioButton GroupName="OrderType" Content="Dine In" IsChecked="True">
-                                    <RadioButton.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding CheckOrderTypeCommand}" CommandParameter="1" />
-                                    </RadioButton.GestureRecognizers>
-                                </RadioButton>
-                            <RadioButton GroupName="OrderType" Content="Pickup">
-                                <RadioButton.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding CheckOrderTypeCommand}" CommandParameter="2" />
-                                </RadioButton.GestureRecognizers>
-                            </RadioButton>
-                        </VerticalStackLayout>
+
                     </Border>
                     <controls:MenuItemsListControl Grid.Row="2" MenuItems="{Binding MenuItems}" OnMenuItemSelected="MenuItemsListControl_OnMenuItemSelected"/>
                     
