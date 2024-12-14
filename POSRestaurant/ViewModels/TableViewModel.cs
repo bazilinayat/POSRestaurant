@@ -1,7 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using POSRestaurant.ChangedMessages;
+using POSRestaurant.Controls;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
@@ -203,6 +205,9 @@ namespace POSRestaurant.ViewModels
                     await Application.Current.MainPage.Navigation.PushAsync(new BillPage(billvm, tableModel));
                     break;
                 case TableOrderStatus.Printed: // To show popup, for marking as paid
+                    var orderCompleteVM = _serviceProvider.GetRequiredService<OrderCompleteViewModel>();
+                    var completeOrderPopup = new OrderCompletePopup(orderCompleteVM, tableModel);
+                    await Shell.Current.ShowPopupAsync(completeOrderPopup);
                     break;
             }
         }

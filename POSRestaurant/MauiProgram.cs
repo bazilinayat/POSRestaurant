@@ -54,7 +54,8 @@ namespace POSRestaurant
                 .AddSingleton<ManageMenuItemViewModel>()
                 .AddSingleton<ViewOrderViewModel>()
                 .AddSingleton<StaffManagementViewModel>()
-                .AddSingleton<BillViewModel>();
+                .AddSingleton<BillViewModel>()
+                .AddSingleton<OrderCompleteViewModel>();
 
             return builder.Build();
         }

@@ -1,5 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Maui.Controls;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
@@ -256,6 +259,11 @@ namespace POSRestaurant.ViewModels
             // TODO: Printing
 
             await Shell.Current.DisplayAlert("Printing", "Printing Taking Place", "OK");
+
+            TableModel.Status = Data.TableOrderStatus.Printed;
+            TableModel.OrderTotal = GrandTotal;
+
+            WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
         }
     }
 }

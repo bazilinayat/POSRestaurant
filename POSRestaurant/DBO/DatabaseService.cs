@@ -31,6 +31,11 @@ namespace POSRestaurant.DBO
         public StaffOperations StaffOperaiotns;
 
         /// <summary>
+        /// To handle calls to staff operations in the db
+        /// </summary>
+        public OrderPaymentOperations OrderPaymentOperations;
+
+        /// <summary>
         /// Class constructor, to generate database and connection
         /// </summary>
         /// <param name="settingService">DI for SettingService</param>
@@ -43,6 +48,7 @@ namespace POSRestaurant.DBO
                 SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.SharedCache);
 
             StaffOperaiotns = new StaffOperations(_connection);
+            OrderPaymentOperations = new OrderPaymentOperations(_connection);
         }
 
         /// <summary>
@@ -61,6 +67,8 @@ namespace POSRestaurant.DBO
             await _connection.CreateTableAsync<KOTItem>();
 
             await _connection.CreateTableAsync<Staff>();
+
+            await _connection.CreateTableAsync<OrderPayment>();
 
             await SeedDataAsync();
         }

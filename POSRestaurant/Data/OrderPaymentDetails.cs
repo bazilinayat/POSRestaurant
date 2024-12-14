@@ -23,21 +23,29 @@ namespace POSRestaurant.Data
         /// </summary>
         public long OrderId { get; set; }
         /// <summary>
-        /// Total amount of the order before tax
-        /// </summary>
-        public decimal SubTotal { get; set; }
-        /// <summary>
         /// Total amout of the order after tax
         /// To be paid by the customer
         /// </summary>
         public decimal Total {  get; set; }
         /// <summary>
-        /// PaymentMode, which was used to pay
+        /// Total amout of the order after tax
+        /// To be paid by the customer
         /// </summary>
-        public PaymentModes PaymentMode { get; set; }
+        public decimal PaidByCustomer { get; set; }
+        /// <summary>
+        /// Total amout of the order after tax
+        /// To be paid by the customer
+        /// </summary>
+        [Ignore]
+        public decimal Return => PaidByCustomer - Total;
+        /// <summary>
+        /// Total amout of the order after tax
+        /// To be paid by the customer
+        /// </summary>
+        public decimal Tip { get; set; }
         /// <summary>
         /// PaymentMode, which was used to pay
         /// </summary>
-        public decimal AmountPaid { get; set; }
+        public PaymentModes PaymentMode { get; set; }
     }
 }

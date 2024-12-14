@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="POSRestaurant.Controls.OrderCompletePopup"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             CanBeDismissedByTappingOutsideOfPopup="False"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
+             x:DataType="vm:OrderCompleteViewModel">
+
+    <toolkit:Popup.Resources>
+        <ResourceDictionary>
+            <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+            <Style TargetType="Entry" x:Key="txt">
+                <Setter Property="BackgroundColor" Value="Wheat" />
+                <Setter Property="PlaceholderColor" Value="Black" />
+            </Style>
+            <Style TargetType="Label" x:Key="lbl">
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+        </ResourceDictionary>
+    </toolkit:Popup.Resources>
+
+    <Border BackgroundColor="{StaticResource LightWheat}"
+            Stroke="Gray">
+        <VerticalStackLayout>
+            <Grid ColumnDefinitions="*, *, Auto"
+                  BackgroundColor="Wheat"
+                  Padding="15, 10">
+                <HorizontalStackLayout Grid.Column="0">
+                    <Label
+                           Text="{Binding TableModel.TableNo, StringFormat='Table No. {0} - '}"
+                           TextColor="Black"
+                           FontSize="15"/>
+                    <Label
+                           Text="{Binding TableModel.OrderTotal, StringFormat='[{0:C}]'}"
+                           TextColor="Black"
+                           FontSize="15"/>
+                </HorizontalStackLayout>
+                
+                <Label Grid.Column="1"
+                       Text="X"
+                       BackgroundColor="Red"
+                       HeightRequest="25"
+                       WidthRequest="25"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center"
+                       TextColor="Black"
+                       FontAttributes="Bold"
+                       FontSize="15"
+                       HorizontalOptions="End">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="CloseLabel_Tapped"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+            <VerticalStackLayout Spacing="10"
+                                 Padding="20">
+                <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                    <RadioButton GroupName="PaymentMode" Content="Cash" 
+                                 IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
+                    </RadioButton>
+                    <RadioButton GroupName="PaymentMode" Content="Online"
+                                 IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
+                    </RadioButton>
+                    <RadioButton GroupName="PaymentMode" Content="Card"
+                                 IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=3}">
+                    </RadioButton>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="50">
+                    <Label Text="Paid By Customer:" FontSize="16"
+                           VerticalOptions="Center"/>
+                    <Entry Text="{Binding PaidByCustomer}"
+                           TextChanged="Entry_TextChanged"
+                           Style="{StaticResource txt}"
+                           BackgroundColor="Wheat"
+                           VerticalOptions="Center"
+                           WidthRequest="100"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="50">
+                    <Label Text="Return:" FontSize="16" VerticalOptions="Center"/>
+                    <Label Text="{Binding Return}" Style="{StaticResource txt}" VerticalOptions="Center" TextColor="Red" BackgroundColor="{StaticResource LightWheat}"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="50">
+                    <Label Text="Tip:" FontSize="16" VerticalOptions="Center"/>
+                    <Entry Text="{Binding Tip}" Style="{StaticResource txt}" VerticalOptions="Center" WidthRequest="100"
+                           BackgroundColor="Wheat"/>
+                </HorizontalStackLayout>
+                <Grid ColumnDefinitions="*, *, *">
+                    <Button Grid.Column="0"
+                            Text="Cancel"
+                            BackgroundColor="Red"
+                            HorizontalOptions="Start"
+                            Clicked="Button_Clicked"/>
+                    <Button Grid.Column="2"
+                            BackgroundColor="DarkOliveGreen"
+                            Text="Save"
+                            HorizontalOptions="End"
+                            Clicked="Button_Clicked_1"/>
+                </Grid>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+    
+</toolkit:Popup>

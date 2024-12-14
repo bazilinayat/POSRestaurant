@@ -52,6 +52,10 @@ namespace POSRestaurant.Models
         /// </summary>
         public StaffModel Waiter { get; set; }
         /// <summary>
+        /// Order total, to be displayed on UI
+        /// </summary>
+        public decimal OrderTotal { get; set; }
+        /// <summary>
         /// To track the selected order
         /// </summary>
         [ObservableProperty]
