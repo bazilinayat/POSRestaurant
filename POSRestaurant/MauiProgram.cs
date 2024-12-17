@@ -38,6 +38,7 @@ namespace POSRestaurant
             builder.Services.AddSingleton<DatabaseService>()
                 .AddSingleton<SettingService>()
                 .AddSingleton<TaxService>()
+                .AddSingleton<MenuService>()
                 
                 .AddSingleton<MainPage>()
                 .AddSingleton<OrdersPage>()

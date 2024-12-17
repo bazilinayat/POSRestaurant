@@ -5,6 +5,7 @@ using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.Service;
 using POSRestaurant.Utility;
 
 namespace POSRestaurant.ViewModels
@@ -18,6 +19,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed variable for MenuService
+        /// </summary>
+        private readonly MenuService _menuService;
 
         /// <summary>
         /// To check if ViewModel is already initialized
@@ -66,9 +72,10 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="databaseService">DIed DatabaseService</param>
         /// <param name="settingService">DIed SettingService</param>
-        public ManageMenuItemViewModel(DatabaseService databaseService, SettingService settingService)
+        public ManageMenuItemViewModel(DatabaseService databaseService, MenuService menuService, SettingService settingService)
         {
             _databaseService = databaseService;
+            _menuService = menuService;
             _settingService = settingService;
         }
 
@@ -92,9 +99,7 @@ namespace POSRestaurant.ViewModels
         {
             IsLoading = true;
 
-            Categories = (await _databaseService.GetMenuCategoriesAsync())
-                            .Select(MenuCategoryModel.FromEntity)
-                            .ToArray();
+            Categories = await _menuService.GetMenuCategories();
 
             if (!_isInitialized)
             {
@@ -107,7 +112,7 @@ namespace POSRestaurant.ViewModels
                 category.IsSelected = true;
             }
 
-            MenuItems = await _databaseService.GetMenuItemsByCategoryAsync(SelectedCategory.Id);
+            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
 
             AddNewItemMenuItem();
 
@@ -135,7 +140,7 @@ namespace POSRestaurant.ViewModels
 
             SelectedCategory = newSelectedCategory;
 
-            MenuItems = await _databaseService.GetMenuItemsByCategoryAsync(SelectedCategory.Id);
+            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
 
             AddNewItemMenuItem();
 
@@ -160,7 +165,7 @@ namespace POSRestaurant.ViewModels
 
             if (itemOnMenu.Id != 0)
             {
-                var itemCategory = await _databaseService.GetCategoryOfMenuItem(itemOnMenu.Id);
+                var itemCategory = await _databaseService.MenuOperations.GetCategoryOfMenuItem(itemOnMenu.Id);
 
                 var categorOfItem = new MenuCategoryModel
                 {
@@ -197,7 +202,7 @@ namespace POSRestaurant.ViewModels
         {
             IsLoading = true;
 
-            var errorMessage = await _databaseService.SaveMenuItemAsync(item);
+            var errorMessage = await _databaseService.MenuOperations.SaveMenuItemAsync(item);
 
             if (errorMessage != null)
             {
@@ -240,7 +245,7 @@ namespace POSRestaurant.ViewModels
                 Price = item.Price,
                 MenuCategoryId = item.Category.Id
             };
-            if (await _databaseService.DeleteMenuItemAsync(menuItem) > 0)
+            if (await _databaseService.MenuOperations.DeleteMenuItemAsync(menuItem) > 0)
             {
                 await Shell.Current.DisplayAlert("Successful", $"{item.Name} deleted successfully", "OK");
 
