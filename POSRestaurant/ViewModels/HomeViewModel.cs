@@ -18,7 +18,7 @@ namespace POSRestaurant.ViewModels
     /// <summary>
     /// ViewModel for Home Page
     /// </summary>
-    public partial class HomeViewModel : ObservableObject, IRecipient<MenuItemChangedMessage>
+    public partial class HomeViewModel : ObservableObject, IRecipient<MenuItemChangedMessage>, IRecipient<StaffChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -241,6 +241,7 @@ namespace POSRestaurant.ViewModels
 
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<MenuItemChangedMessage>(this);
+            WeakReferenceMessenger.Default.Register<StaffChangedMessage>(this);
 
             // Set the initial selection
             SelectedOrderType = 1; // Default to "Dine In"
@@ -283,9 +284,7 @@ namespace POSRestaurant.ViewModels
 
             MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
 
-            Waiters = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Waiter))
-                            .Select(StaffModel.FromEntity)
-                            .ToArray(); ;
+            await LoadWaiters();
 
             CartItems.Clear();
 
@@ -560,6 +559,26 @@ namespace POSRestaurant.ViewModels
                 return;
             
             NumberOfPeople -= 1;
+        }
+
+        /// <summary>
+        /// Refresh staff details when received
+        /// </summary>
+        /// <param name="message">StaffChangedMessage</param>
+        public async void Receive(StaffChangedMessage message)
+        {
+            await LoadWaiters();
+        }
+
+        /// <summary>
+        /// To call the database and load the list of waiters
+        /// </summary>
+        /// <returns>Returns a task object</returns>
+        private async Task LoadWaiters()
+        {
+            Waiters = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Waiter))
+                            .Select(StaffModel.FromEntity)
+                            .ToArray();
         }
     }
 }

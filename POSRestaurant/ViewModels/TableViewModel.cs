@@ -105,7 +105,7 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task Object</returns>
         public async ValueTask GetTablesAsync()
         {
-            var tables = (await _databaseService.GetTablesAsync())
+            var tables = (await _databaseService.TableOperations.GetTablesAsync())
                             .Select(TableModel.FromEntity)
                             .ToArray();
 

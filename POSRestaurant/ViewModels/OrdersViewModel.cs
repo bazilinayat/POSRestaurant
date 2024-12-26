@@ -1,9 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Animations;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.Service;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace POSRestaurant.ViewModels
 {
@@ -29,16 +33,43 @@ namespace POSRestaurant.ViewModels
         private bool _isLoading;
 
         /// <summary>
-        /// To store the order items of selected order
+        /// Selected date from the Order page
         /// </summary>
         [ObservableProperty]
-        private OrderItem[] _orderItems = [];
+        private DateTime _selectedDate = DateTime.Now;
+
+        /// <summary>
+        /// To add order types in picker
+        /// </summary>
+        public ObservableCollection<ValueForPicker> OrderTypes { get; set; } = new();
+
+        /// <summary>
+        /// Selected type for filter
+        /// </summary>
+        [ObservableProperty]
+        private ValueForPicker _selectedType;
+
+        /// <summary>
+        /// Current page of the table
+        /// </summary>
+        private int _currentPage = 1;
+
+        /// <summary>
+        /// Default page size for the table
+        /// </summary>
+        private const int PageSize = 5;
+
+        /// <summary>
+        /// Current page on the table of orders
+        /// </summary>
+        [ObservableProperty]
+        private string _currentPageLabel = "Page: 1";
 
         /// <summary>
         /// To store the order items of selected order
         /// </summary>
         [ObservableProperty]
-        private KOTModel[] _orderKOTs = [];
+        private OrderItem[] _orderItems = [];
 
         /// <summary>
         /// To check if ViewModel is already initialized
@@ -46,13 +77,130 @@ namespace POSRestaurant.ViewModels
         private bool _isInitialized;
 
         /// <summary>
+        /// DIed SettingService
+        /// </summary>
+        private readonly TaxService _taxService;
+
+        /// <summary>
+        /// To store the order items of selected order
+        /// </summary>
+        public List<KOTModel> OrderKOTs { get; set; } = new();
+
+        /// <summary>
+        /// Comma separated order kot ids for this order
+        /// </summary>
+        [ObservableProperty]
+        private string _orderKOTIds;
+
+        /// <summary>
+        /// To store the order items of selected order
+        /// </summary>
+        public ObservableCollection<KOTItemBillModel> OrderKOTItems { get; set; } = new();
+
+        /// <summary>
+        /// To print order id on screen
+        /// </summary>
+        [ObservableProperty]
+        private int _tableNo;
+
+        /// <summary>
+        /// To print the waiter name on screen
+        /// </summary>
+        [ObservableProperty]
+        private string _waiterName;
+
+        /// <summary>
+        /// To print order id on screen
+        /// </summary>
+        [ObservableProperty]
+        private OrderModel _orderToShow;
+
+        /// <summary>
+        /// Total quantity of items ordered
+        /// </summary>
+        [ObservableProperty]
+        private int _totalQuantity;
+
+        /// <summary>
+        /// Total price of all the items
+        /// </summary>
+        [ObservableProperty]
+        private decimal _subTotal;
+
+        /// <summary>
+        /// Round off of the order to get grand total
+        /// </summary>
+        [ObservableProperty]
+        private decimal _roundOff;
+
+        /// <summary>
+        /// Grand total of the order, to be paid by the customer
+        /// </summary>
+        [ObservableProperty]
+        private decimal _grandTotal;
+
+        /// <summary>
+        /// CGST Amount of the order
+        /// </summary>
+        [ObservableProperty]
+        private decimal _cGST;
+
+        /// <summary>
+        /// SGST Amount of the order
+        /// </summary>
+        [ObservableProperty]
+        private decimal _sGST;
+
+        /// <summary>
+        /// CGST Amount of the order
+        /// </summary>
+        [ObservableProperty]
+        private decimal _cGSTAmount;
+
+        /// <summary>
+        /// SGST Amount of the order
+        /// </summary>
+        [ObservableProperty]
+        private decimal _sGSTAmount;
+
+        /// <summary>
+        /// To show the payment mode on the screen
+        /// </summary>
+        [ObservableProperty]
+        private string _paymentMode;
+
+        /// <summary>
+        /// To show or not to show the order details
+        /// Should not be shown until order is selected
+        /// </summary>
+        [ObservableProperty]
+        private bool _orderDetailsVisible = false;
+
+        /// <summary>
+        /// Property changed event to call when there is a change
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public OrdersViewModel(DatabaseService databaseService)
+        public OrdersViewModel(DatabaseService databaseService, TaxService taxService)
         {
             _databaseService = databaseService;
+            _taxService = taxService;
+
+            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
+            if (OrderTypes.Where(o => o.Key == 0) != null)
+                _selectedType = defaultOrderType;
         }
+
+        /// <summary>
+        /// OnPropertyChange event for the options changed on the UI
+        /// </summary>
+        /// <param name="propertyName"></param>
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         /// <summary>
         /// Initialize the ViewModel
@@ -66,6 +214,14 @@ namespace POSRestaurant.ViewModels
             _isInitialized = true;
             IsLoading = true;
 
+            foreach(ValueForPicker desc in EnumExtensions.GetAllDescriptions<OrderTypes>())
+            {
+                OrderTypes.Add(desc);
+            }
+            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
+            OrderTypes.Add(defaultOrderType);
+            
+
             await GetOrdersAsync();
 
             IsLoading = false;
@@ -78,21 +234,78 @@ namespace POSRestaurant.ViewModels
         private async ValueTask GetOrdersAsync()
         {
             Orders.Clear();
-            var dbOrders = await _databaseService.GetOrdersAsync();
-            var orders = dbOrders.Select(o => new OrderModel
-            {
-                Id = o.Id,
-                TableId = o.TableId,
-                OrderDate = o.OrderDate,
-                TotalItemCount = o.TotalItemCount,
-                TotalPrice = o.TotalPrice,
-                PaymentMode = o.PaymentMode,
-                OrderStatus = o.OrderStatus,
-            });
+            var filteredOrders = await _databaseService.GetFilteredOrderssAsync(SelectedDate, SelectedType != null ? SelectedType.Key : 0);
 
-            foreach (var order in orders)
+            if (filteredOrders.Length == 0)
             {
-                Orders.Add(order);
+                await Shell.Current.DisplayAlert("Search Error", "No orders on this date", "Ok");
+                return;
+            }
+
+            int startIndex = (_currentPage - 1) * PageSize;
+            var paginatedOrders = filteredOrders.Skip(startIndex).Take(PageSize);
+
+            foreach(var o in paginatedOrders)
+            {
+                Orders.Add(new OrderModel
+                {
+                    Id = o.Id,
+                    TableId = o.TableId,
+                    OrderDate = o.OrderDate,
+                    TotalItemCount = o.TotalItemCount,
+                    TotalPrice = o.TotalPrice,
+                    PaymentMode = o.PaymentMode,
+                    OrderStatus = o.OrderStatus,
+                    OrderType = o.OrderType,
+                    NumberOfPeople = o.NumberOfPeople,
+                    OrderNumber = o.OrderNumber,
+                    WaiterId = o.WaiterId,
+                });
+            }
+
+            CurrentPageLabel = $"Page: {_currentPage}";
+        }
+
+        /// <summary>
+        /// To search the order with given paramters
+        /// </summary>
+        [RelayCommand]
+        private async void Search()
+        {
+            if (SelectedType == null)
+            {
+                await Shell.Current.DisplayAlert("Search Error", "Select a order type", "Ok");
+                return;
+            }
+
+            _currentPage = 1;
+            await GetOrdersAsync();
+        }
+
+        /// <summary>
+        /// Command to be called when user wants to navigate to previous page
+        /// </summary>
+        [RelayCommand]
+        private async void PreviousPage()
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage--;
+                await GetOrdersAsync();
+            }
+        }
+
+        /// <summary>
+        /// Command to be called when user wants to navigate to next page
+        /// </summary>
+        [RelayCommand]
+        private async void NextPage()
+        {
+            var totalOrders = (await _databaseService.GetFilteredOrderssAsync(SelectedDate, SelectedType.Key)).Length;
+            if (_currentPage * PageSize < totalOrders)
+            {
+                _currentPage++;
+                await GetOrdersAsync();
             }
         }
 
@@ -117,26 +330,80 @@ namespace POSRestaurant.ViewModels
                 if (prevSelectedOrder.Id == orderModel.Id)
                 {
                     OrderItems = [];
+
+                    OrderDetailsVisible = false;
                     return;
                 }
             }
 
             IsLoading = true;
             orderModel.IsSelected = true;
-            //OrderItems = await _databaseService.GetOrderItemsAsync(orderModel.Id);
-
+            // Get Order KOTs for More Details
             OrderKOTs = (await _databaseService.GetOrderKotsAsync(orderModel.Id))
                             .Select(KOTModel.FromEntity)
-                            .ToArray();
+                            .ToList();
+
+            OrderKOTIds = string.Join(',', OrderKOTs.Select(o => o.Id).ToArray());
+
+            /*
+             * Get Order KOT Items
+             * Group them together
+             * Calculcate totals
+             */
+            var kotItems = new List<KOTItemModel>();
+            OrderKOTItems.Clear();
 
             foreach (var kot in OrderKOTs)
             {
-                kot.Items = await _databaseService.GetKotItemsAsync(kot.Id);
+                var items = (await _databaseService.GetKotItemsAsync(kot.Id))
+                            .Select(KOTItemModel.FromEntity)
+                            .ToList();
+
+                kotItems.AddRange(items);
             }
 
+            // Group items together
+            var dict = kotItems.GroupBy(o => o.ItemId).ToDictionary(g => g.Key, g => g.Select(o => o));
+
+            foreach (var groupedItems in dict)
+            {
+                OrderKOTItems.Add(new KOTItemBillModel
+                {
+                    ItemId = groupedItems.Key,
+                    Name = groupedItems.Value.First().Name,
+                    Quantity = groupedItems.Value.Sum(o => o.Quantity),
+                    Price = groupedItems.Value.First().Price,
+                });
+            }
+
+            // Calculate totals
+            TotalQuantity = OrderKOTItems.Sum(o => o.Quantity);
+            SubTotal = OrderKOTItems.Sum(o => o.Amount);
+
+            CGST = _taxService.IndianTaxService.CGST;
+            SGST = _taxService.IndianTaxService.SGST;
+
+            CGSTAmount = _taxService.IndianTaxService.CalculateCGST(SubTotal);
+            SGSTAmount = _taxService.IndianTaxService.CalculateSGST(SubTotal);
+
+            var total = SubTotal + CGSTAmount + SGSTAmount;
+            GrandTotal = Math.Floor(total);
+
+            RoundOff = GrandTotal - total;
+
+            WaiterName = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.WaiterId);
+            TableNo = await _databaseService.TableOperations.GetTableNoAsync(orderModel.TableId);
+            OrderToShow = orderModel;
+
+            var orderPayment = await _databaseService.OrderPaymentOperations.GetOrderPaymentById(orderModel.Id);
+
+            if (orderPayment != null)
+                PaymentMode = EnumExtensions.GetDescription(orderPayment.PaymentMode);
+
+            OrderDetailsVisible = true;
             IsLoading = false;
         }
-
+        
         /// <summary>
         /// Command to clear all the cart items
         /// </summary>

@@ -34,5 +34,13 @@ namespace POSRestaurant.DBO
 
             return "Error in saving order payment details";
         }
+
+        /// <summary>
+        /// To get the order payment details as per the given order id
+        /// </summary>
+        /// <param name="orderId">order id</param>
+        /// <returns>Returns a Order Payment Object</returns>
+        public async Task<OrderPayment> GetOrderPaymentById(long orderId) =>
+            await _connection.Table<OrderPayment>().FirstOrDefaultAsync(o => o.OrderId == orderId);
     }
 }

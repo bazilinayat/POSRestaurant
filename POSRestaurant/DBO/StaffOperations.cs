@@ -40,9 +40,17 @@ namespace POSRestaurant.DBO
         /// Get the staff member as per the id given
         /// </summary>
         /// <param name="Id">Id to be searched</param>
-        /// <returns>A array of Staff members</returns>
+        /// <returns>A Staff member</returns>
         public async Task<Staff> GetStaffBasedOnId(int Id) =>
             await _connection.Table<Staff>().FirstOrDefaultAsync(o => o.Id == Id);
+
+        /// <summary>
+        /// Get the staff member name as per the id given
+        /// </summary>
+        /// <param name="Id">Id to be searched</param>
+        /// <returns>Staff member name</returns>
+        public async Task<string> GetStaffNameBasedOnId(int Id) =>
+            (await _connection.Table<Staff>().FirstOrDefaultAsync(o => o.Id == Id)).Name;
 
         /// <summary>
         /// Get all the staff members

@@ -152,6 +152,7 @@ namespace POSRestaurant.ViewModels
             _databaseService = databaseService;
             _ordersViewModel = ordersViewModel;
             _settingService = settingService;
+            _menuService = menuService;
             OrderItems.CollectionChanged += CartItems_CollectionChanged;
 
             Name = _settingService.Settings.CustomerName;

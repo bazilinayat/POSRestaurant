@@ -49,5 +49,9 @@ namespace POSRestaurant.Data
         /// Number of people sitting on the table
         /// </summary>
         public int NumberOfPeople { get; set; }
+        /// <summary>
+        /// Id of the staff waiter who handled the order and table
+        /// </summary>
+        public int WaiterId { get; set; }
     }
 }

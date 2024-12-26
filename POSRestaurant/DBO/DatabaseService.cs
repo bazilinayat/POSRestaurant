@@ -41,6 +41,11 @@ namespace POSRestaurant.DBO
         public MenuOperations MenuOperations;
 
         /// <summary>
+        /// To handle calls to menu operations in the db
+        /// </summary>
+        public TableOperations TableOperations;
+
+        /// <summary>
         /// Class constructor, to generate database and connection
         /// </summary>
         /// <param name="settingService">DI for SettingService</param>
@@ -55,6 +60,7 @@ namespace POSRestaurant.DBO
             StaffOperaiotns = new StaffOperations(_connection);
             OrderPaymentOperations = new OrderPaymentOperations(_connection);
             MenuOperations = new MenuOperations(_connection);
+            TableOperations = new TableOperations(_connection);
         }
 
         /// <summary>
@@ -116,6 +122,8 @@ namespace POSRestaurant.DBO
                 OrderStatus = orderModel.OrderStatus,
                 OrderNumber = orderModel.OrderNumber,
                 OrderType = orderModel.OrderType,
+                NumberOfPeople = orderModel.NumberOfPeople,
+                WaiterId = orderModel.WaiterId,
             };
 
             if (await _connection.InsertAsync(order) > 0)
@@ -242,6 +250,31 @@ namespace POSRestaurant.DBO
             await _connection.Table<Order>().ToArrayAsync();
 
         /// <summary>
+        /// Get a array of all the orders, if needed, you can apply paging here
+        /// </summary>
+        /// <param name="selectedDate">Date filter</param>
+        /// <param name="orderType">Order Type filter</param>
+        /// <returns>Array of filtered orders</returns>
+        public async Task<Order[]> GetFilteredOrderssAsync(DateTime selectedDate, int orderType)
+        {
+            var yesterday = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, 0, 0, 0);
+            var oneDateMore = selectedDate.AddDays(1);
+            var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
+
+            var ordersOnDate = await _connection.Table<Order>().Where(o => o.OrderDate > yesterday && o.OrderDate < tomorrow).ToListAsync();
+            
+            if (orderType == 0)
+            {
+                return ordersOnDate.ToArray();
+            } 
+            else
+            {
+                return ordersOnDate.Where(o => o.OrderType == (OrderTypes)orderType).ToArray();
+            }
+        }
+            
+
+        /// <summary>
         /// Method to get all the items from a specific order
         /// </summary>
         /// <param name="orderId">For which order</param>
@@ -279,13 +312,6 @@ namespace POSRestaurant.DBO
         /// <returns>Returns a array of ItemOnMenu</returns>
         public async Task<ItemOnMenu[]> GetMenuItemBySearch(string searchText) =>
             await _connection.Table<ItemOnMenu>().Where(o => o.ShortCode.Contains(searchText)).ToArrayAsync();
-
-        /// <summary>
-        /// Method to get all the tables from database
-        /// </summary>
-        /// <returns>Array of Table</returns>
-        public async Task<Table[]> GetTablesAsync() =>
-            await _connection.Table<Table>().ToArrayAsync();
 
         /// <summary>
         /// To get the last KOT number for orderId, so we can number the new kots properly
@@ -456,9 +482,11 @@ namespace POSRestaurant.DBO
         /// <returns>Return the last ordernumber</returns>
         public async Task<long> GetLastestOrderNumberForToday()
         {
-            var yesterday = DateTime.Today.AddDays(-1);
-            var tomorrow = DateTime.Today.AddDays(1);
-            var latestOrder = await _connection.Table<Order>().FirstOrDefaultAsync(y => y.OrderDate > yesterday && y.OrderDate < tomorrow);
+            var yesterday = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 0, 0, 0);
+            var oneDateMore = DateTime.Today.AddDays(1);
+            var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
+
+            var latestOrder = await _connection.Table<Order>().Where(y => y.OrderDate > yesterday && y.OrderDate < tomorrow).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
             if (latestOrder != null) 
                 return latestOrder.OrderNumber;
             else

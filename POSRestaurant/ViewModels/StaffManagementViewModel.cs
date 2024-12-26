@@ -1,5 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Maui.Controls;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
@@ -148,6 +151,9 @@ namespace POSRestaurant.ViewModels
                 await Shell.Current.DisplayAlert("Successful", "Staff saved successfully", "OK");
 
                 await InitializeAsync();
+
+                // Push for change in staff info
+                WeakReferenceMessenger.Default.Send(StaffChangedMessage.From(staffModel));
 
                 Cancel();
             }
