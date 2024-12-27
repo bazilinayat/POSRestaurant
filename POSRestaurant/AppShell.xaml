@@ -55,6 +55,11 @@
     ContentTemplate="{DataTemplate pages:StaffManagementPage}"
     Icon="grid_alt_solid_24.png"
     Route="StaffManagementPage" />
+        <ShellContent
+            Title="Item Report"
+            ContentTemplate="{DataTemplate pages:ItemReportPage}"
+            Icon="grid_alt_solid_24.png"
+            Route="ItemReportPage" />
     </TabBar>
     
 

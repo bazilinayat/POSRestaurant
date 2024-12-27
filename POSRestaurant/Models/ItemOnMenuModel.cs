@@ -35,5 +35,10 @@ namespace POSRestaurant.Models
         /// </summary>
         [ObservableProperty]
         private MenuCategoryModel _category;
+        /// <summary>
+        /// Shortcode for the menu item for quick search
+        /// </summary>
+        [ObservableProperty]
+        private string _shortCode;
     }
 }

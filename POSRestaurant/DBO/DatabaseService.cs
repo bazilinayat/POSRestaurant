@@ -303,7 +303,47 @@ namespace POSRestaurant.DBO
         /// <param name="KotId">For which Kot</param>
         /// <returns>Array of items in the Kot</returns>
         public async Task<KOTItem[]> GetKotItemsAsync(long KotId) =>
-            await _connection.Table<KOTItem>().Where(o => o.KOTId == KotId).ToArrayAsync();        
+            await _connection.Table<KOTItem>().Where(o => o.KOTId == KotId).ToArrayAsync();
+
+
+        /// <summary>
+        /// Method to get all the items in Kot
+        /// </summary>
+        /// <param name="selectedDate">Selected date for report/param>
+        /// <param name="itemId">item id to search</param>
+        /// <returns>Array of KotItem</returns>
+        public async Task<KOTItem[]> GetAllKotItemsAsync(DateTime selectedDate, int itemId)
+        {
+            var yesterday = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, 0, 0, 0);
+            var oneDateMore = selectedDate.AddDays(1);
+            var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
+
+            var ordersOnDate = await _connection.Table<Order>().Where(o => o.OrderDate > yesterday && o.OrderDate < tomorrow).ToListAsync();
+
+            var orderIds = ordersOnDate.Select(o => o.Id).ToArray();
+
+            var kotsOnDate = await _connection.Table<KOT>().Where(o => orderIds.Contains(o.OrderId)).ToArrayAsync();
+
+            var kotIds = kotsOnDate.Select(o => o.Id).ToArray();
+
+            var kotItems = await _connection.Table<KOTItem>().Where(o => kotIds.Contains(o.KOTId)).ToArrayAsync();
+
+            if (itemId == 0)
+            {
+                return kotItems;
+            }
+            else
+            {
+                return kotItems.Where(o => o.ItemId == itemId).ToArray();
+            }
+        }
+
+        /// <summary>
+        /// To Get all the menu items in database
+        /// </summary>
+        /// <returns>Returns a array of ItemOnMenu</returns>
+        public async Task<ItemOnMenu[]> GetMenuItemBySearch() =>
+            await _connection.Table<ItemOnMenu>().ToArrayAsync();
 
         /// <summary>
         /// To Get menu item by name thorugh searching in database

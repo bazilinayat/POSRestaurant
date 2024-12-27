@@ -177,14 +177,10 @@ namespace POSRestaurant.ViewModels
         private bool _orderDetailsVisible = false;
 
         /// <summary>
-        /// Property changed event to call when there is a change
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
+        /// <param name="taxService">DI for TaxService</param>
         public OrdersViewModel(DatabaseService databaseService, TaxService taxService)
         {
             _databaseService = databaseService;
@@ -192,15 +188,8 @@ namespace POSRestaurant.ViewModels
 
             var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
             if (OrderTypes.Where(o => o.Key == 0) != null)
-                _selectedType = defaultOrderType;
+                SelectedType = defaultOrderType;
         }
-
-        /// <summary>
-        /// OnPropertyChange event for the options changed on the UI
-        /// </summary>
-        /// <param name="propertyName"></param>
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         /// <summary>
         /// Initialize the ViewModel
@@ -214,13 +203,13 @@ namespace POSRestaurant.ViewModels
             _isInitialized = true;
             IsLoading = true;
 
-            foreach(ValueForPicker desc in EnumExtensions.GetAllDescriptions<OrderTypes>())
+            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
+            OrderTypes.Add(defaultOrderType);
+
+            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<OrderTypes>())
             {
                 OrderTypes.Add(desc);
             }
-            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
-            OrderTypes.Add(defaultOrderType);
-            
 
             await GetOrdersAsync();
 
