@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             x:Class="POSRestaurant.Controls.ItemReportControl"
+             x:Name="this">
+    <Grid RowDefinitions="*, Auto" BindingContext="{x:Reference this}">
+        <Label Text="{Binding Category, StringFormat='Category: {0}'}" Grid.Row="0" BackgroundColor="Aqua" />
+        <CollectionView ItemsSource="{Binding KOTs}" Grid.Row="1">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="data:KOTItem">
+                    <Grid ColumnSpacing="1"
+                    ColumnDefinitions="*, *, *, *, *"
+                    RowDefinitions="*, Auto">
+                        <Label Grid.Column="0"
+                           Text="{Binding ItemId}"
+                           Style="{StaticResource td}"/>
+                        <Label Grid.Column="1"
+                           Text="{Binding Name}"
+                           Style="{StaticResource td}"/>
+                        <Label Grid.Column="2"
+                           Text="{Binding Price}"
+                           Style="{StaticResource td}"/>
+                        <Label Grid.Column="3"
+                           Text="{Binding Quantity}"
+                           Style="{StaticResource td}"/>
+                        <Label Grid.Column="4"
+                            Text="{Binding Amount}"
+                            Style="{StaticResource td}"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentView>

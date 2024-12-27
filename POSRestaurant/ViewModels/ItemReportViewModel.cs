@@ -43,7 +43,10 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// ObservableCollection for KotItems
         /// </summary>
-        public ObservableCollection<KOTItem> KOTItems { get; set; } = new();
+        public ObservableCollection<ItemReportModel> ItemReportData { get; set; } = new();
+
+        [ObservableProperty]
+        private Dictionary<string, List<KOTItem>> _itemData = new();
 
         /// <summary>
         /// Selected type for filter
@@ -101,7 +104,7 @@ namespace POSRestaurant.ViewModels
                 if (Items.Where(o => o.Key == 0) != null)
                     SelectedItem = defaultOrderType;
 
-                KOTItems.Clear();
+                ItemReportData.Clear();
                 TotalItems = 0;
                 TotalQuantity = 0;
                 TotalAmount = 0;
@@ -135,25 +138,46 @@ namespace POSRestaurant.ViewModels
         /// <returns></returns>
         private async ValueTask MakeItemReport()
         {
-            KOTItems.Clear();
+            ItemReportData.Clear();
             var kotItems = await _databaseService.GetAllKotItemsAsync(SelectedDate, SelectedItem.Key);
 
             var groupedItems = kotItems.GroupBy(o => o.ItemId).ToDictionary(group => group.Key, group => group.ToArray());
 
             foreach (var kotItem in groupedItems)
             {
-                KOTItems.Add(new KOTItem
+                var kotItemsList = new List<KOTItem>();
+                kotItemsList.Add(new KOTItem
                 {
                     ItemId = kotItem.Key,
                     Name = kotItem.Value.First().Name,
                     Price = kotItem.Value.First().Price,
                     Quantity = kotItem.Value.Sum(o => o.Quantity)
                 });
+
+                var category = await _databaseService.MenuOperations.GetCategoryOfMenuItem(kotItem.Key);
+
+                if (ItemReportData.Any(o => o.CategoryName == category.Name)) 
+                {
+                    var toAdd = ItemReportData.Where(o => o.CategoryName == category.Name).FirstOrDefault();
+                    if (toAdd != null)
+                    {
+                        toAdd.KOTItems.AddRange(kotItemsList);
+                    }
+                }
+                else
+                {
+                    ItemReportData.Add(new ItemReportModel
+                    {
+                        CategoryName = category.Name,
+                        KOTItems = kotItemsList
+                    });
+
+                }
             }
 
-            TotalItems = KOTItems.Count;
-            TotalQuantity = KOTItems.Sum(o => o.Quantity);
-            TotalAmount = KOTItems.Sum(o => o.Amount);
+            //TotalItems = KOTItems.Count;
+            //TotalQuantity = KOTItems.Sum(o => o.Quantity);
+            //TotalAmount = KOTItems.Sum(o => o.Amount);
         }
 
         /// <summary>
