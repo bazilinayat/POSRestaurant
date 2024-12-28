@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="POSRestaurant.Pages.ExpenseItemManagementPage"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
+             Title="ExpenseItemManagementPage"
+             x:DataType="vm:ExpenseItemViewModel">
+
+    <Grid ColumnDefinitions=".70*, .30*">
+        <Grid Grid.Column="0"
+          Padding="15"
+          RowDefinitions="Auto, Auto, *" 
+          RowSpacing="15">
+            <Label Grid.Row="0" 
+               FontAttributes="Bold"
+               FontSize="22"
+               Text="Expense Items"/>
+            <Button Grid.Row="1" Text="Add New Expense Item" HeightRequest="40"
+                HorizontalOptions="Start"
+                Command="{Binding AddNewExpenseItemCommand}"/>
+
+            <Grid Grid.Row="2">
+                <Grid RowDefinitions="30, *">
+                    <Grid ColumnDefinitions="*, *, *, *"
+                      BackgroundColor="Blue">
+                        <Label Grid.Column="0"
+                           Text="Expense Item Name"
+                           Padding="5, 0, 0, 0"
+                           Style="{StaticResource th}"/>
+                        <Label Grid.Column="1"
+                            Text="Is Weighted"
+                            Style="{StaticResource th}"/>
+                        <Label Grid.Column="2"
+                           Text="Expense Type"
+                           Style="{StaticResource th}"/>
+                        <Label Grid.Column="3"
+                           Style="{StaticResource th}"/>
+                    </Grid>
+                    <CollectionView Grid.Row="1"
+                                ItemsSource="{Binding ExpenseItems}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ExpenseItemModel">
+                                <Grid ColumnDefinitions="*, *, *, *"
+                                  RowDefinitions="*, Auto">
+                                    <Grid.Triggers>
+                                        <DataTrigger TargetType="Grid" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource LightWheat}"/>
+                                        </DataTrigger>
+                                    </Grid.Triggers>
+                                    <Label Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       Padding="5, 0, 0, 0"
+                                       Style="{StaticResource td}"/>
+                                    <Label Grid.Column="1"
+                                       Text="{Binding IsWeighted}"
+                                       Style="{StaticResource td}"/>
+                                    <Label Grid.Column="2"
+                                       Text="{Binding ItemType}"
+                                       Style="{StaticResource td}"/>
+                                    <Button Grid.Column="3"
+                                        Text="View Items"
+                                        BackgroundColor="DarkOliveGreen"
+                                        HeightRequest="25"
+                                        MinimumWidthRequest="25"
+                                        VerticalOptions="Center"
+                                        HorizontalOptions="Center"
+                                        Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ExpenseItemViewModel}}, Path=SelectExpenseItemCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                    <BoxView Grid.Row="1"
+                                         Grid.ColumnSpan="6"
+                                         HeightRequest="1"
+                                         Color="LightGray"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+                <BoxView IsVisible="{Binding IsLoading}"
+             HorizontalOptions="Fill"
+             VerticalOptions="Fill"
+             Color="{StaticResource LightWheat}"
+             Opacity="0.3"/>
+                <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                       HeightRequest="25" 
+                       WidthRequest="25" 
+                       HorizontalOptions="Center" 
+                       VerticalOptions="Center"
+                       Color="LightBlue"/>
+            </Grid>
+        </Grid>
+        <Grid Grid.Column="1">
+            <controls:SaveExpenseItemControl ExpenseItemTypes="{Binding ExpenseTypes}"
+                                   ExpenseItemToSave="{Binding ExpenseItem}"
+                                   CanBeDeleted="{Binding ExpenseItem.Id}"
+                                   IsWeighted="{Binding IsWeighted}"
+                                   IsQuantity="{Binding IsQuantity}"
+                                   OnCancel="SaveExpenseItemControl_OnCancel"
+                                   OnSaveExpenseItem="SaveExpenseItemControl_OnSaveExpenseItem"
+                                   OnDeleteItem="SaveExpenseItemControl_OnDeleteItem"/>
+        </Grid>
+    </Grid>
+
+</ContentPage>

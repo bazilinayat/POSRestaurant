@@ -117,7 +117,7 @@ public partial class SaveStaffControl : ContentView
     public event Action<StaffEditModel> OnDeleteItem;
 
     /// <summary>
-    /// Command called when Save button is clicked
+    /// Command called when delete button is clicked
     /// </summary>
     /// <returns>Returns a task object</returns>
     [RelayCommand]

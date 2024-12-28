@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Maui.Controls;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
@@ -197,6 +196,12 @@ namespace POSRestaurant.ViewModels
             foreach (var role in Roles)
             {
                 role.IsSelected = false;
+            }
+
+            var prevSelectedOrder = StaffMembers.FirstOrDefault(o => o.IsSelected);
+            if (prevSelectedOrder != null)
+            {
+                prevSelectedOrder.IsSelected = false;
             }
         }
 

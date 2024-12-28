@@ -46,6 +46,11 @@ namespace POSRestaurant.DBO
         public TableOperations TableOperations;
 
         /// <summary>
+        /// To handle calls to inventory related operations in the db
+        /// </summary>
+        public InventoryOperations InventoryOperations;
+
+        /// <summary>
         /// Class constructor, to generate database and connection
         /// </summary>
         /// <param name="settingService">DI for SettingService</param>
@@ -61,6 +66,7 @@ namespace POSRestaurant.DBO
             OrderPaymentOperations = new OrderPaymentOperations(_connection);
             MenuOperations = new MenuOperations(_connection);
             TableOperations = new TableOperations(_connection);
+            InventoryOperations = new InventoryOperations(_connection);
         }
 
         /// <summary>
@@ -79,6 +85,7 @@ namespace POSRestaurant.DBO
             await _connection.CreateTableAsync<KOTItem>();
 
             await _connection.CreateTableAsync<Staff>();
+            await _connection.CreateTableAsync<ExpenseItem>();
 
             await _connection.CreateTableAsync<OrderPayment>();
 

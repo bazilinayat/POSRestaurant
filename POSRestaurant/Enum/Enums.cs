@@ -51,6 +51,29 @@ namespace POSRestaurant.Data
     }
 
     /// <summary>
+    /// List of expense item types
+    /// </summary>
+    public enum ExpenseItemTypes
+    {
+        /// <summary>
+        /// Vegetable products
+        /// </summary>
+        Vegetable = 0,
+        /// <summary>
+        /// Non veg products
+        /// </summary>
+        Fruit = 1,
+        /// <summary>
+        /// Dairy products
+        /// </summary>
+        Dairy = 2,
+        /// <summary>
+        /// Bakery products
+        /// </summary>
+        Bakery = 3
+    }
+
+    /// <summary>
     /// List of Payment Modes
     /// </summary>
     public enum PaymentModes
