@@ -56,21 +56,30 @@ namespace POSRestaurant.Data
     public enum ExpenseItemTypes
     {
         /// <summary>
+        /// To represent all types, for reports only
+        /// </summary>
+        [Description("All")]
+        All = 0,
+        /// <summary>
         /// Vegetable products
         /// </summary>
-        Vegetable = 0,
+        [Description("Vegetable")]
+        Vegetable = 1,
         /// <summary>
         /// Non veg products
         /// </summary>
-        Fruit = 1,
+        [Description("Fruit")]
+        Fruit = 2,
         /// <summary>
         /// Dairy products
         /// </summary>
-        Dairy = 2,
+        [Description("Dairy")]
+        Dairy = 3,
         /// <summary>
         /// Bakery products
         /// </summary>
-        Bakery = 3
+        [Description("Bakery")]
+        Bakery = 4
     }
 
     /// <summary>
@@ -147,6 +156,10 @@ namespace POSRestaurant.Data
     /// </summary>
     public enum StaffRole
     {
+        /// <summary>
+        /// To represent all roles, for reporting only
+        /// </summary>
+        All = 0,
         /// <summary>
         /// Owner of the organization
         /// </summary>

@@ -10,7 +10,94 @@
              Title="InventoryPage"
              Shell.NavBarIsVisible="True"
              x:DataType="vm:InventoryViewModel">
-    
-    
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Padding="10" Spacing="10">
+            <!-- Add Rows Button -->
+            <Button Text="Add 10 Rows" Command="{Binding AddRowsCommand}" HorizontalOptions="Start"/>
+
+            <!-- Table -->
+            <ScrollView>
+            <VerticalStackLayout Spacing="5">
+                <Grid ColumnSpacing="10" RowSpacing="5" >
+                    <!-- Headers -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="Expense Type" Grid.Row="0" Grid.Column="0" FontAttributes="Bold"/>
+                    <Label Text="Expense Item" Grid.Row="0" Grid.Column="1" FontAttributes="Bold"/>
+                    <Label Text="Weight/Quantity" Grid.Row="0" Grid.Column="2" FontAttributes="Bold"/>
+                    <Label Text="Amount Paid" Grid.Row="0" Grid.Column="3" FontAttributes="Bold"/>
+                    <Label Text="Payer" Grid.Row="0" Grid.Column="4" FontAttributes="Bold"/>
+                    <Label Text="" Grid.Row="0" Grid.Column="5"/>
+
+                    <!-- Data Rows -->
+                    <CollectionView ItemsSource="{Binding Rows}" Grid.Row="1" Grid.ColumnSpan="6">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:InventoryRowModel">
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Expense Type Picker -->
+                                    <Picker ItemsSource="{Binding ExpenseItemTypes}" 
+                            SelectedItem="{Binding SelectedExpenseItemType}" 
+                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"
+                            ItemDisplayBinding="{Binding Value}"/>
+
+                                    <!-- Expense Item Picker -->
+                                    <Picker Grid.Column="1" ItemsSource="{Binding ExpenseItems}" 
+                            ItemDisplayBinding="{Binding Name}" 
+                            SelectedItem="{Binding SelectedExpenseItem}"
+                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                                    <!-- Weight/Quantity Entry -->
+                                    <Entry Grid.Column="2" Text="{Binding WeightOrQuantity}" 
+                           IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                                    <!-- Amount Paid Entry -->
+                                    <Entry Grid.Column="3" Text="{Binding AmountPaid}" 
+                           Keyboard="Numeric"
+                           IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                                    <!-- Payer Picker -->
+                                    <Picker Grid.Column="4" ItemsSource="{Binding StaffMembers}" 
+                            ItemDisplayBinding="{Binding Name}" 
+                            SelectedItem="{Binding SelectedPayer}"
+                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                                    <!-- Save Button -->
+                                    <Button Grid.Column="5" Text="Save" 
+                            Command="{Binding SaveCommand}" 
+                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </VerticalStackLayout>
+                
+            </ScrollView>
+        </VerticalStackLayout>
     
 </ContentPage>

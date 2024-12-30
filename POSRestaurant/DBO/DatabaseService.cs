@@ -86,6 +86,7 @@ namespace POSRestaurant.DBO
 
             await _connection.CreateTableAsync<Staff>();
             await _connection.CreateTableAsync<ExpenseItem>();
+            await _connection.CreateTableAsync<Inventory>();
 
             await _connection.CreateTableAsync<OrderPayment>();
 

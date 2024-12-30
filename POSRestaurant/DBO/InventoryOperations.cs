@@ -94,5 +94,66 @@ namespace POSRestaurant.DBO
 
             return await _connection.DeleteAsync(expenseItem);
         }
+
+        /// <summary>
+        /// To save the inventory entry in the DB
+        /// </summary>
+        /// <param name="inventoryToSave">Inventory entry to save</param>
+        /// <returns>Return error message in failure, else null</returns>
+        public async Task<string?> SaveInventoryEntryAsync(Inventory inventoryToSave)
+        {
+            if (inventoryToSave.Id == 0)
+            {
+                if (await _connection.InsertAsync(inventoryToSave) > 0)
+                    return null;
+
+                return "Error in saving Inventory Entry";
+            }
+            else
+            {
+                if (await _connection.UpdateAsync(inventoryToSave) > 0)
+                    return null;
+
+                return "Error in updating Inventory Entry";
+            }
+        }
+
+        /// <summary>
+        /// To get all the inventory items from the db
+        /// </summary>
+        /// <returns>Array of Inventories</returns>
+        public async Task<Inventory[]> GetAllInventoryItemAsync() =>
+            await _connection.Table<Inventory>().ToArrayAsync();
+
+        /// <summary>
+        /// To filter the data for reports as per the conditions given
+        /// </summary>
+        /// <param name="selectedDate">Selected date of the data entry</param>
+        /// <param name="expenseType">Expense type of the entry</param>
+        /// <param name="paidByWho">Paid by who, staffId of person</param>
+        /// <returns>Array of Inventory</returns>
+        public async Task<Inventory[]> GetInventoryItemsAsync(DateTime selectedDate, ExpenseItemTypes expenseType, int paidByWho)
+        {
+            var yesterday = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, 0, 0, 0);
+            var oneDateMore = selectedDate.AddDays(1);
+            var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
+
+            var inventoryOnDate = await _connection.Table<Inventory>().Where(o => o.EntryDate > yesterday && o.EntryDate < tomorrow).ToListAsync();
+
+            var filteredData = new Inventory[inventoryOnDate.Count];
+
+            if (expenseType != 0)
+            {
+                filteredData = inventoryOnDate.Where(o => o.ItemType == expenseType).ToArray();
+            }
+
+            if (paidByWho != 0)
+            {
+                filteredData = inventoryOnDate.Where(o => o.StaffId == paidByWho).ToArray();
+            }
+
+            return filteredData;
+        }
+
     }
 }
