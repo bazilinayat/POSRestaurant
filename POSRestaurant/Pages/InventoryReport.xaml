@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             x:Class="POSRestaurant.Pages.InventoryReport"
+             Title="InventoryReport"
+             Shell.NavBarIsVisible="True"
+             x:DataType="vm:InventoryReportViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label" x:Key="th">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="Black" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+            <Style TargetType="Label" x:Key="td">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Padding="20" Spacing="10">
+        <HorizontalStackLayout Spacing="10">
+            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                <Label Text="Select Date:" Style="{StaticResource th}" />
+                <DatePicker Date="{Binding SelectedDate}" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                <Label Text="Select Expense Type:" Style="{StaticResource th}" />
+                <Picker WidthRequest="100" ItemsSource="{Binding ItemTypes}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                <Label Text="Select Payer:" Style="{StaticResource th}" />
+                <Picker WidthRequest="100" ItemsSource="{Binding Payers}" SelectedItem="{Binding SelectedPayer, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout>
+                <Button Text="Search" Command="{Binding SearchCommand}" />
+            </HorizontalStackLayout>
+        </HorizontalStackLayout>
+
+        <!--<HorizontalStackLayout Spacing="20">
+            <Label Text="{Binding TotalItems, StringFormat='Total Items: {0}'}" Style="{StaticResource th}" />
+            <Label Text="{Binding TotalQuantity, StringFormat='Total Quantity: {0}'}" Style="{StaticResource th}" />
+            <Label Text="{Binding TotalAmount, StringFormat='Total Amount: {0}'}" Style="{StaticResource th}" />
+        </HorizontalStackLayout>-->
+
+        <ScrollView>
+            <Grid RowDefinitions="30, *">
+                <Grid RowSpacing="1" ColumnSpacing="1" BackgroundColor="Gray" Padding="1"
+              ColumnDefinitions="*, *, *, *, *">
+                    <Label Grid.Column="0" Text="Expense Type" Style="{StaticResource th}" />
+                    <Label Grid.Column="1" Text="Item Name" Style="{StaticResource th}" />
+                    <Label Grid.Column="2" Text="Weight/Quantity" Style="{StaticResource th}" />
+                    <Label Grid.Column="3" Text="Amount" Style="{StaticResource th}" />
+                    <Label Grid.Column="4" Text="Paid By" Style="{StaticResource th}" />
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding InventoryReportData}" Grid.Row="1">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:InventoryReportModel">
+                            <Grid RowDefinitions="*, Auto">
+                                <Grid ColumnSpacing="1"
+                                      ColumnDefinitions="*, *, *, *, *"
+                                      RowDefinitions="*, Auto">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding ItemType}"
+                                           Style="{StaticResource td}"/>
+                                    <Label Grid.Column="1"
+                                           Text="{Binding ExpenseItemName}"
+                                           Style="{StaticResource td}"/>
+                                    <Label Grid.Column="2"
+                                           Text="{Binding QuantityOrWeight}"
+                                           Style="{StaticResource td}"/>
+                                    <Label Grid.Column="3"
+                                           Text="{Binding TotalPrice}"
+                                           Style="{StaticResource td}"/>
+                                    <Label Grid.Column="4"
+                                           Text="{Binding StaffName}"
+                                           Style="{StaticResource td}"/>
+                                </Grid>
+                            </Grid>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </ScrollView>
+
+    </VerticalStackLayout>
+
+</ContentPage>

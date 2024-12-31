@@ -25,6 +25,11 @@ namespace POSRestaurant.Data
         public long ExpenseItemId { get; set; }
 
         /// <summary>
+        /// Expense Item Name to be added
+        /// </summary>
+        public string ExpenseItemName { get; set; }
+
+        /// <summary>
         /// If the item is weighted or counted
         /// </summary>
         public bool IsWeighted { get; set; }
@@ -44,6 +49,11 @@ namespace POSRestaurant.Data
         /// Staff member id who paid for the item
         /// </summary>
         public int StaffId { get; set; }
+
+        /// <summary>
+        /// Staff member name who paid for the item
+        /// </summary>
+        public string StaffName { get; set; }
 
         /// <summary>
         /// Date of record entry

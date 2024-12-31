@@ -70,6 +70,11 @@
     ContentTemplate="{DataTemplate pages:InventoryPage}"
     Icon="grid_alt_solid_24.png"
     Route="InventoryPage" />
+        <ShellContent
+    Title="Inventory Report"
+    ContentTemplate="{DataTemplate pages:InventoryReport}"
+    Icon="grid_alt_solid_24.png"
+    Route="InventoryReport" />
     </TabBar>
     
 

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
@@ -30,11 +31,25 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         private bool _isInitialized;
 
+        /// <summary>
+        /// Rows which we will be able to edit
+        /// </summary>
         public ObservableCollection<InventoryRowModel> Rows { get; set; } = new ObservableCollection<InventoryRowModel>();
+
+        /// <summary>
+        /// Type of expense items, we need to choose one
+        /// </summary>
         public ObservableCollection<ValueForPicker> ExpenseItemTypes { get; set; } = new();
+
+        /// <summary>
+        /// List of expense items to choose from
+        /// </summary>
         public ObservableCollection<ExpenseItem> ExpenseItems { get; set; } = new();
+
+        /// <summary>
+        /// List of staff members, co-owners
+        /// </summary>
         public ObservableCollection<Staff> StaffMembers { get; set; } = new();
-        public ICommand AddRowsCommand { get; }
 
         /// <summary>
         /// Constructor for the InventoryViewModel
@@ -45,8 +60,6 @@ namespace POSRestaurant.ViewModels
             _databaseService = databaseService;
 
             InitializeAsync();
-            InitializeRows(10);
-            AddRowsCommand = new Command(AddRows);
         }
 
         /// <summary>
@@ -82,9 +95,16 @@ namespace POSRestaurant.ViewModels
                 StaffMembers.Add(coowner);
             }
 
+            InitializeRows(10);
+
             IsLoading = false;
         }
 
+        /// <summary>
+        /// To initialize 10 rows on the UI
+        /// Which can be edited to put data in inventory
+        /// </summary>
+        /// <param name="count">Count of the rows we need to add</param>
         private void InitializeRows(int count)
         {
             for (int i = 0; i < count; i++)
@@ -98,17 +118,13 @@ namespace POSRestaurant.ViewModels
             }
         }
 
+        /// <summary>
+        /// To handle the add rows command from the UI
+        /// </summary>
+        [RelayCommand]
         private void AddRows()
         {
             InitializeRows(10);
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        
     }
 }

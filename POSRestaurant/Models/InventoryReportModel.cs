@@ -1,5 +1,4 @@
 ﻿using POSRestaurant.Data;
-using SQLite;
 
 namespace POSRestaurant.Models
 {
@@ -11,7 +10,6 @@ namespace POSRestaurant.Models
         /// <summary>
         /// Primary id of the entry done
         /// </summary>
-        [PrimaryKey, AutoIncrement]
         public long Id { get; set; }
 
         /// <summary>
@@ -23,6 +21,11 @@ namespace POSRestaurant.Models
         /// Expense Item to be added
         /// </summary>
         public long ExpenseItemId { get; set; }
+
+        /// <summary>
+        /// Expense Item to be added
+        /// </summary>
+        public string ExpenseItemName { get; set; }
 
         /// <summary>
         /// If the item is weighted or counted
@@ -46,6 +49,11 @@ namespace POSRestaurant.Models
         public int StaffId { get; set; }
 
         /// <summary>
+        /// Staff member id who paid for the item
+        /// </summary>
+        public string StaffName { get; set; }
+
+        /// <summary>
         /// Date of record entry
         /// </summary>
         public DateTime EntryDate { get; set; }
@@ -66,6 +74,8 @@ namespace POSRestaurant.Models
                 QuantityOrWeight = entity.QuantityOrWeight,
                 TotalPrice = entity.TotalPrice,
                 StaffId = entity.StaffId,
+                ExpenseItemName = entity.ExpenseItemName,
+                StaffName = entity.StaffName,
             };
     }
 }

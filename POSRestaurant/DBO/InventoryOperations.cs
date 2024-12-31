@@ -129,27 +129,27 @@ namespace POSRestaurant.DBO
         /// To filter the data for reports as per the conditions given
         /// </summary>
         /// <param name="selectedDate">Selected date of the data entry</param>
-        /// <param name="expenseType">Expense type of the entry</param>
+        /// <param name="expenseType">Int, Expense type of the entry</param>
         /// <param name="paidByWho">Paid by who, staffId of person</param>
         /// <returns>Array of Inventory</returns>
-        public async Task<Inventory[]> GetInventoryItemsAsync(DateTime selectedDate, ExpenseItemTypes expenseType, int paidByWho)
+        public async Task<Inventory[]> GetInventoryItemsAsync(DateTime selectedDate, int expenseType, int paidByWho)
         {
             var yesterday = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, 0, 0, 0);
             var oneDateMore = selectedDate.AddDays(1);
             var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
 
-            var inventoryOnDate = await _connection.Table<Inventory>().Where(o => o.EntryDate > yesterday && o.EntryDate < tomorrow).ToListAsync();
+            var inventoryOnDate = await _connection.Table<Inventory>().Where(o => o.EntryDate > yesterday && o.EntryDate < tomorrow).ToArrayAsync();
 
-            var filteredData = new Inventory[inventoryOnDate.Count];
+            var filteredData = inventoryOnDate;
 
             if (expenseType != 0)
             {
-                filteredData = inventoryOnDate.Where(o => o.ItemType == expenseType).ToArray();
+                filteredData = filteredData.Where(o => o.ItemType == (ExpenseItemTypes)expenseType).ToArray();
             }
 
             if (paidByWho != 0)
             {
-                filteredData = inventoryOnDate.Where(o => o.StaffId == paidByWho).ToArray();
+                filteredData = filteredData.Where(o => o.StaffId == paidByWho).ToArray();
             }
 
             return filteredData;

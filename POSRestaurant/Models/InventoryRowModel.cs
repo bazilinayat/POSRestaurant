@@ -20,13 +20,35 @@ namespace POSRestaurant.Models
     /// </summary>
     public partial class InventoryRowModel : INotifyPropertyChanged
     {
-
+        /// <summary>
+        /// To pass and use for items and saving the data
+        /// </summary>
         DatabaseService _databaseService;
+
+        /// <summary>
+        /// Types of expense item, to category
+        /// </summary>
         public ObservableCollection<ValueForPicker> ExpenseItemTypes { get; set; } = new();
+
+        /// <summary>
+        /// List of expense items to choose from, will be given values when type is selected
+        /// </summary>
         public ObservableCollection<ExpenseItem> ExpenseItems { get; set; } = new();
+
+        /// <summary>
+        /// List of staff members, co-owner
+        /// </summary>
         public ObservableCollection<Staff> StaffMembers { get; set; } = new();
 
+        /// <summary>
+        /// Expense Iten Type, which is selected from Picker
+        /// </summary>
+
         private ValueForPicker _selectedExpenseItemType;
+
+        /// <summary>
+        /// To load the items when type is selected
+        /// </summary>
         public ValueForPicker SelectedExpenseItemType
         {
             get => _selectedExpenseItemType;
@@ -38,6 +60,9 @@ namespace POSRestaurant.Models
             }
         }
 
+        /// <summary>
+        /// To handle change of selection of expense item from Picker
+        /// </summary>
         private ExpenseItem _selectedExpenseItem;
         public ExpenseItem SelectedExpenseItem
         {
@@ -45,6 +70,9 @@ namespace POSRestaurant.Models
             set { _selectedExpenseItem = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// To handle the weight or quantity entry
+        /// </summary>
         private double _weightOrQuantity;
         public double WeightOrQuantity
         {
@@ -52,6 +80,9 @@ namespace POSRestaurant.Models
             set { _weightOrQuantity = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// To handle the amount paid entry
+        /// </summary>
         private double _amountPaid;
         public double AmountPaid
         {
@@ -59,6 +90,9 @@ namespace POSRestaurant.Models
             set { _amountPaid = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// To handle change of selection of Payer from Picker
+        /// </summary>
         private Staff _selectedPayer;
         public Staff SelectedPayer
         {
@@ -66,11 +100,29 @@ namespace POSRestaurant.Models
             set { _selectedPayer = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        private bool _isSaved;
+        public bool IsSaved
+        {
+            get => _isSaved;
+            set { _isSaved = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>
+        /// Constructor of the RowModel
+        /// </summary>
+        /// <param name="databaseService">Object of Database to use for items and save</param>
         public InventoryRowModel(DatabaseService databaseService)
         {
             _databaseService = databaseService;
         }
 
+        /// <summary>
+        /// To handle the save command for each row
+        /// </summary>
+        /// <returns>Returns a Task object</returns>
         [RelayCommand]
         private async Task Save()
         {
@@ -82,7 +134,9 @@ namespace POSRestaurant.Models
                 ItemType = (ExpenseItemTypes)SelectedExpenseItemType.Key,
                 QuantityOrWeight = WeightOrQuantity,
                 StaffId = SelectedPayer.Id,
-                TotalPrice = AmountPaid
+                TotalPrice = AmountPaid,
+                ExpenseItemName = SelectedExpenseItem.Name,
+                StaffName = SelectedPayer.Name,
             };
 
             var error = await _databaseService.InventoryOperations.SaveInventoryEntryAsync(inventory);
@@ -96,19 +150,20 @@ namespace POSRestaurant.Models
             IsSaved = true;
         }
 
-        private bool _isSaved;
-        public bool IsSaved
-        {
-            get => _isSaved;
-            set { _isSaved = value; OnPropertyChanged(); }
-        }
-
+        /// <summary>
+        /// To update the list of expense items
+        /// </summary>
+        /// <param name="expenseType">Int, expense type</param>
         private void UpdateExpenseItems(int expenseType)
         {
-            // Logic to update ExpenseItems based on SelectedExpenseItemType
             PopulateItems(expenseType);
         }
 
+        /// <summary>
+        /// Database call and load items
+        /// </summary>
+        /// <param name="expenseType">Int, expense type</param>
+        /// <returns>Returns a Task object</returns>
         private async Task PopulateItems(int expenseType)
         {
             var items = await _databaseService.InventoryOperations.GetExpenseItemBasedOnTypeAsync((ExpenseItemTypes)expenseType);
@@ -121,6 +176,9 @@ namespace POSRestaurant.Models
             }
         }
 
+        /// <summary>
+        /// To handle the property changed
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
