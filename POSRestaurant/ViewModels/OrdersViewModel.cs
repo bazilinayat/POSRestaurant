@@ -177,6 +177,30 @@ namespace POSRestaurant.ViewModels
         private bool _orderDetailsVisible = false;
 
         /// <summary>
+        /// To get the discount details of the order, if any
+        /// </summary>
+        [ObservableProperty]
+        private Discount _discount;
+
+        /// <summary>
+        /// To display the discount amount on UI
+        /// </summary>
+        [ObservableProperty]
+        private decimal _discountAmount;
+
+        /// <summary>
+        /// To display the subtotal after discount on UI
+        /// </summary>
+        [ObservableProperty]
+        private decimal _subTotalAfterDiscount;
+
+        /// <summary>
+        /// To decide to show or not the discount variables
+        /// </summary>
+        [ObservableProperty]
+        private bool _showDiscountVariables;
+
+        /// <summary>
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
@@ -306,6 +330,7 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SelectOrderAsync(OrderModel? orderModel)
         {
+            ShowDiscountVariables = false;
             if (orderModel == null || orderModel.Id == 0)
             {
                 OrderItems = [];
@@ -368,6 +393,23 @@ namespace POSRestaurant.ViewModels
             // Calculate totals
             TotalQuantity = OrderKOTItems.Sum(o => o.Quantity);
             SubTotal = OrderKOTItems.Sum(o => o.Amount);
+
+            // Get discount details
+            Discount = await _databaseService.DiscountOperations.GetDiscountDetailsForOrderAsync(orderModel.Id);
+
+            if (Discount != null)
+            {
+                ShowDiscountVariables = true;
+                if (Discount.IsFixedBased)
+                {
+                    DiscountAmount = Discount.DiscountFixed;
+                }
+                else if (Discount.IsPercentageBased)
+                {
+                    DiscountAmount = SubTotal * Discount.DiscountPercentage / 100;
+                }
+                SubTotalAfterDiscount = SubTotal - DiscountAmount;
+            }
 
             CGST = _taxService.IndianTaxService.CGST;
             SGST = _taxService.IndianTaxService.SGST;

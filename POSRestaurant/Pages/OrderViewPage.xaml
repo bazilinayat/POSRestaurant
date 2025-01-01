@@ -5,9 +5,16 @@
              xmlns:data="clr-namespace:POSRestaurant.Data"
              xmlns:models="clr-namespace:POSRestaurant.Models"
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
              x:Class="POSRestaurant.Pages.OrderViewPage"
              Shell.NavBarIsVisible="True"
              x:DataType="vm:ViewOrderViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid ColumnDefinitions=".60*, .40*">
         <Grid Grid.Column="0"
@@ -163,18 +170,44 @@
                         <HorizontalStackLayout Grid.Row="1"
                                                Grid.Column="0"
                                                Spacing="5">
-                            <Label Text="Tax"
-                                   VerticalOptions="Center"/>
-                            <Label Text="{Binding TaxPercentage, StringFormat='{0}%'}"
+                            <Label Text="Discount:" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2">
+                            <RadioButton GroupName="DiscountType" Content="Percentage" 
+                                         IsChecked="{Binding SelectedDiscountType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
+                            </RadioButton>
+                            <Label Text="{Binding DiscountPercentage, StringFormat='{0}%'}"
                                    Padding="5, 0"
                                    BackgroundColor="{StaticResource LightWheat}"
+                                   IsEnabled="{Binding EnablePercentageDiscount}"
                                    VerticalOptions="Center">
                                 <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding TaxPercentageClickCommand}"/>
+                                    <TapGestureRecognizer Command="{Binding DiscountPercentageClickCommand}"/>
                                 </Label.GestureRecognizers>
                             </Label>
+                            <RadioButton GroupName="DiscountType" Content="Fixed"
+                                         IsChecked="{Binding SelectedDiscountType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
+                            </RadioButton>
+                            <Label Text="{Binding DiscountFixed}"
+                                   Padding="5, 0"
+                                   BackgroundColor="{StaticResource LightWheat}"
+                                   IsEnabled="{Binding EnableFixedDiscount}"
+                                   VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding DiscountFixedClickCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <Button Grid.Column="0"
+                                    Text="Cancel"
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="Center"
+                                    CornerRadius="5"
+                                    MinimumHeightRequest="25"
+                                    MinimumWidthRequest="25"
+                                    BackgroundColor="Red"
+                                    Command="{Binding CancelDiscountCommand}"/>
                         </HorizontalStackLayout>
-                        <Label Grid.Row="1"
+                        <!--<Label Grid.Row="1"
                                Grid.Column="1"
                                HorizontalOptions="Center"
                                Text="{Binding TaxAmount, StringFormat='{0:C}'}" />
@@ -183,7 +216,7 @@
                                 Stroke="White"
                                 StrokeDashArray="10, 5"
                                 StrokeThickness="0.5">
-                        </Border>
+                        </Border>-->
                         <Label Grid.Row="3"
                                Grid.Column="0"
                                FontAttributes="Bold"

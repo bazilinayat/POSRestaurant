@@ -176,23 +176,31 @@
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="100">
                         <Label Text="SubTotal:" />
-                        <Label Text="{Binding SubTotal}" />
+                        <Label Text="{Binding SubTotal, StringFormat='{0:C}'}" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
+                        <Label Text="Discount:" />
+                        <Label Text="{Binding DiscountAmount, StringFormat='- {0:C}'}" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
+                        <Label Text="SubTotal After Discount:" />
+                        <Label Text="{Binding SubTotalAfterDiscount, StringFormat='{0:C}'}" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="100">
                         <Label Text="{Binding CGST, StringFormat='CGST@{0}%'}" />
-                        <Label Text="{Binding CGSTAmount}" />
+                        <Label Text="{Binding CGSTAmount, StringFormat='{0:C}'}" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="100">
                         <Label Text="{Binding SGST, StringFormat='SGST@{0}%'}" />
-                        <Label Text="{Binding SGSTAmount}" />
+                        <Label Text="{Binding SGSTAmount, StringFormat='{0:C}'}" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="100">
                         <Label Text="Round Off:" />
-                        <Label Text="{Binding RoundOff}" />
+                        <Label Text="{Binding RoundOff, StringFormat='{0:C}'}" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="100">
                         <Label Text="Grand Total:" />
-                        <Label Text="{Binding GrandTotal}" />
+                        <Label Text="{Binding GrandTotal, StringFormat='{0:C}'}" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </VerticalStackLayout>
