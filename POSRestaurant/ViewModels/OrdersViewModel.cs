@@ -201,6 +201,54 @@ namespace POSRestaurant.ViewModels
         private bool _showDiscountVariables;
 
         /// <summary>
+        /// To know if the payment is done in parts
+        /// </summary>
+        [ObservableProperty]
+        private bool _isPartPayment;
+
+        /// <summary>
+        /// To know if the payment is done in parts
+        /// </summary>
+        [ObservableProperty]
+        private bool _isNotPartPayment;
+
+        /// <summary>
+        /// In case of part payment, is cash selected
+        /// </summary>
+        [ObservableProperty]
+        private bool _isCashForPart;
+
+        /// <summary>
+        /// In case of part payment, is card selected
+        /// </summary>
+        [ObservableProperty]
+        private bool _isCardForPart;
+
+        /// <summary>
+        /// In case of part payment, is online selected
+        /// </summary>
+        [ObservableProperty]
+        private bool _isOnlineForPart;
+
+        /// <summary>
+        /// In case of part payment, how much is paid in cash
+        /// </summary>
+        [ObservableProperty]
+        private decimal _paidByCustomerInCash;
+
+        /// <summary>
+        /// In case of part payment, how much is paid in card
+        /// </summary>
+        [ObservableProperty]
+        private decimal _paidByCustomerInCard;
+
+        /// <summary>
+        /// In case of part payment, how much is paid in online
+        /// </summary>
+        [ObservableProperty]
+        private decimal _paidByCustomerInOnline;
+
+        /// <summary>
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
@@ -209,10 +257,6 @@ namespace POSRestaurant.ViewModels
         {
             _databaseService = databaseService;
             _taxService = taxService;
-
-            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
-            if (OrderTypes.Where(o => o.Key == 0) != null)
-                SelectedType = defaultOrderType;
         }
 
         /// <summary>
@@ -222,13 +266,14 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            if (_isInitialized) return;
+            if (_isInitialized)
+            {
+                SelectedType = OrderTypes[0];
+                return;
+            }
 
             _isInitialized = true;
             IsLoading = true;
-
-            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
-            OrderTypes.Add(defaultOrderType);
 
             foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<OrderTypes>())
             {
@@ -331,6 +376,7 @@ namespace POSRestaurant.ViewModels
         private async Task SelectOrderAsync(OrderModel? orderModel)
         {
             ShowDiscountVariables = false;
+            IsPartPayment = false;
             if (orderModel == null || orderModel.Id == 0)
             {
                 OrderItems = [];
@@ -429,7 +475,20 @@ namespace POSRestaurant.ViewModels
             var orderPayment = await _databaseService.OrderPaymentOperations.GetOrderPaymentById(orderModel.Id);
 
             if (orderPayment != null)
+            {
                 PaymentMode = EnumExtensions.GetDescription(orderPayment.PaymentMode);
+
+                if (orderPayment.PaymentMode == PaymentModes.Part)
+                {
+                    IsPartPayment = true;
+                    IsCashForPart = orderPayment.IsCashForPart;
+                    IsCardForPart = orderPayment.IsCardForPart;
+                    IsOnlineForPart = orderPayment.IsOnlineForPart;
+                    PaidByCustomerInCash = orderPayment.PartPaidInCash;
+                    PaidByCustomerInCard = orderPayment.PartPaidInCard;
+                    PaidByCustomerInOnline = orderPayment.PartPaidInOnline;
+                }
+            }
 
             OrderDetailsVisible = true;
             IsLoading = false;

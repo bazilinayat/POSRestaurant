@@ -250,6 +250,14 @@ namespace POSRestaurant.DBO
             await _connection.Table<Order>().FirstOrDefaultAsync(o => o.Id == orderId);
 
         /// <summary>
+        /// To update the given order
+        /// </summary>
+        /// <param name="order">order to update</param>
+        /// <returns>Returns the number of rows affected</returns>
+        public async Task<int> UpdateOrder(Order order) =>
+            await _connection.UpdateAsync(order);
+
+        /// <summary>
         /// To get the last order id for given table id
         /// Later on can be modified for table id as well.
         /// </summary>
@@ -276,7 +284,7 @@ namespace POSRestaurant.DBO
             var oneDateMore = selectedDate.AddDays(1);
             var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
 
-            var ordersOnDate = await _connection.Table<Order>().Where(o => o.OrderDate > yesterday && o.OrderDate < tomorrow).ToListAsync();
+            var ordersOnDate = await _connection.Table<Order>().Where(o => o.OrderDate > yesterday && o.OrderDate < tomorrow && o.OrderStatus == TableOrderStatus.Paid).ToListAsync();
             
             if (orderType == 0)
             {

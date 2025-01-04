@@ -123,6 +123,12 @@
                         <Label Text="Payment Mode:" />
                         <Label Text="{Binding PaymentMode}" />
                     </HorizontalStackLayout>
+                    <HorizontalStackLayout IsVisible="{Binding IsPartPayment}" Spacing="5">
+                        <Label Text="Split Between:" />
+                        <Label IsVisible="{Binding IsCashForPart}" Text="{Binding PaidByCustomerInCash, StringFormat='Paid In Cash - {0:C}'}" />
+                        <Label IsVisible="{Binding IsCardForPart}" Text="{Binding PaidByCustomerInCard, StringFormat='Paid In Card - {0:C}'}" />
+                        <Label IsVisible="{Binding IsOnlineForPart}" Text="{Binding PaidByCustomerInOnline, StringFormat='Paid In Online - {0:C}'}" />
+                    </HorizontalStackLayout>
                 </HorizontalStackLayout>
                 <Grid Grid.Row="4" Padding="10">
                     <Grid RowDefinitions="30, *">

@@ -32,6 +32,16 @@ public partial class OrderCompletePopup : Popup
         _orderCompleteViewModel.TableModel = tableModel;
 
         BindingContext = _orderCompleteViewModel;
+
+        Initialize();
+    }
+
+    /// <summary>
+    /// To load the initial data and add any other logic
+    /// </summary>
+    private async void Initialize()
+    {
+        await _orderCompleteViewModel.InitializeAsync();
     }
 
     /// <summary>
@@ -68,5 +78,14 @@ public partial class OrderCompletePopup : Popup
         await _orderCompleteViewModel.SaveOrderPaymentCommand.ExecuteAsync(null);
         await this.CloseAsync();
     }
-        
+
+    /// <summary>
+    /// Event called when check for payment type is changed in Part payment
+    /// </summary>
+    /// <param name="sender">CheckBox</param>
+    /// <param name="e">EventArgs</param>
+    private void CheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        _orderCompleteViewModel.CalculateReturnCommand.Execute(null);
+    }
 }

@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Converters;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Maui.Controls;
@@ -55,6 +56,54 @@ namespace POSRestaurant.ViewModels
         private int _selectedPaymentMode;
 
         /// <summary>
+        /// To know if the payment is done in parts
+        /// </summary>
+        [ObservableProperty]
+        private bool _isPartPayment;
+
+        /// <summary>
+        /// To know if the payment is done in parts
+        /// </summary>
+        [ObservableProperty]
+        private bool _isNotPartPayment;
+
+        /// <summary>
+        /// In case of part payment, is cash selected
+        /// </summary>
+        [ObservableProperty]
+        private bool _isCashForPart;
+
+        /// <summary>
+        /// In case of part payment, is card selected
+        /// </summary>
+        [ObservableProperty]
+        private bool _isCardForPart;
+
+        /// <summary>
+        /// In case of part payment, is online selected
+        /// </summary>
+        [ObservableProperty]
+        private bool _isOnlineForPart;
+
+        /// <summary>
+        /// In case of part payment, how much is paid in cash
+        /// </summary>
+        [ObservableProperty]
+        private decimal _paidByCustomerInCash;
+
+        /// <summary>
+        /// In case of part payment, how much is paid in card
+        /// </summary>
+        [ObservableProperty]
+        private decimal _paidByCustomerInCard;
+        
+        /// <summary>
+        /// In case of part payment, how much is paid in online
+        /// </summary>
+        [ObservableProperty]
+        private decimal _paidByCustomerInOnline;
+
+        /// <summary>
         /// To manage the selected order type on main page
         /// Should be handled by code as well
         /// </summary>
@@ -66,7 +115,22 @@ namespace POSRestaurant.ViewModels
                 if (_selectedPaymentMode != value)
                 {
                     _selectedPaymentMode = value;
-                    PaymentMode = (PaymentModes)_selectedPaymentMode;
+                    if (_selectedPaymentMode != 0)
+                        PaymentMode = (PaymentModes)_selectedPaymentMode;
+                    if (PaymentMode == PaymentModes.Part)
+                    {
+                        IsPartPayment = true;
+                        IsNotPartPayment = false;
+                        IsCashForPart = IsCardForPart = IsOnlineForPart = false;
+                        PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
+                    }
+                    else if (PaymentMode == PaymentModes.Online || PaymentMode == PaymentModes.Card || PaymentMode == PaymentModes.Cash)
+                    {
+                        IsPartPayment = false;
+                        IsNotPartPayment = true;
+                        PaidByCustomer = 0;
+                    }
+                    CalculateReturn();
                     OnPaymenModeChanged();
                 }
             }
@@ -79,8 +143,21 @@ namespace POSRestaurant.ViewModels
         public OrderCompleteViewModel(DatabaseService databaseService)
         {
             _databaseService = databaseService;
+        }
 
+        /// <summary>
+        /// To initialize the starting of the control
+        /// </summary>
+        /// <returns></returns>
+        public async ValueTask InitializeAsync()
+        {
             SelectedPaymentMode = 1;
+
+            IsPartPayment = false;
+            IsNotPartPayment = true;
+            PaidByCustomer = 0;
+            IsCashForPart = IsCardForPart = IsOnlineForPart = false;
+            PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
         }
 
         /// <summary>
@@ -103,7 +180,22 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private void CalculateReturn()
         {
-            Return = PaidByCustomer - TableModel.OrderTotal;
+            if (IsPartPayment)
+            {
+                if (!IsCashForPart)
+                    PaidByCustomerInCash = 0;
+                if (!IsCardForPart)
+                    PaidByCustomerInCard = 0;
+                if (!IsOnlineForPart)
+                    PaidByCustomerInOnline = 0;
+
+                var totalPaid = PaidByCustomerInCash + PaidByCustomerInCard + PaidByCustomerInOnline;
+                Return = totalPaid - TableModel.OrderTotal;
+            }
+            else
+            {
+                Return = PaidByCustomer - TableModel.OrderTotal;
+            }
         }
 
         /// <summary>
@@ -119,7 +211,13 @@ namespace POSRestaurant.ViewModels
                 PaidByCustomer = PaidByCustomer,
                 PaymentMode = PaymentMode,
                 Tip = Tip,
-                Total = TableModel.OrderTotal
+                Total = TableModel.OrderTotal,
+                IsCardForPart = IsCardForPart,
+                IsCashForPart = IsCashForPart,
+                IsOnlineForPart = IsOnlineForPart,
+                PartPaidInCard = PaidByCustomerInCard,
+                PartPaidInCash = PaidByCustomerInCash,
+                PartPaidInOnline = PaidByCustomerInOnline,
             };
 
             var errorMessage = await _databaseService.OrderPaymentOperations.SaveOrderPaymentAsync(orderPayment);
@@ -128,6 +226,14 @@ namespace POSRestaurant.ViewModels
             {
                 await Shell.Current.DisplayAlert("Order Payment Error", errorMessage, "Ok");
                 return;
+            }
+
+            var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
+            if (order != null)
+            {
+                order.OrderStatus = TableOrderStatus.Paid;
+                order.PaymentMode = PaymentMode;
+                await _databaseService.UpdateOrder(order);
             }
 
             TableModel.Status = TableOrderStatus.NoOrder;

@@ -87,18 +87,29 @@ namespace POSRestaurant.Data
     /// </summary>
     public enum PaymentModes
     {
+        [Description("All")]
+        All = 0,
         /// <summary>
         /// Choose when payment method is cash
         /// </summary>
+        [Description("Cash")]
         Cash = 1,
         /// <summary>
         /// Choose when payment method is online
         /// </summary>
+        [Description("Online")]
         Online = 2,
         /// <summary>
         /// Choose when payment method is card
         /// </summary>
-        Card = 3
+        [Description("Card")]
+        Card = 3,
+        /// <summary>
+        /// Part payment done
+        /// Split in different payment options
+        /// </summary>
+        [Description("Part")]
+        Part = 4
     }
 
     /// <summary>
@@ -134,6 +145,7 @@ namespace POSRestaurant.Data
     /// </summary>
     public enum OrderTypes
     {
+        All = 0,
         /// <summary>
         /// Choose when order type is dinein
         /// </summary>

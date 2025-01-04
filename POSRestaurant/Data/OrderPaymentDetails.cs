@@ -47,5 +47,29 @@ namespace POSRestaurant.Data
         /// PaymentMode, which was used to pay
         /// </summary>
         public PaymentModes PaymentMode { get; set; }
+        /// <summary>
+        /// If part payment is done, is it done in cash
+        /// </summary>
+        public bool IsCashForPart { get; set; }
+        /// <summary>
+        /// If part payment is done, how much is done in cash
+        /// </summary>
+        public decimal PartPaidInCash { get; set; }
+        /// <summary>
+        /// If part payment is done, is it done in card
+        /// </summary>
+        public bool IsCardForPart { get; set; }
+        /// <summary>
+        /// If part payment is done, how much is done in card
+        /// </summary>
+        public decimal PartPaidInCard { get; set; }
+        /// <summary>
+        /// If part payment is done, is it done online
+        /// </summary>
+        public bool IsOnlineForPart { get; set; }
+        /// <summary>
+        /// If part payment id done, how much is done online
+        /// </summary>
+        public decimal PartPaidInOnline { get; set; }
     }
 }

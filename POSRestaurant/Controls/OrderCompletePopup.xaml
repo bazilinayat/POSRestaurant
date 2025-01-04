@@ -25,7 +25,9 @@
     </toolkit:Popup.Resources>
 
     <Border BackgroundColor="{StaticResource LightWheat}"
-            Stroke="Gray">
+            Stroke="Gray"
+            HeightRequest="500"
+            WidthRequest="400">
         <VerticalStackLayout>
             <Grid ColumnDefinitions="*, *, Auto"
                   BackgroundColor="Wheat"
@@ -69,38 +71,76 @@
                     <RadioButton GroupName="PaymentMode" Content="Card"
                                  IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=3}">
                     </RadioButton>
+                    <RadioButton GroupName="PaymentMode" Content="Part"
+                                 IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=4}">
+                    </RadioButton>
                 </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="50">
-                    <Label Text="Paid By Customer:" FontSize="16"
-                           VerticalOptions="Center"/>
-                    <Entry Text="{Binding PaidByCustomer}"
-                           TextChanged="Entry_TextChanged"
-                           Style="{StaticResource txt}"
-                           BackgroundColor="Wheat"
-                           VerticalOptions="Center"
-                           WidthRequest="100"/>
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="50">
-                    <Label Text="Return:" FontSize="16" VerticalOptions="Center"/>
-                    <Label Text="{Binding Return}" Style="{StaticResource txt}" VerticalOptions="Center" TextColor="Red" BackgroundColor="{StaticResource LightWheat}"/>
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="50">
-                    <Label Text="Tip:" FontSize="16" VerticalOptions="Center"/>
-                    <Entry Text="{Binding Tip}" Style="{StaticResource txt}" VerticalOptions="Center" WidthRequest="100"
-                           BackgroundColor="Wheat"/>
-                </HorizontalStackLayout>
-                <Grid ColumnDefinitions="*, *, *">
-                    <Button Grid.Column="0"
-                            Text="Cancel"
-                            BackgroundColor="Red"
-                            HorizontalOptions="Start"
-                            Clicked="Button_Clicked"/>
-                    <Button Grid.Column="2"
-                            BackgroundColor="DarkOliveGreen"
-                            Text="Save"
-                            HorizontalOptions="End"
-                            Clicked="Button_Clicked_1"/>
-                </Grid>
+                <VerticalStackLayout IsVisible="{Binding IsNotPartPayment}">
+                    <HorizontalStackLayout Spacing="50">
+                        <Label Text="Paid By Customer:" FontSize="16" VerticalOptions="Center"/>
+                        <Entry Text="{Binding PaidByCustomer}"
+                               TextChanged="Entry_TextChanged"
+                               Style="{StaticResource txt}"
+                               BackgroundColor="Wheat"
+                               VerticalOptions="Center"
+                               WidthRequest="100"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                <VerticalStackLayout IsVisible="{Binding IsPartPayment}" Padding="10">
+                    <HorizontalStackLayout Spacing="10">
+                        <CheckBox IsChecked="{Binding IsCashForPart}" CheckedChanged="CheckBox_CheckedChanged" />
+                        <Label Text="Cash" VerticalOptions="Center" />
+                        <CheckBox IsChecked="{Binding IsCardForPart}" CheckedChanged="CheckBox_CheckedChanged" />
+                        <Label Text="Card" VerticalOptions="Center" />
+                        <CheckBox IsChecked="{Binding IsOnlineForPart}" CheckedChanged="CheckBox_CheckedChanged" />
+                        <Label Text="Online" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="10">
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Paid By Cash:" VerticalOptions="Center" />
+                            <Entry IsEnabled="{Binding IsCashForPart}"
+                                   TextChanged="Entry_TextChanged"
+                                   Placeholder="Enter cash amount" 
+                                   Text="{Binding PaidByCustomerInCash}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Paid By Card:" VerticalOptions="Center" />
+                            <Entry IsEnabled="{Binding IsCardForPart}"
+                                   TextChanged="Entry_TextChanged"
+                                   Placeholder="Enter card amount"
+                                   Text="{Binding PaidByCustomerInCard}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Paid By Online:" VerticalOptions="Center" />
+                            <Entry IsEnabled="{Binding IsOnlineForPart}" 
+                                   TextChanged="Entry_TextChanged"
+                                   Placeholder="Enter online amount"
+                                   Text="{Binding PaidByCustomerInOnline}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+                <VerticalStackLayout>
+                    <HorizontalStackLayout Spacing="50">
+                        <Label Text="Return:" FontSize="16" VerticalOptions="Center"/>
+                        <Label Text="{Binding Return}" Style="{StaticResource txt}" VerticalOptions="Center" TextColor="Red" BackgroundColor="{StaticResource LightWheat}"/>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="50">
+                        <Label Text="Tip:" FontSize="16" VerticalOptions="Center"/>
+                        <Entry Text="{Binding Tip}" Style="{StaticResource txt}" VerticalOptions="Center" WidthRequest="100" BackgroundColor="Wheat"/>
+                    </HorizontalStackLayout>
+                    <Grid ColumnDefinitions="*, *, *">
+                        <Button Grid.Column="0"
+                                Text="Cancel"
+                                BackgroundColor="Red"
+                                HorizontalOptions="Start"
+                                Clicked="Button_Clicked"/>
+                        <Button Grid.Column="2"
+                                BackgroundColor="DarkOliveGreen"
+                                Text="Save"
+                                HorizontalOptions="End"
+                                Clicked="Button_Clicked_1"/>
+                    </Grid>
+                </VerticalStackLayout>
             </VerticalStackLayout>
         </VerticalStackLayout>
     </Border>
