@@ -77,6 +77,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\LogService\LoggerService.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Update="Pages\ItemReportPage.xaml.cs">
 	    <DependentUpon>ItemReportPage.xaml</DependentUpon>
 	  </Compile>

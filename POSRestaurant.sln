@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "POSRestaurant", "POSRestaurant\POSRestaurant.csproj", "{910AD3E2-29FD-4728-901B-E49099FDC85F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POSRestaurant", "POSRestaurant\POSRestaurant.csproj", "{910AD3E2-29FD-4728-901B-E49099FDC85F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerService", "LogService\LoggerService.csproj", "{CBA98F46-5CA2-4314-92FB-5B39671DB2DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +19,10 @@ Global
 		{910AD3E2-29FD-4728-901B-E49099FDC85F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{910AD3E2-29FD-4728-901B-E49099FDC85F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{910AD3E2-29FD-4728-901B-E49099FDC85F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{CBA98F46-5CA2-4314-92FB-5B39671DB2DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBA98F46-5CA2-4314-92FB-5B39671DB2DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBA98F46-5CA2-4314-92FB-5B39671DB2DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBA98F46-5CA2-4314-92FB-5B39671DB2DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

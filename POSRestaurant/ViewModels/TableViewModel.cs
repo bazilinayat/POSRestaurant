@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using LoggerService;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Controls;
 using POSRestaurant.Data;
@@ -21,6 +22,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// To indicate that the ViewModel data is loading
@@ -68,8 +74,9 @@ namespace POSRestaurant.ViewModels
         /// <param name="homeViewModel">DI for HomeViewModel</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public TableViewModel(IServiceProvider serviceProvider, DatabaseService databaseService, HomeViewModel homeViewModel, OrdersViewModel ordersViewModel, SettingService settingService)
+        public TableViewModel(IServiceProvider serviceProvider, LogService logger, DatabaseService databaseService, HomeViewModel homeViewModel, OrdersViewModel ordersViewModel, SettingService settingService)
         {
+            _logger = logger;
             _serviceProvider = serviceProvider;
             _databaseService = databaseService;
             _ordersViewModel = ordersViewModel;
@@ -119,6 +126,8 @@ namespace POSRestaurant.ViewModels
         /// <param name="tables">List of TableModel</param>
         private void TransformTables(TableModel[] tables)
         {
+            IsLoading = true;
+
             foreach(var table in tables)
             {
                 switch(table.Status)
@@ -151,6 +160,8 @@ namespace POSRestaurant.ViewModels
             }
 
             Tables = [.. tables];
+
+            IsLoading = false;
         }
 
         /// <summary>

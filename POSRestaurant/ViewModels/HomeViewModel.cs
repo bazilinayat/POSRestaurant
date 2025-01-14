@@ -1,7 +1,7 @@
-﻿using CommunityToolkit.Maui.Behaviors;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using LoggerService;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
@@ -24,6 +24,8 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        private readonly LogService _logger;
 
         /// <summary>
         /// DIed variable for MenuService
@@ -227,8 +229,9 @@ namespace POSRestaurant.ViewModels
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public HomeViewModel(DatabaseService databaseService, MenuService menuService, OrdersViewModel ordersViewModel, SettingService settingService)
+        public HomeViewModel(LogService logger, DatabaseService databaseService, MenuService menuService, OrdersViewModel ordersViewModel, SettingService settingService)
         {
+            _logger = logger;
             _databaseService = databaseService;
             _menuService = menuService;
 
@@ -271,7 +274,16 @@ namespace POSRestaurant.ViewModels
             }
 
             if (_isInitialized)
+            {
+                foreach(var category in Categories)
+                {
+                    category.IsSelected = false;
+                }
+                Categories[0].IsSelected = true;
+                SelectedCategory = Categories[0];
+
                 return;
+            }
 
             _isInitialized = true;
 

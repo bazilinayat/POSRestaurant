@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using LoggerService;
 using Microsoft.Extensions.Logging;
 using POSRestaurant.DBO;
 using POSRestaurant.Pages;
@@ -33,6 +34,10 @@ namespace POSRestaurant
 
 #if DEBUG
     		builder.Logging.AddDebug();
+
+            string logFilePath = Path.Combine(AppContext.BaseDirectory, "logs");
+
+            builder.Services.AddSingleton(new LogService(logFilePath));
 #endif
 
             builder.Services.AddSingleton<DatabaseService>()

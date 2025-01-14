@@ -1,13 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Animations;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace POSRestaurant.ViewModels
 {
