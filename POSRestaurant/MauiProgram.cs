@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 using POSRestaurant.DBO;
 using POSRestaurant.Pages;
 using POSRestaurant.Service;
-using POSRestaurant.Utility;
 using POSRestaurant.ViewModels;
+using SettingLibrary;
 
 namespace POSRestaurant
 {

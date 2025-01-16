@@ -1,12 +1,6 @@
-﻿using POSRestaurant.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
-namespace POSRestaurant.Utility
+namespace SettingLibrary
 {
     /// <summary>
     /// To Keep track of the settings, taken from some config

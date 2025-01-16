@@ -1,6 +1,6 @@
 ﻿using POSRestaurant.DBO;
-using POSRestaurant.Utility;
 using POSRestaurant.ViewModels;
+using SettingLibrary;
 
 namespace POSRestaurant
 {

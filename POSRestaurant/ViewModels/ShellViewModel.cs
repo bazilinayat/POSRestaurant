@@ -2,9 +2,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using POSRestaurant.Controls;
-using POSRestaurant.Models;
 using POSRestaurant.Pages;
-using POSRestaurant.Utility;
+using SettingLibrary;
 
 namespace POSRestaurant.ViewModels
 {

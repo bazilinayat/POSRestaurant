@@ -1,6 +1,5 @@
-using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Views;
-using POSRestaurant.Utility;
+using SettingLibrary;
 
 namespace POSRestaurant.Controls;
 

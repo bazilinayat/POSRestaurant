@@ -1,6 +1,6 @@
 ﻿using POSRestaurant.Data;
 using POSRestaurant.Models;
-using POSRestaurant.Utility;
+using SettingLibrary;
 using SQLite;
 
 namespace POSRestaurant.DBO

@@ -9,7 +9,7 @@ using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Pages;
-using POSRestaurant.Utility;
+using SettingLibrary;
 
 namespace POSRestaurant.ViewModels
 {

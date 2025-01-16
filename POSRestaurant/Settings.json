@@ -4,5 +4,15 @@
   "Phone": "123456789",
   "Email": "abc@gmail.com",
   "WebsiteURL": "https://google.com",
-  "NumberOfTables":  10
+  "NumberOfTables": 10,
+  "PaytmInfo": {
+    "CreateQR": "https://securegw-stage.paytm.in/paymentservices/qr/create",
+    "TransactionStatus": "https://securegw-stage.paytm.in/v3/order/status",
+    "MID": "YOUR_MID_HERE",
+    "MerchantKey": "YOUR_KEY_HERE",
+    "POSID": "YOUR_POSID",
+    "OrderDetails": "Restraunt Order",
+    "BusinessType": "UPI_QR_CODE",
+    "Version": "V1"
+  }
 }

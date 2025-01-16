@@ -1,9 +1,6 @@
-﻿using CommunityToolkit.Maui.Views;
-using POSRestaurant.Controls;
-using POSRestaurant.Pages;
-using POSRestaurant.Utility;
+﻿using POSRestaurant.Pages;
 using POSRestaurant.ViewModels;
-using static Microsoft.Maui.ApplicationModel.Permissions;
+using SettingLibrary;
 
 namespace POSRestaurant
 {

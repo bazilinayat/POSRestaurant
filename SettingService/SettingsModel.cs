@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace POSRestaurant.Models
+﻿namespace SettingLibrary
 {
     /// <summary>
     /// Class to keep the values taken from Settings.json file
@@ -23,7 +17,7 @@ namespace POSRestaurant.Models
         /// <summary>
         /// phone number of the developer
         /// </summary>
-        public string Phone {  get; set; }
+        public string Phone { get; set; }
         /// <summary>
         /// Email of the developer
         /// </summary>
@@ -36,5 +30,9 @@ namespace POSRestaurant.Models
         /// To set the number of tables in the restaurant
         /// </summary>
         public int NumberOfTables { get; set; }
+        /// <summary>
+        /// To get the paytm info needed for the paytm transactions
+        /// </summary>
+        public PaytmInfo PaytmInfo { get; set; }
     }
 }

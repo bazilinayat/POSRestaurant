@@ -6,7 +6,7 @@ using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
-using POSRestaurant.Utility;
+using SettingLibrary;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;

@@ -1,13 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Maui.Controls;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
-using POSRestaurant.Utility;
+using SettingLibrary;
 using System.Collections.ObjectModel;
 
 namespace POSRestaurant.ViewModels

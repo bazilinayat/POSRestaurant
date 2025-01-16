@@ -78,6 +78,8 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\LogService\LoggerService.csproj" />
+	  <ProjectReference Include="..\PaymentService\PaymentService.csproj" />
+	  <ProjectReference Include="..\SettingService\SettingLibrary.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
