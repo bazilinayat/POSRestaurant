@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using LoggerService;
 using Microsoft.Extensions.Logging;
+using PaymentService.Online;
 using POSRestaurant.DBO;
 using POSRestaurant.Pages;
 using POSRestaurant.Service;
@@ -44,6 +45,7 @@ namespace POSRestaurant
                 .AddSingleton<SettingService>()
                 .AddSingleton<TaxService>()
                 .AddSingleton<MenuService>()
+                .AddSingleton<PaytmService>()
 
                 .AddSingleton<MainPage>()
                 .AddSingleton<OrdersPage>()
