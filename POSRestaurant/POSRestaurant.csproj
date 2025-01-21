@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-    <TargetFrameworks>net8.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>net8.0-windows10.0.19041.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
     <WindowsSdkPackageVersion>10.0.19041.41</WindowsSdkPackageVersion>
 		<!-- Note for MacCatalyst:
@@ -41,6 +41,7 @@
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 		<PackageCertificateThumbprint>D8B6BE25B084069E4E53E2C0BAD2E07A303D4157</PackageCertificateThumbprint>
+		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
 
 	<ItemGroup>

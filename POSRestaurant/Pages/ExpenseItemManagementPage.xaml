@@ -10,9 +10,23 @@
              Title="ExpenseItemManagementPage"
              x:DataType="vm:ExpenseItemViewModel">
 
-    <Grid ColumnDefinitions=".70*, .30*">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label" x:Key="th">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="Black" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+            <Style TargetType="Label" x:Key="td">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid ColumnDefinitions=".70*, .30*" Margin="10">
         <Grid Grid.Column="0"
-          Padding="15"
           RowDefinitions="Auto, Auto, *" 
           RowSpacing="15">
             <Label Grid.Row="0" 
@@ -23,57 +37,68 @@
                 HorizontalOptions="Start"
                 Command="{Binding AddNewExpenseItemCommand}"/>
 
-            <Grid Grid.Row="2">
-                <Grid RowDefinitions="30, *">
-                    <Grid ColumnDefinitions="*, *, *, *"
-                      BackgroundColor="Blue">
-                        <Label Grid.Column="0"
-                           Text="Expense Item Name"
-                           Padding="5, 0, 0, 0"
-                           Style="{StaticResource th}"/>
-                        <Label Grid.Column="1"
-                            Text="Is Weighted"
-                            Style="{StaticResource th}"/>
-                        <Label Grid.Column="2"
-                           Text="Expense Type"
-                           Style="{StaticResource th}"/>
-                        <Label Grid.Column="3"
-                           Style="{StaticResource th}"/>
-                    </Grid>
-                    <CollectionView Grid.Row="1"
-                                ItemsSource="{Binding ExpenseItems}">
+            <Grid Grid.Row="2" Margin="5" Padding="0">
+                <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid ColumnDefinitions="*, *, *, *" BackgroundColor="Gray">
+                            <Label Grid.Column="0"
+                                   Text="Expense Item Name"
+                                   Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                   Style="{StaticResource th}"/>
+                            <Label Grid.Column="1"
+                                   Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    Text="Is Weighted"
+                                    Style="{StaticResource th}"/>
+                            <Label Grid.Column="2"
+                                   Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                   Text="Expense Type"
+                                   Style="{StaticResource th}"/>
+                            <Label Grid.Column="3" 
+                                   Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                   Style="{StaticResource th}"/>
+                        </Grid>
+                    </Border>
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding ExpenseItems}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:ExpenseItemModel">
-                                <Grid ColumnDefinitions="*, *, *, *"
-                                  RowDefinitions="*, Auto">
+                                <Grid ColumnDefinitions="*, *, *, *" RowDefinitions="Auto, *">
                                     <Grid.Triggers>
                                         <DataTrigger TargetType="Grid" Binding="{Binding IsSelected}" Value="True">
                                             <Setter Property="BackgroundColor" Value="{StaticResource LightWheat}"/>
                                         </DataTrigger>
                                     </Grid.Triggers>
                                     <Label Grid.Column="0"
-                                       Text="{Binding Name}"
-                                       Padding="5, 0, 0, 0"
-                                       Style="{StaticResource td}"/>
+                                            Text="{Binding Name}"
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                            Style="{StaticResource td}"/>
                                     <Label Grid.Column="1"
-                                       Text="{Binding IsWeighted}"
-                                       Style="{StaticResource td}"/>
+                                           VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                           Text="{Binding IsWeighted}"
+                                           Style="{StaticResource td}"/>
                                     <Label Grid.Column="2"
-                                       Text="{Binding ItemType}"
-                                       Style="{StaticResource td}"/>
+                                           VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                           Text="{Binding ItemType}"
+                                           Style="{StaticResource td}"/>
                                     <Button Grid.Column="3"
-                                        Text="View Items"
-                                        BackgroundColor="DarkOliveGreen"
-                                        HeightRequest="25"
-                                        MinimumWidthRequest="25"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="Center"
-                                        Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ExpenseItemViewModel}}, Path=SelectExpenseItemCommand}"
-                                        CommandParameter="{Binding .}"/>
+                                            Text="View"
+                                            BackgroundColor="DarkOliveGreen"
+                                            Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ExpenseItemViewModel}}, Path=SelectExpenseItemCommand}"
+                                            CommandParameter="{Binding .}"/>
                                     <BoxView Grid.Row="1"
-                                         Grid.ColumnSpan="6"
-                                         HeightRequest="1"
-                                         Color="LightGray"/>
+                                             Grid.ColumnSpan="6"
+                                             HeightRequest="1"
+                                             Color="LightGray"/>
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
@@ -92,8 +117,8 @@
                        Color="LightBlue"/>
             </Grid>
         </Grid>
-        <Grid Grid.Column="1">
-            <controls:SaveExpenseItemControl ExpenseItemTypes="{Binding ExpenseTypes}"
+        <Border Grid.Column="1" Stroke="Black" StrokeThickness="1" Margin="5">
+            <controls:SaveExpenseItemControl Padding="10" ExpenseItemTypes="{Binding ExpenseTypes}"
                                    ExpenseItemToSave="{Binding ExpenseItem}"
                                    CanBeDeleted="{Binding ExpenseItem.Id}"
                                    IsWeighted="{Binding IsWeighted}"
@@ -101,7 +126,7 @@
                                    OnCancel="SaveExpenseItemControl_OnCancel"
                                    OnSaveExpenseItem="SaveExpenseItemControl_OnSaveExpenseItem"
                                    OnDeleteItem="SaveExpenseItemControl_OnDeleteItem"/>
-        </Grid>
+        </Border>
     </Grid>
 
 </ContentPage>

@@ -67,7 +67,7 @@ namespace POSRestaurant.ViewModels
         /// To track the sub total of the order or KOT
         /// Made observable for using
         /// </summary>
-        [ObservableProperty, NotifyPropertyChangedFor(nameof(TaxAmount)), NotifyPropertyChangedFor(nameof(Total))]
+        [ObservableProperty, NotifyPropertyChangedFor(nameof(Total))]
         private decimal _subTotal;
 
         /// <summary>
@@ -78,21 +78,9 @@ namespace POSRestaurant.ViewModels
         private string _name;
 
         /// <summary>
-        /// To track the tax percentage set on UI
-        /// Made observable for using in UI
-        /// </summary>
-        [ObservableProperty, NotifyPropertyChangedFor(nameof(TaxAmount)), NotifyPropertyChangedFor(nameof(Total))]
-        private decimal _taxPercentage;
-
-        /// <summary>
-        /// To keep track of the tax amount
-        /// </summary>
-        public decimal TaxAmount => (SubTotal * TaxPercentage) / 100;
-
-        /// <summary>
         /// To keep track of the total amount of the bill
         /// </summary>
-        public decimal Total => SubTotal + TaxAmount;
+        public decimal Total => SubTotal;
 
         /// <summary>
         /// To track the order type on UI
@@ -240,7 +228,6 @@ namespace POSRestaurant.ViewModels
             CartItems.CollectionChanged += CartItems_CollectionChanged;
 
             Name = _settingService.Settings.CustomerName;
-            TaxPercentage = _settingService.Settings.DefaultTaxPercentage;
 
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<MenuItemChangedMessage>(this);
@@ -407,27 +394,6 @@ namespace POSRestaurant.ViewModels
         private void CartItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             ReCalculateAmount();
-        }
-
-        /// <summary>
-        /// Command to open a dialog box for accepting tax percentage
-        /// </summary>
-        /// <returns>A Task object</returns>
-        [RelayCommand]
-        private async Task TaxPercentageClickAsync()
-        {
-            var result = await Shell.Current.DisplayPromptAsync("Tax Percentage", "Enter the applicable tax percentage.", placeholder: "10", initialValue: TaxPercentage.ToString());
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-
-                if (!Decimal.TryParse(result, out decimal enteredTaxPercentage))
-                {
-                    await Shell.Current.DisplayAlert("Invalid Value", "Entered tax percentage is invalid.", "Ok");
-                    return;
-                }
-
-                TaxPercentage = enteredTaxPercentage;
-            }
         }
 
         /// <summary>

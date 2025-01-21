@@ -18,17 +18,14 @@
 
     <Grid ColumnDefinitions=".75*, .25*">
         <Grid Grid.Column="0"
+              Margin="5"
             ColumnDefinitions="Auto, *">
-            <Grid Grid.Column="0"
-                  RowDefinitions="Auto, *" 
-                  RowSpacing="10"
-                  BackgroundColor="{StaticResource LightWheat}">
-                <Label Grid.Row="0" Text="{Binding Name, StringFormat='Hello, {0}'}"/>
-
+            <Grid Grid.Column="0">
                 <controls:CategoriesListControl Grid.Row="1" 
-                                                Categories="{Binding Categories}" 
-                                                OnCategorySelected="CategoriesListControl_OnCategorySelected" />
+                                                    Categories="{Binding Categories}" 
+                                                    OnCategorySelected="CategoriesListControl_OnCategorySelected" />
             </Grid>
+
             <Grid Grid.Column="1"
                   RowDefinitions="Auto, *, Auto">
                 <SearchBar Grid.Row="0"
@@ -47,7 +44,7 @@
                         Stroke="Black"
                         StrokeShape="RoundRectangle 10"
                         IsEnabled="{Binding OrderTypeEnable}"
-                        BackgroundColor="Wheat">
+                        BackgroundColor="{StaticResource AllBackground}">
                     <Grid ColumnDefinitions="0.33*, 0.33*, 0.33*">
                         <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
                             <RadioButton GroupName="OrderType" Content="Dine In" 
@@ -109,10 +106,12 @@
                                    Color="LightBlue"/>
             </Grid>
         </Grid>
-        <Grid Grid.Column="1" 
-              BackgroundColor="{StaticResource LightWheat}"
-              RowDefinitions="Auto, *, Auto"
-              Padding="0, 10">
+        <Border Grid.Column="1"
+                Padding="0, 10"
+                Margin="5"
+                Stroke="Black">
+            <Grid Grid.Column="1" 
+              RowDefinitions="Auto, *, Auto">
             <VerticalStackLayout Grid.Row="0" 
                                  Spacing="5"
                                  Padding="10, 0">
@@ -123,7 +122,7 @@
             </VerticalStackLayout>
             <Grid Grid.Row="1"
                   Padding="10"
-                  BackgroundColor="Wheat">
+                  BackgroundColor="{StaticResource AllBackground}">
                 <CollectionView
                     ItemsSource="{Binding CartItems}">
                     <CollectionView.ItemsLayout>
@@ -134,8 +133,7 @@
                         <DataTemplate x:DataType="models:CartItemModel">
                             <Grid>
                                 <Border Padding="5"
-                                        StrokeShape="RoundRectangle 10"
-                                        BackgroundColor="{StaticResource LightWheat}">
+                                        StrokeShape="RoundRectangle 10">
                                     <VerticalStackLayout Spacing="5">
                                         <Label Text="{Binding Name}" 
                                                FontSize="18"
@@ -202,65 +200,35 @@
             </Grid>
             <VerticalStackLayout Grid.Row="2"
                                  Padding="15, 10, 15, 0">
-                <Border BackgroundColor="white"
+                <Border BackgroundColor="{StaticResource AllBackground}"
                         Padding="10"
                         StrokeShape="RoundRectangle 10"
                         StrokeThickness="0">
                     <Border.Shadow>
                         <Shadow Brush="red"/>
                     </Border.Shadow>
-                    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto"
+                    <Grid RowDefinitions="Auto, Auto, Auto"
                           ColumnDefinitions="2*, 3*"
                           RowSpacing="8">
-                        <Label Grid.Row="0"
+                        <!--<Label Grid.Row="0"
                                Grid.Column="0"
                                Text="SubTotal"
                                Style="{StaticResource lbl}"/>
                         <Label Grid.Row="0"
                                Grid.Column="1"
                                HorizontalOptions="Center"
-                               Text="{Binding SubTotal, StringFormat='{0:C}'}" />
-                        <HorizontalStackLayout Grid.Row="1"
-                                               Grid.Column="0"
-                                               Spacing="5">
-                            <Label Text="Tax"
-                                   VerticalOptions="Center"/>
-                            <Label Text="{Binding TaxPercentage, StringFormat='{0}%'}"
-                                   Padding="5, 0"
-                                   BackgroundColor="{StaticResource LightWheat}"
-                                   VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding TaxPercentageClickCommand}"/>
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </HorizontalStackLayout>
-                        <Label Grid.Row="1"
-                               Grid.Column="1"
-                               HorizontalOptions="Center"
-                               Text="{Binding TaxAmount, StringFormat='{0:C}'}" />
-                        <Border Grid.Row="2"
-                                Grid.ColumnSpan="2"
-                                Stroke="White"
-                                StrokeDashArray="10, 5"
-                                StrokeThickness="0.5">
-                        </Border>
-                        <Label Grid.Row="3"
+                               Text="{Binding SubTotal, StringFormat='{0:C}'}" />-->
+                        <Label Grid.Row="0"
                                Grid.Column="0"
                                FontAttributes="Bold"
                                Text="Total"
                                Style="{StaticResource lbl}"/>
-                        <Label Grid.Row="3"
+                            <Label Grid.Row="0"
                                Grid.Column="1"
                                FontAttributes="Bold"
                                HorizontalOptions="Center"
                                Text="{Binding Total, StringFormat='{0:C}'}" />
-                        <Border Grid.Row="4"
-                                Grid.ColumnSpan="2"
-                                Stroke="White"
-                                StrokeDashArray="10, 5"
-                                StrokeThickness="0.5">
-                        </Border>
-                        <Grid Grid.Row="5"
+                            <Grid Grid.Row="1"
                               Grid.ColumnSpan="2"
                               ColumnDefinitions="Auto, *, Auto, Auto"
                               ColumnSpacing="10">
@@ -285,7 +253,7 @@
                             </Button>
 
                         </Grid>
-                        <Button Grid.Row="6"
+                        <Button Grid.Row="2"
                                 Text="Cancel"
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center"
@@ -296,6 +264,7 @@
                 </Border>
             </VerticalStackLayout>
         </Grid>
+        </Border>
     </Grid>
 
 </ContentPage>

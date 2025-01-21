@@ -110,6 +110,8 @@ namespace POSRestaurant.ViewModels
             {
                 if (role.Id == (int)staffModel.Role)
                     role.IsSelected = true;
+                else
+                    role.IsSelected = false;
             }
 
             StaffMember = new StaffEditModel

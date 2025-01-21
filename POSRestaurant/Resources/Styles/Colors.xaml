@@ -13,8 +13,17 @@
     <Color x:Key="SecondaryDarkText">#9880e5</Color>
     <Color x:Key="Tertiary">#2B0B98</Color>
 
-    <Color x:Key="LightWheat">#FFF1E4</Color>
-    
+    <Color x:Key="LightWheat">#768c6e</Color>
+
+    <Color x:Key="DropDownBackground">Wheat</Color>
+    <Color x:Key="AppTitle">#FFFFFF</Color>
+    <Color x:Key="AllBackground">#FFFFFF</Color>
+    <Color x:Key="TextTitle">#000000</Color>
+    <Color x:Key="TextHead">#000000</Color>
+    <Color x:Key="TextPara">#000000</Color>
+    <Color x:Key="ButtonSuccess">#000000</Color>
+    <Color x:Key="ButtonCancel">#000000</Color>
+    <Color x:Key="SelectionHighlight">#B2BC2C</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>

@@ -17,17 +17,22 @@
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="Black" />
                 <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
             </Style>
             <Style TargetType="Label" x:Key="td">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="5"/>
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid ColumnDefinitions="0.40*, 0.60*">
-        <VerticalStackLayout Grid.Column="0" Padding="20" Spacing="10">
-            <HorizontalStackLayout Spacing="10">
+    <Grid ColumnDefinitions="0.40*, 0.60*" Margin="10">
+        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="15">
+            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Orders"/>
+            <HorizontalStackLayout Grid.Row="1" Spacing="10">
                 <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                     <Label Text="Select Date:" Style="{StaticResource th}" />
                     <DatePicker Date="{Binding SelectedDate}" />
@@ -41,13 +46,15 @@
                 </HorizontalStackLayout>
             </HorizontalStackLayout>
 
-            <ScrollView>
-                <Grid RowDefinitions="30, *">
-                    <Grid RowSpacing="1" ColumnSpacing="1" BackgroundColor="Gray" Padding="1"
+            <Grid  Grid.Row="2" Margin="5" Padding="0">
+                <Grid RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid RowSpacing="1" ColumnSpacing="1" BackgroundColor="Gray" Padding="1"
                           ColumnDefinitions="*, *">
-                        <Label Grid.Column="0" Text="Order No." Style="{StaticResource th}" />
-                        <Label Grid.Column="1" Text="Order Type" Style="{StaticResource th}" />
-                    </Grid>
+                            <Label Grid.Column="0" Text="Order No." Style="{StaticResource th}" />
+                            <Label Grid.Column="1" Text="Order Type" Style="{StaticResource th}" />
+                        </Grid>
+                    </Border>
 
                     <CollectionView ItemsSource="{Binding Orders}" Grid.Row="1">
                         <CollectionView.ItemTemplate>
@@ -76,140 +83,145 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </Grid>
-            </ScrollView>
+            </Grid>
 
-            <HorizontalStackLayout Spacing="10" VerticalOptions="End">
+            <HorizontalStackLayout Grid.Row="3" Spacing="10" VerticalOptions="End">
                 <Button Text="Previous" Command="{Binding PreviousPageCommand}" />
                 <Label Text="{Binding CurrentPageLabel}" VerticalTextAlignment="Center" />
                 <Button Text="Next" Command="{Binding NextPageCommand}" />
             </HorizontalStackLayout>
 
-        </VerticalStackLayout>
-        
-        <VerticalStackLayout IsVisible="{Binding OrderDetailsVisible}" Padding="20" Grid.Column="1">
-            <Grid Grid.Column="0" RowDefinitions="Auto, Auto, Auto, Auto, *">
-                <HorizontalStackLayout Grid.Row="0" Spacing="100">
-                    <HorizontalStackLayout Spacing="5">
-                        <Label Text="Order No.:" />
-                        <Label Text="{Binding OrderToShow.Id}" />
+        </Grid>
+
+        <ScrollView Grid.Column="1">
+            <Grid RowDefinitions="Auto, Auto, Auto" IsVisible="{Binding OrderDetailsVisible}" Padding="20">
+                <Grid Grid.Row="0" RowDefinitions="Auto, Auto, Auto, Auto">
+                    <HorizontalStackLayout Grid.Row="0" Spacing="100">
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Order No.:" />
+                            <Label Text="{Binding OrderToShow.Id}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Order Date:" />
+                            <Label Text="{Binding OrderToShow.OrderDate}" />
+                        </HorizontalStackLayout>
                     </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="5">
-                        <Label Text="Order Date:" />
-                        <Label Text="{Binding OrderToShow.OrderDate}" />
+                    <HorizontalStackLayout Grid.Row="1" Spacing="100">
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Order Type:" />
+                            <Label Text="{Binding OrderToShow.OrderTypeString}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Order TableNo.:" />
+                            <Label Text="{Binding TableNo}" />
+                        </HorizontalStackLayout>
                     </HorizontalStackLayout>
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Grid.Row="1" Spacing="100">
-                    <HorizontalStackLayout Spacing="5">
-                        <Label Text="Order Type:" />
-                        <Label Text="{Binding OrderToShow.OrderTypeString}" />
+                    <HorizontalStackLayout Grid.Row="2" Spacing="100">
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Token No.:" />
+                            <Label Text="{Binding OrderKOTIds}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Assign To:" />
+                            <Label Text="{Binding WaiterName}" />
+                        </HorizontalStackLayout>
                     </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="5">
-                        <Label Text="Order TableNo.:" />
-                        <Label Text="{Binding TableNo}" />
+                    <HorizontalStackLayout Grid.Row="3" Spacing="100">
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Payment Mode:" />
+                            <Label Text="{Binding PaymentMode}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout IsVisible="{Binding IsPartPayment}" Spacing="5">
+                            <Label Text="Split Between:" />
+                            <Label IsVisible="{Binding IsCashForPart}" Text="{Binding PaidByCustomerInCash, StringFormat='Paid In Cash - {0:C}'}" />
+                            <Label IsVisible="{Binding IsCardForPart}" Text="{Binding PaidByCustomerInCard, StringFormat='Paid In Card - {0:C}'}" />
+                            <Label IsVisible="{Binding IsOnlineForPart}" Text="{Binding PaidByCustomerInOnline, StringFormat='Paid In Online - {0:C}'}" />
+                        </HorizontalStackLayout>
                     </HorizontalStackLayout>
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Grid.Row="2" Spacing="100">
-                    <HorizontalStackLayout Spacing="5">
-                        <Label Text="Token No.:" />
-                        <Label Text="{Binding OrderKOTIds}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="5">
-                        <Label Text="Assign To:" />
-                        <Label Text="{Binding WaiterName}" />
-                    </HorizontalStackLayout>
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Grid.Row="3" Spacing="100">
-                    <HorizontalStackLayout Spacing="5">
-                        <Label Text="Payment Mode:" />
-                        <Label Text="{Binding PaymentMode}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout IsVisible="{Binding IsPartPayment}" Spacing="5">
-                        <Label Text="Split Between:" />
-                        <Label IsVisible="{Binding IsCashForPart}" Text="{Binding PaidByCustomerInCash, StringFormat='Paid In Cash - {0:C}'}" />
-                        <Label IsVisible="{Binding IsCardForPart}" Text="{Binding PaidByCustomerInCard, StringFormat='Paid In Card - {0:C}'}" />
-                        <Label IsVisible="{Binding IsOnlineForPart}" Text="{Binding PaidByCustomerInOnline, StringFormat='Paid In Online - {0:C}'}" />
-                    </HorizontalStackLayout>
-                </HorizontalStackLayout>
-                <Grid Grid.Row="4" Padding="10">
-                    <Grid RowDefinitions="30, *">
-                        <Grid Grid.Row="0" ColumnDefinitions="*, *, *, *"
-                  Background="Gray">
-                            <Label Grid.Column="0"
-                       Text="Item"
-                       Padding="5, 0, 0, 0"
-                       Style="{StaticResource th}" />
-                            <Label Grid.Column="1"
-                       Text="Qty."
-                       Style="{StaticResource th}" />
-                            <Label Grid.Column="2"
-                       Text="Price"
-                       Style="{StaticResource th}" />
-                            <Label Grid.Column="3"
-                       Text="Amount"
-                       Style="{StaticResource th}" />
-                        </Grid>
-                        <CollectionView Grid.Row="1"
-                            ItemsSource="{Binding OrderKOTItems}">
+                </Grid>
+                <Grid Grid.Row="1" Margin="5">
+                    <Grid RowDefinitions="Auto, *">
+                        <Border Grid.Row="0" Stroke="Black" StrokeShape="RoundRectangle 10" StrokeThickness="1">
+                            <Grid ColumnDefinitions="*, *, *, *" Background="Gray">
+                                <Label Grid.Column="0"
+                                         Text="Item"
+                                         Padding="5, 0, 0, 0"
+                                         Style="{StaticResource th}" />
+                                <Label Grid.Column="1"
+                                         Text="Qty."
+                                         Style="{StaticResource th}" />
+                                <Label Grid.Column="2"
+                                         Text="Price"
+                                         Style="{StaticResource th}" />
+                                <Label Grid.Column="3"
+                                         Text="Amount"
+                                         Style="{StaticResource th}" />
+                            </Grid>
+                        </Border>
+                        <CollectionView Grid.Row="1" ItemsSource="{Binding OrderKOTItems}">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:KOTItemModel">
-                                    <Grid ColumnDefinitions="*, *, *, *"
-                              RowDefinitions="*, Auto">
+                                    <Grid ColumnDefinitions="*, *, *, *" RowDefinitions="Auto, *">
                                         <Label Grid.Column="0"
-                                   Text="{Binding Name}"
-                                   Padding="5, 0, 0, 0"
-                                   Style="{StaticResource td}" />
+                                                 Text="{Binding Name}"
+                                                 Padding="5, 0, 0, 0"
+                                                 Style="{StaticResource td}" />
                                         <Label Grid.Column="1"
-                                   Text="{Binding Quantity}"
-                                   Style="{StaticResource td}" />
+                                                 Text="{Binding Quantity}"
+                                                 Style="{StaticResource td}" />
                                         <Label Grid.Column="2"
-                                   Text="{Binding Price}"
-                                   Style="{StaticResource td}" />
+                                                 Text="{Binding Price}"
+                                                 Style="{StaticResource td}" />
                                         <Label Grid.Column="3"
-                                   Text="{Binding Amount}"
-                                   Style="{StaticResource td}" />
+                                                 Text="{Binding Amount}"
+                                                 Style="{StaticResource td}" />
+                                        <BoxView Grid.Row="1"
+                                                 Grid.ColumnSpan="6"
+                                                 HeightRequest="1"
+                                                 Color="LightGray"/>
                                     </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
                     </Grid>
                 </Grid>
-            </Grid>
-            <VerticalStackLayout Grid.Column="1">
-                <VerticalStackLayout Spacing="10">
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="Total Qty:" />
-                        <Label Text="{Binding TotalQuantity}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="SubTotal:" />
-                        <Label Text="{Binding SubTotal, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
-                        <Label Text="Discount:" />
-                        <Label Text="{Binding DiscountAmount, StringFormat='- {0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
-                        <Label Text="SubTotal After Discount:" />
-                        <Label Text="{Binding SubTotalAfterDiscount, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="{Binding CGST, StringFormat='CGST@{0}%'}" />
-                        <Label Text="{Binding CGSTAmount, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="{Binding SGST, StringFormat='SGST@{0}%'}" />
-                        <Label Text="{Binding SGSTAmount, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="Round Off:" />
-                        <Label Text="{Binding RoundOff, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="Grand Total:" />
-                        <Label Text="{Binding GrandTotal, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
+                <VerticalStackLayout Grid.Row="2">
+                    <VerticalStackLayout Spacing="10">
+                        <HorizontalStackLayout Spacing="100">
+                            <Label Text="Total Qty:" />
+                            <Label Text="{Binding TotalQuantity}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="100">
+                            <Label Text="SubTotal:" />
+                            <Label Text="{Binding SubTotal, StringFormat='{0:C}'}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
+                            <Label Text="Discount:" />
+                            <Label Text="{Binding DiscountAmount, StringFormat='- {0:C}'}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
+                            <Label Text="SubTotal After Discount:" />
+                            <Label Text="{Binding SubTotalAfterDiscount, StringFormat='{0:C}'}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="100">
+                            <Label Text="{Binding CGST, StringFormat='CGST@{0}%'}" />
+                            <Label Text="{Binding CGSTAmount, StringFormat='{0:C}'}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="100">
+                            <Label Text="{Binding SGST, StringFormat='SGST@{0}%'}" />
+                            <Label Text="{Binding SGSTAmount, StringFormat='{0:C}'}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="100">
+                            <Label Text="Round Off:" />
+                            <Label Text="{Binding RoundOff, StringFormat='{0:C}'}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="100">
+                            <Label Text="Grand Total:" />
+                            <Label Text="{Binding GrandTotal, StringFormat='{0:C}'}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
-            </VerticalStackLayout>
-        </VerticalStackLayout>
+            </Grid>
+        </ScrollView>
     </Grid>
 </ContentPage>

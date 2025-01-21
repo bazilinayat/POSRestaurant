@@ -17,84 +17,90 @@
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="Black" />
                 <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
             </Style>
             <Style TargetType="Label" x:Key="td">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <VerticalStackLayout Padding="20" Spacing="10">
-        <HorizontalStackLayout Spacing="10">
-            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                <Label Text="Select Date:" Style="{StaticResource th}" />
-                <DatePicker Date="{Binding SelectedDate}" />
+    <Grid Padding="10" Margin="10">
+        <Grid RowDefinitions="Auto, Auto, Auto, *" RowSpacing="15">
+            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Item Report"/>
+            <HorizontalStackLayout Spacing="10" Grid.Row="1">
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Select Date:" Style="{StaticResource th}" />
+                    <DatePicker Date="{Binding SelectedDate}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Select Order Type:" Style="{StaticResource th}" />
+                    <Picker WidthRequest="100" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout>
+                    <Button Text="Search" Command="{Binding SearchCommand}" />
+                </HorizontalStackLayout>
             </HorizontalStackLayout>
-            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                <Label Text="Select Order Type:" Style="{StaticResource th}" />
-                <Picker WidthRequest="100" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
-            </HorizontalStackLayout>
-            <HorizontalStackLayout>
-                <Button Text="Search" Command="{Binding SearchCommand}" />
-            </HorizontalStackLayout>
-        </HorizontalStackLayout>
 
-        <HorizontalStackLayout Spacing="20">
-            <Label Text="{Binding TotalItems, StringFormat='Total Items: {0}'}" Style="{StaticResource th}" />
-            <Label Text="{Binding TotalQuantity, StringFormat='Total Quantity: {0}'}" Style="{StaticResource th}" />
-            <Label Text="{Binding TotalAmount, StringFormat='Total Amount: {0}'}" Style="{StaticResource th}" />
-        </HorizontalStackLayout>
-        
-        <ScrollView>
-            <Grid RowDefinitions="30, *">
-                <Grid RowSpacing="1" ColumnSpacing="1" BackgroundColor="Gray" Padding="1"
-                  ColumnDefinitions="*, *, *, *, *">
-                    <Label Grid.Column="0" Text="Item Code" Style="{StaticResource th}" />
-                    <Label Grid.Column="1" Text="Item Name" Style="{StaticResource th}" />
-                    <Label Grid.Column="2" Text="Price" Style="{StaticResource th}" />
-                    <Label Grid.Column="3" Text="Quantity" Style="{StaticResource th}" />
-                    <Label Grid.Column="4" Text="Amount" Style="{StaticResource th}" />
+            <HorizontalStackLayout Grid.Row="2" Spacing="20">
+                <Label Text="{Binding TotalItems, StringFormat='Total Items: {0}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalQuantity, StringFormat='Total Quantity: {0}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalAmount, StringFormat='Total Amount: {0}'}" Style="{StaticResource th}" />
+            </HorizontalStackLayout>
+
+            <Grid Grid.Row="3" Margin="5">
+                <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid BackgroundColor="Gray" ColumnDefinitions="*, *, *, *, *">
+                            <Label Grid.Column="0" Text="Item Code" Style="{StaticResource th}" />
+                            <Label Grid.Column="1" Text="Item Name" Style="{StaticResource th}" />
+                            <Label Grid.Column="2" Text="Price" Style="{StaticResource th}" />
+                            <Label Grid.Column="3" Text="Quantity" Style="{StaticResource th}" />
+                            <Label Grid.Column="4" Text="Amount" Style="{StaticResource th}" />
+                        </Grid>
+                    </Border>
+                    <CollectionView ItemsSource="{Binding ItemReportData}" Grid.Row="1">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ItemReportModel">
+                                <Grid RowDefinitions="*, Auto">
+                                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding CategoryName, StringFormat='Category: {0}'}" BackgroundColor="Gray"/>
+                                    </Border>
+                                    <CollectionView ItemsSource="{Binding KOTItems}" Grid.Row="1">
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="data:KOTItem">
+                                                <Grid ColumnSpacing="1" ColumnDefinitions="*, *, *, *, *" RowDefinitions="*, Auto">
+                                                    <Label Grid.Column="0"
+                                                           Text="{Binding ItemId}"
+                                                           Style="{StaticResource td}"/>
+                                                    <Label Grid.Column="1"
+                                                           Text="{Binding Name}"
+                                                           Style="{StaticResource td}"/>
+                                                    <Label Grid.Column="2"
+                                                           Text="{Binding Price}"
+                                                           Style="{StaticResource td}"/>
+                                                    <Label Grid.Column="3"
+                                                           Text="{Binding Quantity}"
+                                                           Style="{StaticResource td}"/>
+                                                    <Label Grid.Column="4"
+                                                           Text="{Binding Amount}"
+                                                           Style="{StaticResource td}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </Grid>
-
-                <CollectionView ItemsSource="{Binding ItemReportData}" Grid.Row="1">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:ItemReportModel">
-                            <Grid RowDefinitions="*, Auto">
-                                <Label Text="{Binding CategoryName, StringFormat='Category: {0}'}" Grid.Row="0" BackgroundColor="Gray" />
-                                <CollectionView ItemsSource="{Binding KOTItems}" Grid.Row="1">
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="data:KOTItem">
-                                            <Grid ColumnSpacing="1"
-                                                ColumnDefinitions="*, *, *, *, *"
-                                                RowDefinitions="*, Auto">
-                                                <Label Grid.Column="0"
-                                                       Text="{Binding ItemId}"
-                                                       Style="{StaticResource td}"/>
-                                                <Label Grid.Column="1"
-                                                       Text="{Binding Name}"
-                                                       Style="{StaticResource td}"/>
-                                                <Label Grid.Column="2"
-                                                       Text="{Binding Price}"
-                                                       Style="{StaticResource td}"/>
-                                                <Label Grid.Column="3"
-                                                       Text="{Binding Quantity}"
-                                                       Style="{StaticResource td}"/>
-                                                <Label Grid.Column="4"
-                                                        Text="{Binding Amount}"
-                                                        Style="{StaticResource td}"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
-                            </Grid>
-                            
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
             </Grid>
-        </ScrollView>
 
-    </VerticalStackLayout>
-
+        </Grid>
+    </Grid>
 </ContentPage>

@@ -18,11 +18,11 @@
 
     <Grid ColumnDefinitions=".60*, .40*">
         <Grid Grid.Column="0"
+              Margin="5"
         ColumnDefinitions="Auto, *">
             <Grid Grid.Column="0"
               RowDefinitions="Auto, *" 
-              RowSpacing="10"
-              BackgroundColor="{StaticResource LightWheat}">
+              RowSpacing="10">
                 <Label Grid.Row="0" Text="{Binding Name, StringFormat='Hello, {0}'}"/>
 
                 <controls:CategoriesListControl Grid.Row="1" 
@@ -55,49 +55,49 @@
                                Color="LightBlue"/>
             </Grid>
         </Grid>
-        <Grid Grid.Column="1" 
-          BackgroundColor="{StaticResource LightWheat}"
-          RowDefinitions="Auto, *, Auto"
-          Padding="0, 10">
-            <VerticalStackLayout Grid.Row="0" 
+        <Border Grid.Column="1"
+        Padding="0, 10"
+        Margin="5"
+        Stroke="Black">
+            <Grid RowDefinitions="Auto, *, Auto">
+                <VerticalStackLayout Grid.Row="0" 
                              Spacing="5"
                              Padding="10, 0">
-                <Label Text="Order Items"
+                    <Label Text="Order Items"
                    FontSize="25"
                    FontAttributes="Bold"/>
-                <Label Text="{Binding OrderModel.Id, StringFormat='Order Id - {0}'}" />
-                <Label Text="{Binding OrderModel.OrderDate, StringFormat='DateTime - {0}'}" />
-            </VerticalStackLayout>
-            <Grid Grid.Row="1"
+                    <Label Text="{Binding OrderModel.Id, StringFormat='Order Id - {0}'}" />
+                    <Label Text="{Binding OrderModel.OrderDate, StringFormat='DateTime - {0}'}" />
+                </VerticalStackLayout>
+                <Grid Grid.Row="1"
               Padding="10"
-              BackgroundColor="Wheat">
-                <CollectionView
+              BackgroundColor="{StaticResource AllBackground}">
+                    <CollectionView
                 ItemsSource="{Binding OrderItems}">
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical"
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical"
                                            ItemSpacing="2"/>
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:KOTItemModel">
-                            <Grid>
-                                <Border Padding="5"
-                                        StrokeShape="RoundRectangle 10"
-                                        BackgroundColor="{StaticResource LightWheat}">
-                                    <VerticalStackLayout Spacing="5">
-                                        <Label Text="{Binding Name}" 
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:KOTItemModel">
+                                <Grid>
+                                    <Border Padding="5"
+                                        StrokeShape="RoundRectangle 10">
+                                        <VerticalStackLayout Spacing="5">
+                                            <Label Text="{Binding Name}" 
                                                FontSize="18"
                                                FontAttributes="Bold"/>
-                                        <Grid ColumnDefinitions="Auto, *">
-                                            <Label Grid.Column="0"
+                                            <Grid ColumnDefinitions="Auto, *">
+                                                <Label Grid.Column="0"
                                                    Text="{Binding Price, StringFormat='{0:C}'}"
                                                    FontSize="18"
                                                    FontAttributes="Bold"
                                                    TextColor="MediumSeaGreen"/>
-                                            <Grid Grid.Column="1"
+                                                <Grid Grid.Column="1"
                                                   ColumnDefinitions="*, 2*, *"
                                                   WidthRequest="120"
                                                   HorizontalOptions="End">
-                                                <ImageButton Grid.Column="0"
+                                                    <ImageButton Grid.Column="0"
                                                              Source="minus_regular_24.png"
                                                              BackgroundColor="LightYellow"
                                                              CornerRadius="8"
@@ -106,7 +106,7 @@
                                                              Padding="5"
                                                              Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=DecreaseQuantityCommand}"
                                                              CommandParameter="{Binding .}"/>
-                                                <Label Grid.Column="1"
+                                                    <Label Grid.Column="1"
                                                        Text="{Binding Quantity}"
                                                        HeightRequest="30"
                                                        WidthRequest="60"
@@ -115,7 +115,7 @@
                                                        HorizontalOptions="Center"
                                                        HorizontalTextAlignment="Center"
                                                        VerticalTextAlignment="Center"/>
-                                                <ImageButton Grid.Column="2"
+                                                    <ImageButton Grid.Column="2"
                                                              Source="plus_regular_24.png"
                                                              BackgroundColor="LightYellow"
                                                              CornerRadius="8"
@@ -124,11 +124,11 @@
                                                              Padding="5"
                                                              Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=IncreaseQuantityCommand}"
                                                              CommandParameter="{Binding .}"/>
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
-                                    </VerticalStackLayout>
-                                </Border>
-                                <ImageButton Source="x_regular_24.png" 
+                                        </VerticalStackLayout>
+                                    </Border>
+                                    <ImageButton Source="x_regular_24.png" 
                                              HorizontalOptions="End"
                                              VerticalOptions="Start"
                                              CornerRadius="5"
@@ -138,66 +138,67 @@
                                              ToolTipProperties.Text="Remove Item"
                                              Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=RemoveItemFromCartCommand}"
                                              CommandParameter="{Binding .}">
-                                    <ImageButton.Shadow>
-                                        <Shadow Brush="Red"/>
-                                    </ImageButton.Shadow>
-                                </ImageButton>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Grid>
-            <VerticalStackLayout Grid.Row="2"
+                                        <ImageButton.Shadow>
+                                            <Shadow Brush="Red"/>
+                                        </ImageButton.Shadow>
+                                    </ImageButton>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+                <VerticalStackLayout Grid.Row="2"
                              Padding="15, 10, 15, 0">
-                <Border BackgroundColor="white"
+                    <Border BackgroundColor="{StaticResource AllBackground}"
                         Padding="10"
                         StrokeShape="RoundRectangle 10"
                         StrokeThickness="0">
-                    <Border.Shadow>
-                        <Shadow Brush="red"/>
-                    </Border.Shadow>
-                    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
+                        <Border.Shadow>
+                            <Shadow Brush="red"/>
+                        </Border.Shadow>
+                        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
                           ColumnDefinitions="2*, 3*"
                           RowSpacing="8">
-                        <Label Grid.Row="0"
+                            <Label Grid.Row="0"
                                Grid.Column="0"
                                Text="SubTotal"
                                Style="{StaticResource lbl}"/>
-                        <Label Grid.Row="0"
+                            <Label Grid.Row="0"
                                Grid.Column="1"
                                HorizontalOptions="Center"
                                Text="{Binding SubTotal, StringFormat='{0:C}'}" />
-                        <HorizontalStackLayout Grid.Row="1"
+                            <HorizontalStackLayout Grid.Row="1"
                                                Grid.Column="0"
                                                Spacing="5">
-                            <Label Text="Discount:" VerticalOptions="Center"/>
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2">
-                            <RadioButton GroupName="DiscountType" Content="Percentage" 
+                                <Label Text="Discount:" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2">
+                                <RadioButton GroupName="DiscountType" Content="Percentage" 
                                          IsChecked="{Binding SelectedDiscountType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
-                            </RadioButton>
-                            <Label Text="{Binding DiscountPercentage, StringFormat='{0}%'}"
+                                </RadioButton>
+                                <Label Text="{Binding DiscountPercentage, StringFormat='{0}%'}"
                                    Padding="5, 0"
                                    BackgroundColor="{StaticResource LightWheat}"
                                    IsEnabled="{Binding EnablePercentageDiscount}"
                                    VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding DiscountPercentageClickCommand}"/>
-                                </Label.GestureRecognizers>
-                            </Label>
-                            <RadioButton GroupName="DiscountType" Content="Fixed"
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding DiscountPercentageClickCommand}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <RadioButton GroupName="DiscountType" Content="Fixed"
                                          IsChecked="{Binding SelectedDiscountType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
-                            </RadioButton>
-                            <Label Text="{Binding DiscountFixed}"
+                                </RadioButton>
+                                <Label Text="{Binding DiscountFixed}"
                                    Padding="5, 0"
                                    BackgroundColor="{StaticResource LightWheat}"
                                    IsEnabled="{Binding EnableFixedDiscount}"
                                    VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding DiscountFixedClickCommand}"/>
-                                </Label.GestureRecognizers>
-                            </Label>
-                            <Button Grid.Column="0"
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding DiscountFixedClickCommand}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Button Grid.Column="0"
+                                        Margin="10, 0"
                                     Text="Cancel"
                                     HorizontalOptions="Start"
                                     VerticalOptions="Center"
@@ -206,8 +207,8 @@
                                     MinimumWidthRequest="25"
                                     BackgroundColor="Red"
                                     Command="{Binding CancelDiscountCommand}"/>
-                        </HorizontalStackLayout>
-                        <!--<Label Grid.Row="1"
+                            </HorizontalStackLayout>
+                            <!--<Label Grid.Row="1"
                                Grid.Column="1"
                                HorizontalOptions="Center"
                                Text="{Binding TaxAmount, StringFormat='{0:C}'}" />
@@ -217,27 +218,27 @@
                                 StrokeDashArray="10, 5"
                                 StrokeThickness="0.5">
                         </Border>-->
-                        <Label Grid.Row="3"
+                            <Label Grid.Row="3"
                                Grid.Column="0"
                                FontAttributes="Bold"
                                Text="Total"
                                Style="{StaticResource lbl}"/>
-                        <Label Grid.Row="3"
+                            <Label Grid.Row="3"
                                Grid.Column="1"
                                FontAttributes="Bold"
                                HorizontalOptions="Center"
                                Text="{Binding Total, StringFormat='{0:C}'}" />
-                        <Border Grid.Row="4"
+                            <Border Grid.Row="4"
                                 Grid.ColumnSpan="2"
                                 Stroke="White"
                                 StrokeDashArray="10, 5"
                                 StrokeThickness="0.5">
-                        </Border>
-                        <Grid Grid.Row="5"
+                            </Border>
+                            <Grid Grid.Row="5"
                               Grid.ColumnSpan="2"
                               ColumnDefinitions="Auto, *, Auto, Auto"
                               ColumnSpacing="10">
-                            <Button Grid.Column="0"
+                                <Button Grid.Column="0"
                                     Text="Cancel"
                                     HorizontalOptions="Start"
                                     VerticalOptions="Center"
@@ -246,7 +247,7 @@
                                     MinimumWidthRequest="25"
                                     BackgroundColor="Red"
                                     Clicked="CancelButton_Clicked"/>
-                            <Button Grid.Column="2"
+                                <Button Grid.Column="2"
                                     Text="Save &amp; Print"
                                     HorizontalOptions="End"
                                     VerticalOptions="Center"
@@ -255,11 +256,12 @@
                                     MinimumWidthRequest="25"
                                     BackgroundColor="MediumSeaGreen"
                                     Command="{Binding SaveAndPrintCommand}">
-                            </Button>
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </Border>
-            </VerticalStackLayout>
-        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
     </Grid>
 </ContentPage>

@@ -14,11 +14,11 @@
 
     <Grid ColumnDefinitions=".75*, .25*">
         <Grid Grid.Column="0"
+              Margin="5"
         ColumnDefinitions="Auto, *">
             <Grid Grid.Column="0"
               RowDefinitions="Auto, *" 
-              RowSpacing="10"
-              BackgroundColor="{StaticResource LightWheat}">
+              RowSpacing="10">
                 <Label Grid.Row="0" Text="Manage Menu Items"/>
 
                 <controls:CategoriesListControl Grid.Row="1" 
@@ -41,28 +41,30 @@
                                Color="LightBlue"/>
             </Grid>
         </Grid>
-        <Grid Grid.Column="1" 
-          BackgroundColor="{StaticResource LightWheat}"
-          RowDefinitions="Auto, *"
-          Padding="0, 10">
-            <VerticalStackLayout Grid.Row="0" 
-                             Spacing="5"
-                             Padding="10, 0">
-                <Label Text="Save Menu Item"
-                   FontSize="25"
-                   FontAttributes="Bold"/>
-                <controls:CurrentDateTimeControl />
-            </VerticalStackLayout>
-            <Grid Grid.Row="1"
-              Padding="10"
-              BackgroundColor="{StaticResource LightWheat}">
-                <controls:SaveMenuItemFormControl Item="{Binding MenuItem}" 
-                                                  CanBeDeleted="{Binding MenuItem.Id}" 
-                                                  OnCancel="SaveMenuItemFormControl_OnCancel"
-                                                  OnSaveItem="SaveMenuItemFormControl_OnSaveItem"
-                                                  OnDeleteItem="SaveMenuItemFormControl_OnDeleteItem"/>
+        <Border Grid.Column="1"
+                Margin="5"
+                Stroke="Black">
+            <Grid Grid.Column="1" 
+              RowDefinitions="Auto, *"
+              Padding="0, 10">
+                <VerticalStackLayout Grid.Row="0" 
+                                 Spacing="5"
+                                 Padding="10, 0">
+                    <Label Text="Save Menu Item"
+                       FontSize="25"
+                       FontAttributes="Bold"/>
+                    <controls:CurrentDateTimeControl />
+                </VerticalStackLayout>
+                <Grid Grid.Row="1"
+                    Padding="10">
+                        <controls:SaveMenuItemFormControl Item="{Binding MenuItem}" 
+                                                          CanBeDeleted="{Binding MenuItem.Id}" 
+                                                          OnCancel="SaveMenuItemFormControl_OnCancel"
+                                                          OnSaveItem="SaveMenuItemFormControl_OnSaveItem"
+                                                          OnDeleteItem="SaveMenuItemFormControl_OnDeleteItem"/>
+                </Grid>
             </Grid>
-        </Grid>
+        </Border>
     </Grid>
 
 </ContentPage>

@@ -24,6 +24,8 @@
                     <VerticalStackLayout Spacing="5">
                         <Border Padding="10"
                                 Stroke="{Binding BorderColour}"
+                                StrokeThickness="5"
+                                StrokeShape="RoundRectangle 10"
                                 StrokeDashOffset="2">
                             <VerticalStackLayout Spacing="10">
                                 <Label Text="{Binding TableNo}"

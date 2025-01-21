@@ -45,7 +45,7 @@
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:ExpenseTypeModel">
-                            <Border BackgroundColor="Wheat"
+                            <Border BackgroundColor="{StaticResource AllBackground}"
                                 StrokeShape="RoundRectangle 10"
                                 HeightRequest="40">
                                 <Label Text="{Binding ExpenseTypeName}" HorizontalOptions="Center" VerticalOptions="Center">
@@ -57,7 +57,7 @@
                                 </Label>
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="Maroon" />
+                                        <Setter Property="BackgroundColor" Value="Green" />
                                     </DataTrigger>
                                 </Border.Triggers>
                                 <Border.GestureRecognizers>

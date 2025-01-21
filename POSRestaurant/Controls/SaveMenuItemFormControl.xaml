@@ -39,7 +39,7 @@
                     <Label HorizontalOptions="Center"
                            Text="{Binding Item.Category.Name}"
                            VerticalOptions="Center"
-                           TextColor="White">
+                           TextColor="{StaticResource AllBackground}">
                     </Label>
                 </Border>
             </VerticalStackLayout>

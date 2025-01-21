@@ -14,90 +14,139 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <Style TargetType="Label" x:Key="th">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="Black" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+            <Style TargetType="Label" x:Key="td">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <VerticalStackLayout Padding="10" Spacing="10">
+    <Grid Padding="10" Margin="10">
+
+        <Grid RowDefinitions="Auto, Auto, *" RowSpacing="15">
+            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Inventory Entries"/>
+
             <!-- Add Rows Button -->
-            <Button Text="Add 10 Rows" Command="{Binding AddRowsCommand}" HorizontalOptions="Start"/>
+            <Button Grid.Row="1" Text="Add 10 Rows" Command="{Binding AddRowsCommand}" HorizontalOptions="Start"/>
 
             <!-- Table -->
-            <ScrollView>
-            <VerticalStackLayout Spacing="5">
-                <Grid ColumnSpacing="10" RowSpacing="5" >
-                    <!-- Headers -->
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Label Text="Expense Type" Grid.Row="0" Grid.Column="0" FontAttributes="Bold"/>
-                    <Label Text="Expense Item" Grid.Row="0" Grid.Column="1" FontAttributes="Bold"/>
-                    <Label Text="Weight/Quantity" Grid.Row="0" Grid.Column="2" FontAttributes="Bold"/>
-                    <Label Text="Amount Paid" Grid.Row="0" Grid.Column="3" FontAttributes="Bold"/>
-                    <Label Text="Payer" Grid.Row="0" Grid.Column="4" FontAttributes="Bold"/>
-                    <Label Text="" Grid.Row="0" Grid.Column="5"/>
-
+            <Grid Grid.Row="2" Margin="5">
+                <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid ColumnDefinitions="*, *, *, *, *, *" BackgroundColor="Gray">
+                            <Label Grid.Column="0" Text="Expense Type"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource th}"/>
+                            <Label Grid.Column="1" Text="Expense Item"
+                                   Padding="10"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"
+                                   Style="{StaticResource th}"/>
+                            <Label Grid.Column="2" Text="Weight Or Quantity"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource th}"/>
+                            <Label Grid.Column="3" Text="Price"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource th}"/>
+                            <Label Grid.Column="4" Text="Payer"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource th}"/>
+                            <Label Grid.Column="5" Padding="10"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"
+                                   Style="{StaticResource th}"/>
+                        </Grid>
+                    </Border>
                     <!-- Data Rows -->
                     <CollectionView ItemsSource="{Binding Rows}" Grid.Row="1" Grid.ColumnSpan="6">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:InventoryRowModel">
-                                <Grid ColumnSpacing="10">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
+                                <Grid ColumnDefinitions="*, *, *, *, *, *, Auto" RowDefinitions="Auto, *">
+                                    
                                     <!-- Expense Type Picker -->
-                                    <Picker ItemsSource="{Binding ExpenseItemTypes}" 
-                            SelectedItem="{Binding SelectedExpenseItemType}" 
-                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"
-                            ItemDisplayBinding="{Binding Value}"/>
+                                    <Picker Grid.Column="0" 
+                                            BackgroundColor="Wheat"
+                                            WidthRequest="200"
+                                            ItemsSource="{Binding ExpenseItemTypes}" 
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                            SelectedItem="{Binding SelectedExpenseItemType}" 
+                                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"
+                                            ItemDisplayBinding="{Binding Value}"/>
 
                                     <!-- Expense Item Picker -->
                                     <Picker Grid.Column="1" ItemsSource="{Binding ExpenseItems}" 
-                            ItemDisplayBinding="{Binding Name}" 
-                            SelectedItem="{Binding SelectedExpenseItem}"
-                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                            BackgroundColor="Wheat"
+                                            WidthRequest="200"
+                                            ItemDisplayBinding="{Binding Name}" 
+                                            SelectedItem="{Binding SelectedExpenseItem}"
+                                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
 
                                     <!-- Weight/Quantity Entry -->
-                                    <Entry Grid.Column="2" Text="{Binding WeightOrQuantity}" 
-                           IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                    <HorizontalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="Center">
+                                        <Entry  Text="{Binding WeightOrQuantity}" 
+                                                BackgroundColor="Wheat"
+                                                WidthRequest="150"
+                                                IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                        <Label Text="Unit" IsVisible="true" Style="{StaticResource th}"/>
+                                    </HorizontalStackLayout>
 
                                     <!-- Amount Paid Entry -->
-                                    <Entry Grid.Column="3" Text="{Binding AmountPaid}" 
-                           Keyboard="Numeric"
-                           IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                    <HorizontalStackLayout Grid.Column="3" VerticalOptions="Center" HorizontalOptions="Center">
+                                        <Label Text="₹" Style="{StaticResource th}"/>
+                                        <Entry Text="{Binding AmountPaid}" 
+                                           BackgroundColor="Wheat"
+                                           WidthRequest="150"
+                                           Keyboard="Numeric"
+                                           IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                    </HorizontalStackLayout>
 
                                     <!-- Payer Picker -->
                                     <Picker Grid.Column="4" ItemsSource="{Binding StaffMembers}" 
-                            ItemDisplayBinding="{Binding Name}" 
-                            SelectedItem="{Binding SelectedPayer}"
-                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                            BackgroundColor="Wheat"
+                                            WidthRequest="200"
+                                            ItemDisplayBinding="{Binding Name}" 
+                                            SelectedItem="{Binding SelectedPayer}"
+                                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
 
                                     <!-- Save Button -->
                                     <Button Grid.Column="5" Text="Save" 
-                            Command="{Binding SaveCommand}" 
-                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                            Command="{Binding SaveCommand}" 
+                                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+                                    <BoxView Grid.Row="1"
+                                             Grid.ColumnSpan="6"
+                                             HeightRequest="1"
+                                             Color="LightGray"/>
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </Grid>
-            </VerticalStackLayout>
-                
-            </ScrollView>
-        </VerticalStackLayout>
+
+            </Grid>
+        </Grid>
+
+
+        </Grid>
     
 </ContentPage>

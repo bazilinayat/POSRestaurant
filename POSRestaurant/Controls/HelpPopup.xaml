@@ -7,7 +7,7 @@
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
              x:Name="this">
 
-    <Border BackgroundColor="Wheat"
+    <Border BackgroundColor="{StaticResource AllBackground}"
             StrokeShape="RoundRectangle 10"
             Stroke="Red">
         <Border.Shadow>
@@ -19,7 +19,7 @@
                   Padding="15, 10">
                 <Label Grid.Column="0"
                        Text="Need Help?"
-                       TextColor="White"
+                       TextColor="{StaticResource AllBackground}"
                        FontSize="15"/>
                 <Label Grid.Column="1"
                        Text="X"
@@ -28,7 +28,7 @@
                        WidthRequest="25"
                        HorizontalTextAlignment="Center"
                        VerticalTextAlignment="Center"
-                       TextColor="White"
+                       TextColor="{StaticResource AllBackground}"
                        FontAttributes="Bold"
                        FontSize="15">
                     <Label.GestureRecognizers>
@@ -71,10 +71,10 @@
                   ColumnSpacing="5">
                 <Label Grid.Column="0"
                        Text="Designed &amp; Developed by:"
-                       TextColor="White"
+                       TextColor="{StaticResource AllBackground}"
                        FontSize="15"
                        VerticalOptions="Center"/>
-                <Label Grid.Column="1" Text="Aman &amp; Team" VerticalOptions="Center" TextDecorations="Underline" TextColor="White" />
+                <Label Grid.Column="1" Text="Aman &amp; Team" VerticalOptions="Center" TextDecorations="Underline" TextColor="{StaticResource AllBackground}" />
                 <Grid.GestureRecognizers>
                     <TapGestureRecognizer Tapped="Footer_Tapped" />
                 </Grid.GestureRecognizers>

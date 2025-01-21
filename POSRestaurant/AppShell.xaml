@@ -9,11 +9,11 @@
     xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
     Title="Restaurant POS"
     Shell.FlyoutBehavior="Disabled"
-    Shell.TabBarBackgroundColor="Wheat"
+    Shell.TabBarBackgroundColor="{StaticResource AllBackground}"
     x:DataType="vm:ShellViewModel">
 
     <Shell.TitleView>
-        <Grid HeightRequest="45" ColumnDefinitions="Auto,*,Auto" Padding="10" VerticalOptions="Center">
+        <Grid HeightRequest="45" BackgroundColor="{StaticResource AllBackground}" ColumnDefinitions="Auto,*,Auto" Padding="10" VerticalOptions="Center">
             <!-- Left: Application Logo -->
             <Image Source="logo.png" HeightRequest="40" WidthRequest="40" Grid.Column="0" />
 

@@ -17,15 +17,91 @@
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="Black" />
                 <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
             </Style>
             <Style TargetType="Label" x:Key="td">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <VerticalStackLayout Padding="20" Spacing="10">
+    <Grid Padding="10" Margin="10">
+        <Grid RowDefinitions="Auto, Auto, *" RowSpacing="15">
+            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Inventory Report"/>
+            <HorizontalStackLayout Grid.Row="1" Spacing="10">
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Select Date:" Style="{StaticResource th}" />
+                    <DatePicker Date="{Binding SelectedDate}" BackgroundColor="{StaticResource DropDownBackground}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Select Expense Type:" Style="{StaticResource th}" />
+                    <Picker WidthRequest="100" BackgroundColor="{StaticResource DropDownBackground}" ItemsSource="{Binding ItemTypes}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Select Payer:" Style="{StaticResource th}" />
+                    <Picker WidthRequest="200" BackgroundColor="{StaticResource DropDownBackground}" ItemsSource="{Binding Payers}" SelectedItem="{Binding SelectedPayer, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout>
+                    <Button Text="Search" Command="{Binding SearchCommand}" />
+                </HorizontalStackLayout>
+            </HorizontalStackLayout>
+
+            <Grid Grid.Row="2" Margin="5">
+                <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid BackgroundColor="Gray" ColumnDefinitions="*, *, *, *, *">
+                            <Label Grid.Column="0" Text="Expense Type" 
+                               Style="{StaticResource th}" />
+                            <Label Grid.Column="1" Text="Item Name"
+                               Style="{StaticResource th}" />
+                            <Label Grid.Column="2" Text="Weight/Quantity" 
+                               Style="{StaticResource th}" />
+                            <Label Grid.Column="3" Text="Amount" 
+                               Style="{StaticResource th}" />
+                            <Label Grid.Column="4" Text="Paid By" 
+                               Style="{StaticResource th}" />
+                        </Grid>
+                    </Border>
+                    <CollectionView ItemsSource="{Binding InventoryReportData}" Grid.Row="1">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:InventoryReportModel">
+                                <Grid ColumnDefinitions="*, *, *, *, *" RowDefinitions="*, Auto">
+                                        <Label Grid.Column="0"
+                             Text="{Binding ItemType}"
+                             Style="{StaticResource td}"/>
+                                        <Label Grid.Column="1"
+                             Text="{Binding ExpenseItemName}"
+                             Style="{StaticResource td}"/>
+                                        <Label Grid.Column="2"
+                             Text="{Binding QuantityOrWeight}"
+                             Style="{StaticResource td}"/>
+                                        <Label Grid.Column="3"
+                             Text="{Binding TotalPrice}"
+                             Style="{StaticResource td}"/>
+                                        <Label Grid.Column="4"
+                             Text="{Binding StaffName}"
+                             Style="{StaticResource td}"/>
+                                    <BoxView Grid.Row="1"
+         Grid.ColumnSpan="6"
+         HeightRequest="1"
+         Color="LightGray"/>
+                                    </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        
+
+    </Grid>
+    <!--<VerticalStackLayout Padding="20" Spacing="10">
         <HorizontalStackLayout Spacing="10">
             <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                 <Label Text="Select Date:" Style="{StaticResource th}" />
@@ -44,11 +120,11 @@
             </HorizontalStackLayout>
         </HorizontalStackLayout>
 
-        <!--<HorizontalStackLayout Spacing="20">
+        --><!--<HorizontalStackLayout Spacing="20">
             <Label Text="{Binding TotalItems, StringFormat='Total Items: {0}'}" Style="{StaticResource th}" />
             <Label Text="{Binding TotalQuantity, StringFormat='Total Quantity: {0}'}" Style="{StaticResource th}" />
             <Label Text="{Binding TotalAmount, StringFormat='Total Amount: {0}'}" Style="{StaticResource th}" />
-        </HorizontalStackLayout>-->
+        </HorizontalStackLayout>--><!--
 
         <ScrollView>
             <Grid RowDefinitions="30, *">
@@ -92,6 +168,6 @@
             </Grid>
         </ScrollView>
 
-    </VerticalStackLayout>
+    </VerticalStackLayout>-->
 
 </ContentPage>

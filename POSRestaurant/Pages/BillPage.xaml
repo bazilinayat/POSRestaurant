@@ -14,19 +14,24 @@
             <Style TargetType="Label" x:Key="th">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="FontAttributes" Value="Bold" />
-                <Setter Property="TextColor" Value="White" />
+                <Setter Property="TextColor" Value="Black" />
                 <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
             </Style>
             <Style TargetType="Label" x:Key="td">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="5"/>
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid ColumnDefinitions="0.60*, 0.40*">
-        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, Auto, *">
-            <HorizontalStackLayout Grid.Row="0" Spacing="100">
+    <Grid ColumnDefinitions="0.60*, 0.40*" Margin="10">
+        <Grid Grid.Column="0" RowDefinitions="Auto, Auto, Auto, Auto, *" RowSpacing="15">
+            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Bill"/>
+            <HorizontalStackLayout Grid.Row="1" Spacing="100">
                 <HorizontalStackLayout Spacing="5">
                     <Label Text="Order No.:" />
                     <Label Text="{Binding TableModel.RunningOrderId}" />
@@ -36,7 +41,7 @@
                     <Label Text="{Binding OrderModel.OrderDate}" />
                 </HorizontalStackLayout>
             </HorizontalStackLayout>
-            <HorizontalStackLayout Grid.Row="1" Spacing="100">
+            <HorizontalStackLayout Grid.Row="2" Spacing="100">
                 <HorizontalStackLayout Spacing="5">
                     <Label Text="Order Type:" />
                     <Label Text="{Binding OrderModel.OrderTypeString}" />
@@ -46,7 +51,7 @@
                     <Label Text="{Binding TableModel.TableNo}" />
                 </HorizontalStackLayout>
             </HorizontalStackLayout>
-            <HorizontalStackLayout Grid.Row="2" Spacing="100">
+            <HorizontalStackLayout Grid.Row="3" Spacing="100">
                 <HorizontalStackLayout Spacing="5">
                     <Label Text="Token No.:" />
                     <Label Text="{Binding OrderKOTIds}" />
@@ -56,26 +61,27 @@
                     <Label Text="{Binding TableModel.Waiter.Name}" />
                 </HorizontalStackLayout>
             </HorizontalStackLayout>
-            <Grid Grid.Row="3" Padding="10">
-                <Grid RowDefinitions="30, *">
-                    <Grid Grid.Row="0" ColumnDefinitions="*, *, *, *"
-                          Background="Red">
-                        <Label Grid.Column="0"
-                               Text="Item"
-                               Padding="5, 0, 0, 0"
-                               Style="{StaticResource th}" />
-                        <Label Grid.Column="1"
-                               Text="Qty."
-                               Style="{StaticResource th}" />
-                        <Label Grid.Column="2"
-                               Text="Price"
-                               Style="{StaticResource th}" />
-                        <Label Grid.Column="3"
-                               Text="Amount"
-                               Style="{StaticResource th}" />
-                    </Grid>
-                    <CollectionView Grid.Row="1"
-                                    ItemsSource="{Binding OrderKOTItems}">
+            <Grid Grid.Row="4" Margin="5">
+                <Grid RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid Grid.Row="0" ColumnDefinitions="*, *, *, *"
+                              Background="Gray">
+                            <Label Grid.Column="0"
+                                   Text="Item"
+                                   Padding="5, 0, 0, 0"
+                                   Style="{StaticResource th}" />
+                            <Label Grid.Column="1"
+                                   Text="Qty."
+                                   Style="{StaticResource th}" />
+                            <Label Grid.Column="2"
+                                   Text="Price"
+                                   Style="{StaticResource th}" />
+                            <Label Grid.Column="3"
+                                   Text="Amount"
+                                   Style="{StaticResource th}" />
+                        </Grid>
+                    </Border>
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding OrderKOTItems}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:KOTItemModel">
                                 <Grid ColumnDefinitions="*, *, *, *"
@@ -93,6 +99,10 @@
                                     <Label Grid.Column="3"
                                            Text="{Binding Amount}"
                                            Style="{StaticResource td}" />
+                                    <BoxView Grid.Row="1"
+                                             Grid.ColumnSpan="4"
+                                             HeightRequest="1"
+                                             Color="LightGray"/>
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
@@ -100,44 +110,42 @@
                 </Grid>
             </Grid>
         </Grid>
-        <VerticalStackLayout Grid.Column="1">
-            <Border Grid.Column="1" Stroke="Red">
-                <VerticalStackLayout Spacing="10">
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="Total Qty:" />
-                        <Label Text="{Binding TotalQuantity}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="SubTotal:" />
-                        <Label Text="{Binding SubTotal, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
-                        <Label Text="Discount:" />
-                        <Label Text="{Binding DiscountAmount, StringFormat='- {0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
-                        <Label Text="SubTotal After Discount:" />
-                        <Label Text="{Binding SubTotalAfterDiscount, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="{Binding CGST, StringFormat='CGST@{0}%'}" />
-                        <Label Text="{Binding CGSTAmount, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="{Binding SGST, StringFormat='SGST@{0}%'}" />
-                        <Label Text="{Binding SGSTAmount, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="Round Off:" />
-                        <Label Text="{Binding RoundOff, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="100">
-                        <Label Text="Grand Total:" />
-                        <Label Text="{Binding GrandTotal, StringFormat='{0:C}'}" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Border>
-            <Button Text="Pring" Command="{Binding PrintReceiptCommand}" />
+        <VerticalStackLayout Grid.Column="1" Margin="10" Spacing="10">
+            <VerticalStackLayout Spacing="10">
+                <HorizontalStackLayout Spacing="100">
+                    <Label Text="Total Qty:" />
+                    <Label Text="{Binding TotalQuantity}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="100">
+                    <Label Text="SubTotal:" />
+                    <Label Text="{Binding SubTotal, StringFormat='{0:C}'}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
+                    <Label Text="Discount:" />
+                    <Label Text="{Binding DiscountAmount, StringFormat='- {0:C}'}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="100" IsVisible="{Binding ShowDiscountVariables}">
+                    <Label Text="SubTotal After Discount:" />
+                    <Label Text="{Binding SubTotalAfterDiscount, StringFormat='{0:C}'}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="100">
+                    <Label Text="{Binding CGST, StringFormat='CGST@{0}%'}" />
+                    <Label Text="{Binding CGSTAmount, StringFormat='{0:C}'}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="100">
+                    <Label Text="{Binding SGST, StringFormat='SGST@{0}%'}" />
+                    <Label Text="{Binding SGSTAmount, StringFormat='{0:C}'}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="100">
+                    <Label Text="Round Off:" />
+                    <Label Text="{Binding RoundOff, StringFormat='{0:C}'}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="100">
+                    <Label Text="Grand Total:" />
+                    <Label Text="{Binding GrandTotal, StringFormat='{0:C}'}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+            <Button Text="Print Bill" Command="{Binding PrintReceiptCommand}" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

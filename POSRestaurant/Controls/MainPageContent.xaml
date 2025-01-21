@@ -8,7 +8,7 @@
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
              x:DataType="vm:HomeViewModel">
 
-    <VerticalStackLayout BackgroundColor="White"
+    <VerticalStackLayout BackgroundColor="{StaticResource AllBackground}"
                          Padding="10"
                          WidthRequest="1200"
                          HeightRequest="1200">
@@ -72,7 +72,7 @@
                 </VerticalStackLayout>
                 <Grid Grid.Row="1"
                       Padding="10"
-                      BackgroundColor="Wheat">
+                      BackgroundColor="{StaticResource AllBackground}">
                     <CollectionView ItemsSource="{Binding CartItems}">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Vertical"
@@ -150,7 +150,7 @@
                 </Grid>
                 <VerticalStackLayout Grid.Row="2"
                          Padding="15, 10, 15, 0">
-                    <Border BackgroundColor="white"
+                    <Border BackgroundColor="{StaticResource AllBackground}"
                             Padding="10"
                             StrokeShape="RoundRectangle 10"
                             StrokeThickness="0">
@@ -168,24 +168,6 @@
                                    Grid.Column="1"
                                    HorizontalOptions="Center"
                                    Text="{Binding SubTotal, StringFormat='{0:C}'}" />
-                            <HorizontalStackLayout Grid.Row="1"
-                                       Grid.Column="0"
-                                       Spacing="5">
-                                <Label Text="Tax"
-                                        VerticalOptions="Center"/>
-                                <Label Text="{Binding TaxPercentage, StringFormat='{0}%'}"
-                                       Padding="5, 0"
-                                       BackgroundColor="{StaticResource LightWheat}"
-                                       VerticalOptions="Center">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding TaxPercentageClickCommand}"/>
-                                    </Label.GestureRecognizers>
-                                </Label>
-                            </HorizontalStackLayout>
-                            <Label Grid.Row="1"
-                                   Grid.Column="1"
-                                   HorizontalOptions="Center"
-                                   Text="{Binding TaxAmount, StringFormat='{0:C}'}" />
                             <Border Grid.Row="2"
                                     Grid.ColumnSpan="2"
                                     Stroke="White"

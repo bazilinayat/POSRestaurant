@@ -16,8 +16,7 @@
         </CollectionView.ItemsLayout>
         <CollectionView.ItemTemplate>
             <DataTemplate x:DataType="models:MenuCategoryModel">
-                <Border Padding="20" 
-                    BackgroundColor="{StaticResource LightWheat}" 
+                <Border Padding="20"
                     StrokeThickness="0">
                     <HorizontalStackLayout>
                         <Image Source="{Binding Icon}" 

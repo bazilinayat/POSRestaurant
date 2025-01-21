@@ -30,9 +30,9 @@
                                TextColor="LightGreen"/>
                             <ImageButton Source="{Binding Source={x:Reference this}, Path=ActionIcon}"
                                      BackgroundColor="{StaticResource LightWheat}"
-                                     CornerRadius="8"
-                                     HeightRequest="25"
-                                     WidthRequest="25"
+                                     CornerRadius="50"
+                                     HeightRequest="30"
+                                     WidthRequest="30"
                                      Command="{Binding Source={x:RelativeSource AncestorType={x:Type controls:MenuItemsListControl}}, Path=SelectMenuItemCommand}"
                                      CommandParameter="{Binding .}"/>
                         </FlexLayout>

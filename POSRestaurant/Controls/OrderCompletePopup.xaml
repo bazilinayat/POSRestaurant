@@ -30,7 +30,7 @@
             WidthRequest="400">
         <VerticalStackLayout>
             <Grid ColumnDefinitions="*, *, Auto"
-                  BackgroundColor="Wheat"
+                  BackgroundColor="{StaticResource AllBackground}"
                   Padding="15, 10">
                 <HorizontalStackLayout Grid.Column="0">
                     <Label
@@ -81,7 +81,7 @@
                         <Entry Text="{Binding PaidByCustomer}"
                                TextChanged="Entry_TextChanged"
                                Style="{StaticResource txt}"
-                               BackgroundColor="Wheat"
+                               BackgroundColor="{StaticResource AllBackground}"
                                VerticalOptions="Center"
                                WidthRequest="100"/>
                     </HorizontalStackLayout>
@@ -126,7 +126,7 @@
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="50">
                         <Label Text="Tip:" FontSize="16" VerticalOptions="Center"/>
-                        <Entry Text="{Binding Tip}" Style="{StaticResource txt}" VerticalOptions="Center" WidthRequest="100" BackgroundColor="Wheat"/>
+                        <Entry Text="{Binding Tip}" Style="{StaticResource txt}" VerticalOptions="Center" WidthRequest="100" BackgroundColor="{StaticResource AllBackground}"/>
                     </HorizontalStackLayout>
                     <Grid ColumnDefinitions="*, *, *">
                         <Button Grid.Column="0"
