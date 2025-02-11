@@ -1,6 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Printing;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
@@ -8,6 +12,8 @@ using POSRestaurant.Models;
 using POSRestaurant.Service;
 using SettingLibrary;
 using System.Collections.ObjectModel;
+using Windows.Graphics.Printing;
+using Windows.UI.WebUI;
 
 namespace POSRestaurant.ViewModels
 {
@@ -36,7 +42,12 @@ namespace POSRestaurant.ViewModels
         /// DIed SettingService
         /// </summary>
         private readonly SettingService _settingService;
-        
+
+        /// <summary>
+        /// DIed ReceiptService
+        /// </summary>
+        private readonly ReceiptService _receiptService;
+
         /// <summary>
         /// DIed SettingService
         /// </summary>
@@ -147,11 +158,14 @@ namespace POSRestaurant.ViewModels
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public BillViewModel(DatabaseService databaseService, OrdersViewModel ordersViewModel, SettingService settingService, TaxService taxService)
+        public BillViewModel(DatabaseService databaseService, OrdersViewModel ordersViewModel, 
+            SettingService settingService, TaxService taxService,
+            ReceiptService receiptService)
         {
             _databaseService = databaseService;
             _settingService = settingService;
             _taxService = taxService;
+            _receiptService = receiptService;
         }
 
         /*
@@ -261,7 +275,7 @@ namespace POSRestaurant.ViewModels
             // Calculate totals
             TotalQuantity = OrderKOTItems.Sum(o => o.Quantity);
             SubTotal = OrderKOTItems.Sum(o => o.Amount);
-
+            SubTotalAfterDiscount = SubTotal;
             // Get discount details
             Discount = await _databaseService.DiscountOperations.GetDiscountDetailsForOrderAsync(OrderModel.Id);
 
@@ -282,10 +296,10 @@ namespace POSRestaurant.ViewModels
             CGST = _taxService.IndianTaxService.CGST;
             SGST = _taxService.IndianTaxService.SGST;
 
-            CGSTAmount = _taxService.IndianTaxService.CalculateCGST(SubTotal);
-            SGSTAmount = _taxService.IndianTaxService.CalculateSGST(SubTotal);
+            CGSTAmount = _taxService.IndianTaxService.CalculateCGST(SubTotalAfterDiscount);
+            SGSTAmount = _taxService.IndianTaxService.CalculateSGST(SubTotalAfterDiscount);
 
-            var total = SubTotal + CGSTAmount + SGSTAmount;
+            var total = SubTotalAfterDiscount + CGSTAmount + SGSTAmount;
             GrandTotal = Math.Floor(total);
 
             RoundOff = GrandTotal - total;
@@ -301,6 +315,42 @@ namespace POSRestaurant.ViewModels
             // TODO: Printing
 
             await Shell.Current.DisplayAlert("Printing", "Printing Taking Place", "OK");
+
+            var billModel = new BillModel
+            {
+                RestrauntName = "Gokul Pav Bhaji",
+                Address = "Restaurant Address",
+                GSTIn = "GST IN",
+                CustomerName = "Customer Name",
+
+                OrderType = OrderModel.OrderType,
+
+                TimeStamp = OrderModel.OrderDate,
+                TableNo = TableModel.TableNo,
+                Cashier = "Cashier Name",
+                BillNo = OrderModel.Id.ToString(),
+                TokenNos = OrderKOTIds,
+                WaiterAssigned = TableModel.Waiter.Name,
+
+                Items = OrderKOTItems.ToList(),
+
+                TotalQty = TotalQuantity,
+                SubTotal = SubTotal,
+                Discount = Discount,
+                SubTotalAfterDiscount = SubTotalAfterDiscount,
+                CGST = CGST,
+                SGST = SGST,
+                CGSTAmount = CGSTAmount,
+                SGSTAmount = SGSTAmount,
+                RoundOff = RoundOff,
+                GrandTotal = GrandTotal,
+
+                FassaiNo = "Food License",
+                QRCode = "Data"
+            };
+
+            var pdfData = await _receiptService.GenerateReceipt(billModel);
+            await _receiptService.PrintReceipt(pdfData);
 
             TableModel.Status = Data.TableOrderStatus.Printed;
             TableModel.OrderTotal = GrandTotal;

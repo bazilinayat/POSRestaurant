@@ -28,6 +28,8 @@ public partial class BillPage : ContentPage
         BindingContext = _billViewModel;
 
         Initialize();
+
+        //_billViewModel.RegisterForPrinting();
     }
 
     /// <summary>
@@ -37,4 +39,11 @@ public partial class BillPage : ContentPage
     {
         await _billViewModel.InitializeAsync();
     }
+
+    protected virtual void OnNavigatedFrom(Microsoft.Maui.Controls.NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+        //_billViewModel.UnregisterForPrinting();
+    }
+
 }

@@ -46,6 +46,7 @@ namespace POSRestaurant
                 .AddSingleton<TaxService>()
                 .AddSingleton<MenuService>()
                 .AddSingleton<PaytmService>()
+                .AddSingleton<ReceiptService>()
 
                 .AddSingleton<MainPage>()
                 .AddSingleton<OrdersPage>()
@@ -58,6 +59,7 @@ namespace POSRestaurant
                 .AddSingleton<ItemReportPage>()
                 .AddSingleton<ExpenseItemManagementPage>()
                 .AddSingleton<InventoryReport>()
+                .AddSingleton<SettingsPage>()
                 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<HomeViewModel>()
@@ -71,7 +73,8 @@ namespace POSRestaurant
                 .AddSingleton<InventoryViewModel>()
                 .AddSingleton<ItemReportViewModel>()
                 .AddSingleton<ExpenseItemViewModel>()
-                .AddSingleton<InventoryReportViewModel>();
+                .AddSingleton<InventoryReportViewModel>()
+                .AddSingleton<SettingsViewModel>();
 
             return builder.Build();
         }

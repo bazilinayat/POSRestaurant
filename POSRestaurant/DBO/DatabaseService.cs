@@ -54,6 +54,12 @@ namespace POSRestaurant.DBO
         /// To handle calls to discount related operations in the db
         /// </summary>
         public DiscountOperations DiscountOperations;
+        
+        /// <summary>
+        /// To handle calls to settings related operations in the db
+        /// </summary>
+        public SettingsOperation SettingsOperation;
+
 
         /// <summary>
         /// Class constructor, to generate database and connection
@@ -73,6 +79,7 @@ namespace POSRestaurant.DBO
             TableOperations = new TableOperations(_connection);
             InventoryOperations = new InventoryOperations(_connection);
             DiscountOperations = new DiscountOperations(_connection);
+            SettingsOperation = new SettingsOperation(_connection);
         }
 
         /// <summary>
@@ -96,6 +103,7 @@ namespace POSRestaurant.DBO
             await _connection.CreateTableAsync<Inventory>();
 
             await _connection.CreateTableAsync<OrderPayment>();
+            await _connection.CreateTableAsync<RestaurantInfo>();
 
             await SeedDataAsync();
         }

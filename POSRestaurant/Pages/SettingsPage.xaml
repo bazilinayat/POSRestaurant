@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="POSRestaurant.Pages.SettingsPage"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             Title="SettingsPage"
+             x:DataType="vm:SettingsViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Entry" x:Key="txt">
+                <Setter Property="BackgroundColor" Value="Wheat" />
+                <Setter Property="PlaceholderColor" Value="Black" />
+            </Style>
+            <Style TargetType="Label" x:Key="lbl">
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid Margin="5">
+        <VerticalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="Restaurant Name:" Style="{StaticResource lbl}"/>
+                <Entry Text="{Binding Name}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="Restaurant Address:" Style="{StaticResource lbl}"/>
+                <Entry Text="{Binding Address}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="Restaurant Contact:" Style="{StaticResource lbl}"/>
+                <Entry Text="{Binding Phone}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="Restaurant GST Number:" Style="{StaticResource lbl}"/>
+                <Entry Text="{Binding GstIn}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="Restaurant FASSAI:" Style="{StaticResource lbl}"/>
+                <Entry Text="{Binding Fassai}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+            </HorizontalStackLayout>
+
+            <Button Text="Save" Command="{Binding SaveRestaurantInfoCommand}"></Button>
+        </VerticalStackLayout>
+    </Grid>
+
+
+</ContentPage>

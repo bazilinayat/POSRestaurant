@@ -43,8 +43,8 @@ namespace POSRestaurant.ViewModels
         private async Task NavigateToSettings()
         {
             // Navigate to SettingsPage
-            var manageVM = _serviceProvider.GetRequiredService<ManageMenuItemViewModel>();
-            await Application.Current.MainPage.Navigation.PushAsync(new ManageMenuItemPage(manageVM));
+            var settingVM = _serviceProvider.GetRequiredService<SettingsViewModel>();
+            await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage(settingVM));
         }
 
         /// <summary>
