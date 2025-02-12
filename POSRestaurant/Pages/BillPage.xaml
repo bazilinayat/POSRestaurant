@@ -111,6 +111,14 @@
             </Grid>
         </Grid>
         <VerticalStackLayout Grid.Column="1" Margin="10" Spacing="10">
+            <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center">
+                <Label Text="Cashier" FontSize="16" VerticalOptions="Center"/>
+                <Picker ItemsSource="{Binding Cashiers}"
+            SelectedItem="{Binding SelectedCashier, Mode=TwoWay}"
+            ItemDisplayBinding="{Binding Name}"
+            BackgroundColor="LightYellow">
+                </Picker>
+            </HorizontalStackLayout>
             <VerticalStackLayout Spacing="10">
                 <HorizontalStackLayout Spacing="100">
                     <Label Text="Total Qty:" />

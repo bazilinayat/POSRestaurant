@@ -40,6 +40,7 @@ namespace POSRestaurant.DBO
             int count = await _connection.Table<RestaurantInfo>().CountAsync();
             if (count > 0)
             {
+                info.Id = 1;
                 if (await _connection.UpdateAsync(info) > 0)
                     return null;
 

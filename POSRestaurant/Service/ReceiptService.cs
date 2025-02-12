@@ -1,4 +1,5 @@
 ﻿using iText.Barcodes;
+using iText.IO.Image;
 using iText.Kernel.Colors;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
@@ -13,6 +14,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using Cell = iText.Layout.Element.Cell;
+using Image = iText.Layout.Element.Image;
 
 namespace POSRestaurant.Service
 {
@@ -45,7 +47,7 @@ namespace POSRestaurant.Service
         /// <summary>
         /// The paper height in mm
         /// </summary>
-        private const int PAPER_HEIGHT_MM = 210;
+        private const int PAPER_HEIGHT_MM = 297;
 
         /// <summary>
         /// The scale at which we will print, so the text does not blur out
@@ -117,7 +119,7 @@ namespace POSRestaurant.Service
         private float CalculateEstimatedHeight(BillModel data)
         {
             // Basic height calculation (adjust based on your needs)
-            float height = 40; // Header space
+            float height = 150; // Header space
             height += data.Items.Count * 10; // Items space
             height += 50; // Totals space
             height += 60; // Footer space
@@ -135,6 +137,19 @@ namespace POSRestaurant.Service
                 .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
                 .SetFontSize(12);
             document.Add(header);
+
+            ImageData imageData = ImageDataFactory.Create("gokul.scale-100.jpg");
+            Image image = new Image(imageData);
+
+            // Set size if needed
+            image.SetWidth(100);  // Width in points
+            image.SetHeight(100); // Height in points
+
+            image.SetAutoScale(true);
+
+            // Add to document
+            document.Add(image)
+                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
 
             document.Add(new Paragraph(data.Address)
                 .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)

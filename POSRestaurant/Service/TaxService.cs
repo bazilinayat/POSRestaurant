@@ -1,13 +1,4 @@
-﻿using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-
-namespace POSRestaurant.Service
+﻿namespace POSRestaurant.Service
 {
     /// <summary>
     /// To calculate teh tax of any order given the sub total

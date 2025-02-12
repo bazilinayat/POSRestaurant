@@ -131,7 +131,7 @@ namespace POSRestaurant.ViewModels
             
             IsLoading = true;
 
-            var errorMessage = _databaseService.SettingsOperation.SaveRestaurantInfo(info);
+            var errorMessage = await _databaseService.SettingsOperation.SaveRestaurantInfo(info);
 
             if (errorMessage != null)
             {

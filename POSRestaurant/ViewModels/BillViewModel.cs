@@ -14,6 +14,7 @@ using SettingLibrary;
 using System.Collections.ObjectModel;
 using Windows.Graphics.Printing;
 using Windows.UI.WebUI;
+using static CommunityToolkit.Mvvm.ComponentModel.__Internals.__TaskExtensions.TaskAwaitableWithoutEndValidation;
 
 namespace POSRestaurant.ViewModels
 {
@@ -153,6 +154,18 @@ namespace POSRestaurant.ViewModels
         private bool _showDiscountVariables;
 
         /// <summary>
+        /// List of waiters to be assigned to the order
+        /// </summary>
+        [ObservableProperty]
+        public StaffModel[] _cashiers;
+
+        /// <summary>
+        /// To manage the selected waiter for the order
+        /// </summary>
+        [ObservableProperty]
+        private StaffModel _selectedCashier;
+
+        /// <summary>
         /// Constructor for the HomeViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
@@ -211,7 +224,20 @@ namespace POSRestaurant.ViewModels
 
             await GetOrderDetailsAsync();
 
+            await LoadCashiers();
+
             IsLoading = false;
+        }
+
+        /// <summary>
+        /// To call the database and load the list of waiters
+        /// </summary>
+        /// <returns>Returns a task object</returns>
+        private async Task LoadCashiers()
+        {
+            Cashiers = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Cashier))
+                            .Select(StaffModel.FromEntity)
+                            .ToArray();
         }
 
         /// <summary>
@@ -314,20 +340,28 @@ namespace POSRestaurant.ViewModels
         {
             // TODO: Printing
 
+            if (SelectedCashier == null)
+            {
+                await Shell.Current.DisplayAlert("Printing Error", "Assign a cashier to the order.", "Ok");
+                return;
+            }
+
             await Shell.Current.DisplayAlert("Printing", "Printing Taking Place", "OK");
+
+            var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
 
             var billModel = new BillModel
             {
-                RestrauntName = "Gokul Pav Bhaji",
-                Address = "Restaurant Address",
-                GSTIn = "GST IN",
+                RestrauntName = restaurantInfo.Name,
+                Address = restaurantInfo.Address,
+                GSTIn = restaurantInfo.GSTIN,
                 CustomerName = "Customer Name",
 
                 OrderType = OrderModel.OrderType,
 
                 TimeStamp = OrderModel.OrderDate,
                 TableNo = TableModel.TableNo,
-                Cashier = "Cashier Name",
+                Cashier = SelectedCashier.Name,
                 BillNo = OrderModel.Id.ToString(),
                 TokenNos = OrderKOTIds,
                 WaiterAssigned = TableModel.Waiter.Name,
@@ -345,7 +379,7 @@ namespace POSRestaurant.ViewModels
                 RoundOff = RoundOff,
                 GrandTotal = GrandTotal,
 
-                FassaiNo = "Food License",
+                FassaiNo = restaurantInfo.FSSAI,
                 QRCode = "Data"
             };
 

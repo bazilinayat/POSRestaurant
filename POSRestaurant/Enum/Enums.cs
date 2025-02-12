@@ -195,6 +195,10 @@ namespace POSRestaurant.Data
         /// <summary>
         /// Cook working in org
         /// </summary>
-        Cook = 6
+        Cook = 6,
+        /// <summary>
+        /// Cook working in org
+        /// </summary>
+        Cashier = 7
     }
 }
