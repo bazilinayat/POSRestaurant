@@ -251,17 +251,17 @@ namespace POSRestaurant.Service
                 .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
                 .SetFontSize(8));
 
-            if (data.Discount != null)
+            if (data.IsDiscountGiven)
             {
-                if (data.Discount.IsFixedBased)
+                if (data.IsFixedBased)
                 {
-                    document.Add(new Paragraph($"Fixed Discount: {data.Discount.DiscountFixed}")
+                    document.Add(new Paragraph($"Fixed Discount: {data.DiscountFixed}")
                     .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
                     .SetFontSize(8));
                 }
-                else if (data.Discount.IsPercentageBased)
+                else if (data.IsPercentageBased)
                 {
-                    document.Add(new Paragraph($"Discount@{data.Discount.DiscountPercentage}: {(data.SubTotal * data.Discount.DiscountPercentage / 100):F2}")
+                    document.Add(new Paragraph($"Discount@{data.DiscountPercentage}: {(data.SubTotal * data.DiscountPercentage / 100):F2}")
                     .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
                     .SetFontSize(8));
                 }
@@ -270,13 +270,16 @@ namespace POSRestaurant.Service
                     .SetFontSize(8));
             }
 
-            document.Add(new Paragraph($"CGST@{data.CGST}: {data.CGSTAmount:F2}")
+            if (data.UsginGST)
+            {
+                document.Add(new Paragraph($"CGST@{data.CGST}: {data.CGSTAmount:F2}")
                 .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
                 .SetFontSize(8));
 
-            document.Add(new Paragraph($"SGST@{data.SGST}: {data.SGSTAmount:F2}")
-                .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                .SetFontSize(8));
+                document.Add(new Paragraph($"SGST@{data.SGST}: {data.SGSTAmount:F2}")
+                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
+                    .SetFontSize(8));
+            }
 
             document.Add(new Paragraph($"RoundOff: {data.RoundOff:F2}")
                 .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)

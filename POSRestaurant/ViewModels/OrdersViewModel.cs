@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
@@ -11,7 +13,7 @@ namespace POSRestaurant.ViewModels
     /// <summary>
     /// ViewModel for Order operations
     /// </summary>
-    public partial class OrdersViewModel : ObservableObject
+    public partial class OrdersViewModel : ObservableObject, IRecipient<OrderChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -246,14 +248,28 @@ namespace POSRestaurant.ViewModels
         private decimal _paidByCustomerInOnline;
 
         /// <summary>
+        /// To kno if the order used gst or not
+        /// </summary>
+        [ObservableProperty]
+        private bool _usingGST;
+
+        /// <summary>
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="taxService">DI for TaxService</param>
-        public OrdersViewModel(DatabaseService databaseService, TaxService taxService)
+        public OrdersViewModel(DatabaseService databaseService)
         {
             _databaseService = databaseService;
-            _taxService = taxService;
+        }
+
+        /// <summary>
+        /// To know that there are some changes in order details
+        /// </summary>
+        /// <param name="orderChangedMessage">Order Details are changed</param>
+        public void Receive(OrderChangedMessage orderChangedMessage)
+        {
+            GetOrdersAsync();
         }
 
         /// <summary>
@@ -308,13 +324,29 @@ namespace POSRestaurant.ViewModels
                     TableId = o.TableId,
                     OrderDate = o.OrderDate,
                     TotalItemCount = o.TotalItemCount,
-                    TotalPrice = o.TotalPrice,
+                    TotalAmount = o.TotalAmount,
                     PaymentMode = o.PaymentMode,
                     OrderStatus = o.OrderStatus,
                     OrderType = o.OrderType,
                     NumberOfPeople = o.NumberOfPeople,
                     OrderNumber = o.OrderNumber,
                     WaiterId = o.WaiterId,
+
+                    IsDiscountGiven = o.IsDiscountGiven,
+                    IsFixedBased = o.IsFixedBased,
+                    IsPercentageBased = o.IsPercentageBased,
+                    DiscountFixed = o.DiscountFixed,
+                    DiscountPercentage = o.DiscountPercentage,
+                    TotalAmountAfterDiscount = o.TotalAmountAfterDiscount,
+
+                    UsingGST = o.UsingGST,
+                    CGST = o.CGST,
+                    SGST = o.SGST,
+                    CGSTAmount = o.CGSTAmount,
+                    SGSTAmount = o.SGSTAmount,
+
+                    RoundOff = o.RoundOff,
+                    GrandTotal = o.GrandTotal,
                 });
             }
 
@@ -434,36 +466,33 @@ namespace POSRestaurant.ViewModels
             }
 
             // Calculate totals
-            TotalQuantity = OrderKOTItems.Sum(o => o.Quantity);
-            SubTotal = OrderKOTItems.Sum(o => o.Amount);
+            TotalQuantity = orderModel.TotalItemCount;
+            SubTotal = orderModel.TotalAmount;
+            SubTotalAfterDiscount = SubTotal;
 
-            // Get discount details
-            Discount = await _databaseService.DiscountOperations.GetDiscountDetailsForOrderAsync(orderModel.Id);
-
-            if (Discount != null)
+            if (orderModel.IsDiscountGiven)
             {
                 ShowDiscountVariables = true;
-                if (Discount.IsFixedBased)
+                if (orderModel.IsFixedBased)
                 {
-                    DiscountAmount = Discount.DiscountFixed;
+                    DiscountAmount = orderModel.DiscountFixed;
                 }
-                else if (Discount.IsPercentageBased)
+                else if (orderModel.IsPercentageBased)
                 {
-                    DiscountAmount = SubTotal * Discount.DiscountPercentage / 100;
+                    DiscountAmount = SubTotal * orderModel.DiscountPercentage / 100;
                 }
                 SubTotalAfterDiscount = SubTotal - DiscountAmount;
             }
 
-            CGST = _taxService.IndianTaxService.CGST;
-            SGST = _taxService.IndianTaxService.SGST;
+            UsingGST = orderModel.UsingGST;
+            CGST = orderModel.CGST;
+            SGST = orderModel.SGST;
 
-            CGSTAmount = _taxService.IndianTaxService.CalculateCGST(SubTotal);
-            SGSTAmount = _taxService.IndianTaxService.CalculateSGST(SubTotal);
-
-            var total = SubTotal + CGSTAmount + SGSTAmount;
-            GrandTotal = Math.Floor(total);
-
-            RoundOff = GrandTotal - total;
+            CGSTAmount = orderModel.CGSTAmount;
+            SGSTAmount = orderModel.SGSTAmount;   
+            
+            GrandTotal = orderModel.GrandTotal;
+            RoundOff = orderModel.RoundOff;
 
             WaiterName = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.WaiterId);
             TableNo = await _databaseService.TableOperations.GetTableNoAsync(orderModel.TableId);
@@ -572,7 +601,7 @@ namespace POSRestaurant.ViewModels
                     TableId = tableModel.Id,
                     OrderDate = DateTime.Now,
                     TotalItemCount = kots.Sum(x => x.TotalItemCount),
-                    TotalPrice = kots.Sum(x => x.TotalPrice),
+                    TotalAmount = kots.Sum(x => x.TotalPrice),
                     KOTs = kots.ToArray(),
                     OrderStatus = TableOrderStatus.Running,
                     OrderNumber = lastOrderNumber + 1,
@@ -588,8 +617,6 @@ namespace POSRestaurant.ViewModels
                     await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
                     return false;
                 }
-
-                Orders.Add(orderModel);
 
                 tableModel.RunningOrderId = orderModel.Id;
                 tableModel.Status = TableOrderStatus.Running;

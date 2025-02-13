@@ -30,6 +30,11 @@ namespace POSRestaurant.ViewModels
         private readonly MenuService _menuService;
 
         /// <summary>
+        /// DIed variable for TaxService
+        /// </summary>
+        private readonly TaxService _taxService;
+
+        /// <summary>
         /// To check if ViewModel is already initialized
         /// </summary>
         private bool _isInitialized;
@@ -223,12 +228,15 @@ namespace POSRestaurant.ViewModels
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public ViewOrderViewModel(DatabaseService databaseService, MenuService menuService, OrdersViewModel ordersViewModel, SettingService settingService)
+        public ViewOrderViewModel(DatabaseService databaseService, MenuService menuService, 
+            OrdersViewModel ordersViewModel, SettingService settingService,
+            TaxService taxService)
         {
             _databaseService = databaseService;
             _ordersViewModel = ordersViewModel;
             _settingService = settingService;
             _menuService = menuService;
+            _taxService = taxService;
             OrderItems.CollectionChanged += CartItems_CollectionChanged;
 
             Name = _settingService.Settings.CustomerName;
@@ -272,7 +280,7 @@ namespace POSRestaurant.ViewModels
                 TableId = order.TableId,
                 OrderDate = order.OrderDate,
                 TotalItemCount = order.TotalItemCount,
-                TotalPrice = order.TotalPrice,
+                TotalAmount = order.TotalAmount,
                 PaymentMode = order.PaymentMode,
                 OrderStatus = order.OrderStatus,
             };
@@ -570,11 +578,68 @@ namespace POSRestaurant.ViewModels
                 await _databaseService.DiscountOperations.SaveDiscountAsync(discount);
             }
 
+            if (await UpdateOrder() <= 0)
+            {
+                await Shell.Current.DisplayAlert("Saving Error", "Couldn't Update Order", "OK");
+                return;
+            }
+
             TableModel.Status = TableOrderStatus.Confirmed;
             // Push for change in table info
             WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
 
             await Application.Current.MainPage.Navigation.PopAsync();
+        }
+
+        /// <summary>
+        /// To update the order in db and add all the necessary information there
+        /// </summary>
+        /// <returns>Return the number of rows affected by the operation</returns>
+        private async Task<int> UpdateOrder()
+        {
+            var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
+
+            order.IsDiscountGiven = IsDiscountGiven;
+            order.IsFixedBased = EnableFixedDiscount;
+            order.IsPercentageBased = EnablePercentageDiscount;
+            order.DiscountFixed = DiscountFixed;
+            order.DiscountPercentage = DiscountPercentage;
+            if (IsDiscountGiven)
+            {
+                if (EnableFixedDiscount)
+                {
+                    order.TotalAmountAfterDiscount = order.TotalAmount - DiscountFixed;
+                }
+                else if (EnablePercentageDiscount)
+                {
+                    order.TotalAmountAfterDiscount = order.TotalAmount * DiscountPercentage / 100;
+                }
+            }
+            else
+            {
+                order.TotalAmountAfterDiscount = order.TotalAmount;
+            }
+
+
+            order.UsingGST = _taxService.IndianTaxService.UsingGST;
+            order.CGST = _taxService.IndianTaxService.CGST;
+            order.SGST = _taxService.IndianTaxService.SGST;
+            order.CGSTAmount = _taxService.IndianTaxService.CalculateCGST(order.TotalAmount);
+            order.SGSTAmount = _taxService.IndianTaxService.CalculateSGST(order.TotalAmount);
+
+            if (order.UsingGST)
+            {
+                var total = order.TotalAmountAfterDiscount + order.CGSTAmount + order.SGSTAmount;
+                order.GrandTotal = Math.Floor(total);
+                order.RoundOff = order.GrandTotal - total;
+            }
+            else
+            {
+                order.GrandTotal = Math.Floor(order.TotalAmountAfterDiscount);
+                order.RoundOff = order.GrandTotal - order.TotalAmountAfterDiscount;
+            }
+
+            return await _databaseService.UpdateOrder(order);
         }
 
         /// <summary>

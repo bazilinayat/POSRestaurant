@@ -37,7 +37,7 @@ namespace POSRestaurant.Models
         /// <summary>
         /// Total amount of the order
         /// </summary>
-        public decimal TotalPrice { get; set; }
+        public decimal TotalAmount { get; set; }
         /// <summary>
         /// PaymentMode, which was used to pay
         /// </summary>
@@ -87,5 +87,58 @@ namespace POSRestaurant.Models
         /// </summary>
         [ObservableProperty]
         private bool _isSelected;
+
+        /// <summary>
+        /// To know if there was any discount given at the time of this order placement
+        /// </summary>
+        public bool IsDiscountGiven { get; set; }
+        /// <summary>
+        /// To know if fixed discount was given on the order
+        /// </summary>
+        public bool IsFixedBased { get; set; }
+        /// <summary>
+        /// To know if percentage discount was given on the order
+        /// </summary>
+        public bool IsPercentageBased { get; set; }
+        /// <summary>
+        /// To know how much fixed discount was given on the order
+        /// </summary>
+        public decimal DiscountFixed { get; set; }
+        /// <summary>
+        /// To know how much percentage discount as given on the order
+        /// </summary>
+        public decimal DiscountPercentage { get; set; }
+        /// <summary>
+        /// To know how much customer has to pay after discount
+        /// </summary>
+        public decimal TotalAmountAfterDiscount { get; set; }
+        /// <summary>
+        /// To know if the restaurant was using gst at the time of this order placement
+        /// </summary>
+        public bool UsingGST { get; set; }
+        /// <summary>
+        /// CGST percent for order
+        /// </summary>
+        public decimal CGST { get; set; }
+        /// <summary>
+        /// SGST percent for order
+        /// </summary>
+        public decimal SGST { get; set; }
+        /// <summary>
+        /// CGST amount for order
+        /// </summary>
+        public decimal CGSTAmount { get; set; }
+        /// <summary>
+        /// SGST amount for order
+        /// </summary>
+        public decimal SGSTAmount { get; set; }
+        /// <summary>
+        /// To know how much round off was done to get the grandtotal
+        /// </summary>
+        public decimal RoundOff { get; set; }
+        /// <summary>
+        /// Grand total of the order
+        /// </summary>
+        public decimal GrandTotal { get; set; }
     }
 }

@@ -203,14 +203,16 @@
                             <Label Text="SubTotal After Discount:" />
                             <Label Text="{Binding SubTotalAfterDiscount, StringFormat='{0:C}'}" />
                         </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="100">
-                            <Label Text="{Binding CGST, StringFormat='CGST@{0}%'}" />
-                            <Label Text="{Binding CGSTAmount, StringFormat='{0:C}'}" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="100">
-                            <Label Text="{Binding SGST, StringFormat='SGST@{0}%'}" />
-                            <Label Text="{Binding SGSTAmount, StringFormat='{0:C}'}" />
-                        </HorizontalStackLayout>
+                        <VerticalStackLayout Spacing="10" IsVisible="{Binding UsingGST}">
+                            <HorizontalStackLayout Spacing="100">
+                                <Label Text="{Binding CGST, StringFormat='CGST@{0}%'}" />
+                                <Label Text="{Binding CGSTAmount, StringFormat='{0:C}'}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="100">
+                                <Label Text="{Binding SGST, StringFormat='SGST@{0}%'}" />
+                                <Label Text="{Binding SGSTAmount, StringFormat='{0:C}'}" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
                         <HorizontalStackLayout Spacing="100">
                             <Label Text="Round Off:" />
                             <Label Text="{Binding RoundOff, StringFormat='{0:C}'}" />

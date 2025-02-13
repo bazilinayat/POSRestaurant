@@ -82,70 +82,10 @@ namespace POSRestaurant.ViewModels
         public ObservableCollection<KOTItemBillModel> OrderKOTItems { get; set; } = new();
 
         /// <summary>
-        /// Total quantity of items ordered
-        /// </summary>
-        [ObservableProperty]
-        private int _totalQuantity;
-
-        /// <summary>
-        /// Total price of all the items
-        /// </summary>
-        [ObservableProperty]
-        private decimal _subTotal;
-
-        /// <summary>
-        /// Round off of the order to get grand total
-        /// </summary>
-        [ObservableProperty]
-        private decimal _roundOff;
-
-        /// <summary>
-        /// Grand total of the order, to be paid by the customer
-        /// </summary>
-        [ObservableProperty]
-        private decimal _grandTotal;
-
-        /// <summary>
-        /// CGST Amount of the order
-        /// </summary>
-        [ObservableProperty]
-        private decimal _cGST;
-
-        /// <summary>
-        /// SGST Amount of the order
-        /// </summary>
-        [ObservableProperty]
-        private decimal _sGST;
-
-        /// <summary>
-        /// CGST Amount of the order
-        /// </summary>
-        [ObservableProperty]
-        private decimal _cGSTAmount;
-
-        /// <summary>
-        /// SGST Amount of the order
-        /// </summary>
-        [ObservableProperty]
-        private decimal _sGSTAmount;
-
-        /// <summary>
-        /// To get the discount details of the order, if any
-        /// </summary>
-        [ObservableProperty]
-        private Discount _discount;
-
-        /// <summary>
         /// To display the discount amount on UI
         /// </summary>
         [ObservableProperty]
         private decimal _discountAmount;
-
-        /// <summary>
-        /// To display the subtotal after discount on UI
-        /// </summary>
-        [ObservableProperty]
-        private decimal _subTotalAfterDiscount;
 
         /// <summary>
         /// To decide to show or not the discount variables
@@ -172,12 +112,10 @@ namespace POSRestaurant.ViewModels
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
         public BillViewModel(DatabaseService databaseService, OrdersViewModel ordersViewModel, 
-            SettingService settingService, TaxService taxService,
-            ReceiptService receiptService)
+            SettingService settingService, ReceiptService receiptService)
         {
             _databaseService = databaseService;
             _settingService = settingService;
-            _taxService = taxService;
             _receiptService = receiptService;
         }
 
@@ -256,9 +194,25 @@ namespace POSRestaurant.ViewModels
                 OrderDate = order.OrderDate,
                 OrderType = order.OrderType,
                 TotalItemCount = order.TotalItemCount,
-                TotalPrice = order.TotalPrice,
+                TotalAmount = order.TotalAmount,
                 PaymentMode = order.PaymentMode,
                 OrderStatus = order.OrderStatus,
+
+                IsDiscountGiven = order.IsDiscountGiven,
+                IsFixedBased = order.IsFixedBased,
+                IsPercentageBased = order.IsPercentageBased,
+                DiscountFixed = order.DiscountFixed,
+                DiscountPercentage = order.DiscountPercentage,
+                TotalAmountAfterDiscount = order.TotalAmountAfterDiscount,
+
+                UsingGST = order.UsingGST,
+                CGST = order.CGST,
+                SGST = order.SGST,
+                CGSTAmount = order.CGSTAmount,
+                SGSTAmount = order.SGSTAmount,
+
+                RoundOff = order.RoundOff,
+                GrandTotal = order.GrandTotal,
             };
 
             // Get Order KOTs for More Details
@@ -299,36 +253,19 @@ namespace POSRestaurant.ViewModels
             }
 
             // Calculate totals
-            TotalQuantity = OrderKOTItems.Sum(o => o.Quantity);
-            SubTotal = OrderKOTItems.Sum(o => o.Amount);
-            SubTotalAfterDiscount = SubTotal;
-            // Get discount details
-            Discount = await _databaseService.DiscountOperations.GetDiscountDetailsForOrderAsync(OrderModel.Id);
 
-            if (Discount != null)
+            if (OrderModel.IsDiscountGiven)
             {
                 ShowDiscountVariables = true;
-                if (Discount.IsFixedBased)
+                if (OrderModel.IsFixedBased)
                 {
-                    DiscountAmount = Discount.DiscountFixed;
+                    DiscountAmount = OrderModel.DiscountFixed;
                 }
-                else if (Discount.IsPercentageBased)
+                else if (OrderModel.IsPercentageBased)
                 {
-                    DiscountAmount = SubTotal * Discount.DiscountPercentage / 100;
+                    DiscountAmount = OrderModel.TotalAmount * OrderModel.DiscountPercentage / 100;
                 }
-                SubTotalAfterDiscount = SubTotal - DiscountAmount;
             }
-
-            CGST = _taxService.IndianTaxService.CGST;
-            SGST = _taxService.IndianTaxService.SGST;
-
-            CGSTAmount = _taxService.IndianTaxService.CalculateCGST(SubTotalAfterDiscount);
-            SGSTAmount = _taxService.IndianTaxService.CalculateSGST(SubTotalAfterDiscount);
-
-            var total = SubTotalAfterDiscount + CGSTAmount + SGSTAmount;
-            GrandTotal = Math.Floor(total);
-
-            RoundOff = GrandTotal - total;
         }
 
         /// <summary>
@@ -368,16 +305,23 @@ namespace POSRestaurant.ViewModels
 
                 Items = OrderKOTItems.ToList(),
 
-                TotalQty = TotalQuantity,
-                SubTotal = SubTotal,
-                Discount = Discount,
-                SubTotalAfterDiscount = SubTotalAfterDiscount,
-                CGST = CGST,
-                SGST = SGST,
-                CGSTAmount = CGSTAmount,
-                SGSTAmount = SGSTAmount,
-                RoundOff = RoundOff,
-                GrandTotal = GrandTotal,
+                TotalQty = OrderModel.TotalItemCount,
+                SubTotal = OrderModel.TotalAmount,
+
+                IsDiscountGiven = OrderModel.IsDiscountGiven,
+                IsFixedBased = OrderModel.IsFixedBased,
+                IsPercentageBased = OrderModel.IsPercentageBased,
+                DiscountFixed = OrderModel.DiscountFixed,
+                DiscountPercentage = OrderModel.DiscountPercentage,
+                SubTotalAfterDiscount = OrderModel.TotalAmountAfterDiscount,
+
+                UsginGST = OrderModel.UsingGST,
+                CGST = OrderModel.CGST,
+                SGST = OrderModel.SGST,
+                CGSTAmount = OrderModel.CGSTAmount,
+                SGSTAmount = OrderModel.SGSTAmount,
+                RoundOff = OrderModel.RoundOff,
+                GrandTotal = OrderModel.GrandTotal,
 
                 FassaiNo = restaurantInfo.FSSAI,
                 QRCode = "Data"
@@ -387,7 +331,7 @@ namespace POSRestaurant.ViewModels
             await _receiptService.PrintReceipt(pdfData);
 
             TableModel.Status = Data.TableOrderStatus.Printed;
-            TableModel.OrderTotal = GrandTotal;
+            TableModel.OrderTotal = OrderModel.GrandTotal;
 
             WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
         }

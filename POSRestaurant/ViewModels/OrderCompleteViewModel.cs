@@ -243,6 +243,7 @@ namespace POSRestaurant.ViewModels
             TableModel.NumberOfPeople = 0;
 
             WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
+            WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(true));
         }
     }
 }

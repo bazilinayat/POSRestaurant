@@ -23,8 +23,34 @@ namespace POSRestaurant.Models
         public List<KOTItemBillModel> Items { get; set; }
         public int TotalQty { get; set; }
         public decimal SubTotal { get; set; }
-        public Discount Discount { get; set; }
+
+        /// <summary>
+        /// To know if there was any discount given at the time of this order placement
+        /// </summary>
+        public bool IsDiscountGiven { get; set; }
+        /// <summary>
+        /// To know if fixed discount was given on the order
+        /// </summary>
+        public bool IsFixedBased { get; set; }
+        /// <summary>
+        /// To know if percentage discount was given on the order
+        /// </summary>
+        public bool IsPercentageBased { get; set; }
+        /// <summary>
+        /// To know how much fixed discount was given on the order
+        /// </summary>
+        public decimal DiscountFixed { get; set; }
+        /// <summary>
+        /// To know how much percentage discount as given on the order
+        /// </summary>
+        public decimal DiscountPercentage { get; set; }
+        /// <summary>
+        /// To know how much customer has to pay after discount
+        /// </summary>
+        public decimal TotalAmountAfterDiscount { get; set; }
+
         public decimal SubTotalAfterDiscount { get; set; }
+        public bool UsginGST { get; set; }
         public decimal CGST { get; set; }
         public decimal SGST { get; set; }
         public decimal CGSTAmount { get; set; }

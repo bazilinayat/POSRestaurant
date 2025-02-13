@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Maui.Controls;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
@@ -24,21 +26,28 @@ namespace POSRestaurant.ViewModels
         private bool _isLoading;
 
         /// <summary>
-        /// To show the list of settings the user can change
-        /// </summary>
-        public List<TextSelectModel> SettingsToSet;
-
-        /// <summary>
-        /// Property to observe the selected setting on UI
+        /// To know if restaurant is using Gst on the application
         /// </summary>
         [ObservableProperty]
-        private TextSelectModel _selectedSetting;
+        private bool _usingGST;
 
         /// <summary>
         /// To update gst number on the application
         /// </summary>
         [ObservableProperty]
         private string _gstIn;
+
+        /// <summary>
+        /// To update cgst number on the application
+        /// </summary>
+        [ObservableProperty]
+        private decimal _cgst;
+
+        /// <summary>
+        /// To update sgst number on the application
+        /// </summary>
+        [ObservableProperty]
+        private decimal _sgst;
 
         /// <summary>
         /// To update fassai number on the application
@@ -71,25 +80,6 @@ namespace POSRestaurant.ViewModels
         public SettingsViewModel(DatabaseService databaseService)
         {
             _databaseService = databaseService;
-
-            SettingsToSet = new List<TextSelectModel>
-            {
-                new TextSelectModel
-                {
-                    Text = "Restaurant Info",
-                    IsSelected = false,
-                },
-                new TextSelectModel
-                {
-                    Text = "GST",
-                    IsSelected = false,
-                },
-                new TextSelectModel
-                {
-                    Text = "Fassai",
-                    IsSelected = false,
-                }
-            };
         }
 
         /// <summary>
@@ -102,15 +92,21 @@ namespace POSRestaurant.ViewModels
 
             if (restaurantInfo == null)
             {
+                UsingGST = false;
                 GstIn = Fassai = Address = Phone = "";
+                Cgst = Sgst = 0;
             }
             else
             {
-                GstIn = restaurantInfo.GSTIN;
                 Fassai = restaurantInfo.FSSAI;
                 Name = restaurantInfo.Name;
                 Address = restaurantInfo.Address;
                 Phone = restaurantInfo.PhoneNumber;
+
+                UsingGST = restaurantInfo.UsingGST;
+                GstIn = restaurantInfo.GSTIN;
+                Cgst = restaurantInfo.CGST;
+                Sgst = restaurantInfo.SGST;
             }
         }
 
@@ -122,11 +118,15 @@ namespace POSRestaurant.ViewModels
         {
             var info = new RestaurantInfo
             {
-                GSTIN = GstIn,
                 FSSAI = Fassai,
                 Name = Name,
                 Address = Address,
                 PhoneNumber = Phone,
+
+                UsingGST = UsingGST,
+                GSTIN = GstIn,
+                CGST = Cgst,
+                SGST = Sgst
             };
             
             IsLoading = true;
@@ -140,6 +140,8 @@ namespace POSRestaurant.ViewModels
             }
 
             await Shell.Current.DisplayAlert("Successful", "Restaurant Info Save Successfully", "Ok");
+
+            WeakReferenceMessenger.Default.Send(TaxChangedMessage.From(true));
 
             IsLoading = false;
         }

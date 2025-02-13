@@ -141,7 +141,7 @@ namespace POSRestaurant.DBO
                 OrderDate = orderModel.OrderDate,
                 PaymentMode = orderModel.PaymentMode,
                 TotalItemCount = orderModel.TotalItemCount,
-                TotalPrice = orderModel.TotalPrice,
+                TotalAmount = orderModel.TotalAmount,
                 OrderStatus = orderModel.OrderStatus,
                 OrderNumber = orderModel.OrderNumber,
                 OrderType = orderModel.OrderType,
@@ -221,7 +221,7 @@ namespace POSRestaurant.DBO
                     }
 
                     // Update the order details, for each kot
-                    orderModel.TotalPrice += kotItem.TotalPrice;
+                    orderModel.TotalAmount += kotItem.TotalPrice;
                     orderModel.TotalItemCount += kotItem.TotalItemCount;
                     orderModel.OrderDate = DateTime.Now;
                 }
@@ -453,7 +453,7 @@ namespace POSRestaurant.DBO
                         }
 
                         var orderModel = await GetOrderById(runningOrderId);
-                        orderModel.TotalPrice = 0;
+                        orderModel.TotalAmount = 0;
                         orderModel.TotalItemCount = 0;
                         orderModel.OrderDate = DateTime.Now;
 
@@ -461,7 +461,7 @@ namespace POSRestaurant.DBO
 
                         for (int i = 0; i < kots.Length; i++)
                         {
-                            orderModel.TotalPrice += kots[i].TotalPrice;
+                            orderModel.TotalAmount += kots[i].TotalPrice;
                             orderModel.TotalItemCount += kots[i].TotalItemCount;
                         }
 
@@ -517,7 +517,7 @@ namespace POSRestaurant.DBO
                         }
 
                         var orderModel = await GetOrderById(runningOrderId);
-                        orderModel.TotalPrice = 0;
+                        orderModel.TotalAmount = 0;
                         orderModel.TotalItemCount = 0;
                         orderModel.OrderDate = DateTime.Now;
 
@@ -525,7 +525,7 @@ namespace POSRestaurant.DBO
 
                         for (int i = 0; i < kots.Length; i++)
                         {
-                            orderModel.TotalPrice += kots[i].TotalPrice;
+                            orderModel.TotalAmount += kots[i].TotalPrice;
                             orderModel.TotalItemCount += kots[i].TotalItemCount;
                         }
 

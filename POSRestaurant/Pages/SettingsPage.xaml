@@ -13,9 +13,11 @@
             <Style TargetType="Entry" x:Key="txt">
                 <Setter Property="BackgroundColor" Value="Wheat" />
                 <Setter Property="PlaceholderColor" Value="Black" />
+                <Setter Property="WidthRequest" Value="200" />
             </Style>
             <Style TargetType="Label" x:Key="lbl">
                 <Setter Property="FontSize" Value="16" />
+                <Setter Property="WidthRequest" Value="200" />
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
@@ -24,29 +26,50 @@
         <VerticalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
             <HorizontalStackLayout Spacing="10">
                 <Label Text="Restaurant Name:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding Name}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+                <Entry Text="{Binding Name}" Placeholder="Enter Name" Style="{StaticResource txt}"/>
             </HorizontalStackLayout>
 
             <HorizontalStackLayout Spacing="10">
                 <Label Text="Restaurant Address:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding Address}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+                <Entry Text="{Binding Address}" Placeholder="Enter Address" Style="{StaticResource txt}"/>
             </HorizontalStackLayout>
 
             <HorizontalStackLayout Spacing="10">
                 <Label Text="Restaurant Contact:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding Phone}" Placeholder="Enter name" Style="{StaticResource txt}"/>
-            </HorizontalStackLayout>
-
-            <HorizontalStackLayout Spacing="10">
-                <Label Text="Restaurant GST Number:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding GstIn}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+                <Entry Text="{Binding Phone}" Placeholder="Enter Contact" Style="{StaticResource txt}"/>
             </HorizontalStackLayout>
 
             <HorizontalStackLayout Spacing="10">
                 <Label Text="Restaurant FASSAI:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding Fassai}" Placeholder="Enter name" Style="{StaticResource txt}"/>
+                <Entry Text="{Binding Fassai}" Placeholder="Enter FASSAI" Style="{StaticResource txt}"/>
             </HorizontalStackLayout>
 
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="Restaurant Using GST?:" Style="{StaticResource lbl}"/>
+                <CheckBox IsChecked="{Binding UsingGST}"/>
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout IsVisible="{Binding UsingGST}" Spacing="10">
+
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Restaurant GST Number:" Style="{StaticResource lbl}"/>
+                    <Entry Text="{Binding GstIn}" Placeholder="Enter GST Number" Style="{StaticResource txt}"/>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="CGST (In %):" Style="{StaticResource lbl}"
+                           ToolTipProperties.Text="This value will be applied as SGST to the bills."/>
+                    <Entry Text="{Binding Cgst}" Placeholder="Enter CGST" Style="{StaticResource txt}"/>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="SGST (In %):" Style="{StaticResource lbl}"
+                           ToolTipProperties.Text="This value will be applied as SGST to the bills."/>
+                    <Entry Text="{Binding Sgst}" Placeholder="Enter SGST" Style="{StaticResource txt}"/>
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+            
             <Button Text="Save" Command="{Binding SaveRestaurantInfoCommand}"></Button>
         </VerticalStackLayout>
     </Grid>
