@@ -94,6 +94,15 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
+
+            var info = await _databaseService.SettingsOperation.GetRestaurantInfo();
+            if (info == null)
+            {
+                var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
+                var setInfo = new InitialPopup(settingsViewModel);
+                await Shell.Current.ShowPopupAsync(setInfo);
+            }
+
             if (_isInitialized)
                 return;
 

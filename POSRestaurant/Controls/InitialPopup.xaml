@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="POSRestaurant.Controls.InitialPopup"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             CanBeDismissedByTappingOutsideOfPopup="False"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
+             x:DataType="vm:SettingsViewModel">
+
+    <toolkit:Popup.Resources>
+        <ResourceDictionary>
+            <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+            <Style TargetType="Entry" x:Key="txt">
+                <Setter Property="BackgroundColor" Value="Wheat" />
+                <Setter Property="PlaceholderColor" Value="Black" />
+            </Style>
+            <Style TargetType="Label" x:Key="lbl">
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+        </ResourceDictionary>
+    </toolkit:Popup.Resources>
+
+    <Border BackgroundColor="{StaticResource LightWheat}"
+            Stroke="Gray"
+            HeightRequest="500"
+            WidthRequest="400">
+        <Grid Margin="5">
+            <VerticalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Restaurant Name:" Style="{StaticResource lbl}"/>
+                    <Entry Text="{Binding Name}" Placeholder="Enter Name" Style="{StaticResource txt}"/>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Restaurant Address:" Style="{StaticResource lbl}"/>
+                    <Entry Text="{Binding Address}" Placeholder="Enter Address" Style="{StaticResource txt}"/>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Restaurant Contact:" Style="{StaticResource lbl}"/>
+                    <Entry Text="{Binding Phone}" Placeholder="Enter Contact" Style="{StaticResource txt}"/>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Restaurant FASSAI:" Style="{StaticResource lbl}"/>
+                    <Entry Text="{Binding Fassai}" Placeholder="Enter FASSAI" Style="{StaticResource txt}"/>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Restaurant Using GST?:" Style="{StaticResource lbl}"/>
+                    <CheckBox IsChecked="{Binding UsingGST}"/>
+                </HorizontalStackLayout>
+
+                <VerticalStackLayout IsVisible="{Binding UsingGST}" Spacing="10">
+
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Restaurant GST Number:" Style="{StaticResource lbl}"/>
+                        <Entry Text="{Binding GstIn}" Placeholder="Enter GST Number" Style="{StaticResource txt}"/>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="CGST (In %):" Style="{StaticResource lbl}"
+                       ToolTipProperties.Text="This value will be applied as SGST to the bills."/>
+                        <Entry Text="{Binding Cgst}" Placeholder="Enter CGST" Style="{StaticResource txt}"/>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="SGST (In %):" Style="{StaticResource lbl}"
+                       ToolTipProperties.Text="This value will be applied as SGST to the bills."/>
+                        <Entry Text="{Binding Sgst}" Placeholder="Enter SGST" Style="{StaticResource txt}"/>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+
+                <Button Text="Save" Clicked="Button_Clicked_2"></Button>
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+    
+</toolkit:Popup>

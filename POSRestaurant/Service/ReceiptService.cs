@@ -133,23 +133,26 @@ namespace POSRestaurant.Service
         /// <param name="data">Bill model to add data</param>
         private void AddHeader(Document document, BillModel data)
         {
-            Paragraph header = new Paragraph(data.RestrauntName)
-                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                .SetFontSize(12);
-            document.Add(header);
+            //Paragraph header = new Paragraph(data.RestrauntName)
+            //    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+            //    .SetFontSize(12);
+            //document.Add(header);
 
-            ImageData imageData = ImageDataFactory.Create("gokul.scale-100.jpg");
+            ImageData imageData = ImageDataFactory.Create("gokul.scale-100.png");
             Image image = new Image(imageData);
 
             // Set size if needed
-            image.SetWidth(100);  // Width in points
-            image.SetHeight(100); // Height in points
+            image.SetWidth(150);  // Width in points
+            //image.SetHeight(100); // Height in points
 
-            image.SetAutoScale(true);
+            //image.SetAutoScale(true);
+
+            image.SetHorizontalAlignment(iText.Layout.Properties.HorizontalAlignment.CENTER);  // This centers the image
+            image.SetMarginTop(20);    // Remove top margin
+            image.SetMarginBottom(20); // Remove bottom margin
 
             // Add to document
-            document.Add(image)
-                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+            document.Add(image);
 
             document.Add(new Paragraph(data.Address)
                 .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)

@@ -74,6 +74,11 @@ namespace POSRestaurant.ViewModels
         private string _phone;
 
         /// <summary>
+        /// To know if the restaurant info is initialized
+        /// </summary>
+        public bool InfoInitialized = false;
+
+        /// <summary>
         /// Constructor for the view model
         /// </summary>
         /// <param name="databaseService">DIed Database Service</param>
@@ -116,6 +121,30 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SaveRestaurantInfoAsync()
         {
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant name", "Ok");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Address))
+            {
+                await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant address", "Ok");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Phone))
+            {
+                await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant contact number", "Ok");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Fassai))
+            {
+                await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant FASSAI number", "Ok");
+                return;
+            }
+
             var info = new RestaurantInfo
             {
                 FSSAI = Fassai,
@@ -140,8 +169,9 @@ namespace POSRestaurant.ViewModels
             }
 
             await Shell.Current.DisplayAlert("Successful", "Restaurant Info Save Successfully", "Ok");
-
             WeakReferenceMessenger.Default.Send(TaxChangedMessage.From(true));
+
+            InfoInitialized = true;
 
             IsLoading = false;
         }

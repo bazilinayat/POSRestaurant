@@ -1,42 +1,67 @@
 [
   {
     "Id": 1,
-    "Name": "Starters",
+    "Name": "BREAKFAST",
     "Icon": "starters.png"
   },
   {
     "Id": 2,
-    "Name": "Snacks",
+    "Name": "SANDWICHES",
     "Icon": "nachos.png"
   },
   {
     "Id": 3,
-    "Name": "Main Course",
+    "Name": "PAV BHAJI",
     "Icon": "thali.png"
   },
   {
     "Id": 4,
-    "Name": "Rice",
+    "Name": "TAWA PULAV",
     "Icon": "rice.png"
   },
   {
     "Id": 5,
-    "Name": "Roti",
+    "Name": "DESI PIZZA",
     "Icon": "roti.png"
   },
   {
     "Id": 6,
-    "Name": "Sweets",
+    "Name": "REFRESHERS",
     "Icon": "cupcake.png"
   },
   {
     "Id": 7,
-    "Name": "Drinks",
+    "Name": "NATURAL JUICES",
     "Icon": "drink.png"
   },
   {
     "Id": 8,
-    "Name": "Extras",
+    "Name": "MASTANI",
+    "Icon": "extra.png"
+  },
+  {
+    "Id": 9,
+    "Name": "MILKSHAKES",
+    "Icon": "extra.png"
+  },
+  {
+    "Id": 10,
+    "Name": "PREMIUM MILKSHAKES",
+    "Icon": "extra.png"
+  },
+  {
+    "Id": 11,
+    "Name": "ICE-CREAM",
+    "Icon": "extra.png"
+  },
+  {
+    "Id": 12,
+    "Name": "ADD ONS",
+    "Icon": "extra.png"
+  },
+  {
+    "Id": 13,
+    "Name": "COMBOS",
     "Icon": "extra.png"
   }
 ]

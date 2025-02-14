@@ -91,6 +91,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Update="Controls\InitialPopup.xaml.cs">
+	    <DependentUpon>InitialPopup.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Pages\ItemReportPage.xaml.cs">
 	    <DependentUpon>ItemReportPage.xaml</DependentUpon>
 	  </Compile>
@@ -116,6 +119,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\MenuItemsListControl.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Controls\InitialPopup.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Controls\OrderCompletePopup.xaml">
