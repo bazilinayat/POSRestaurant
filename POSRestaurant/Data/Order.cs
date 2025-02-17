@@ -105,5 +105,21 @@ namespace POSRestaurant.Data
         /// Grand total of the order
         /// </summary>
         public decimal GrandTotal { get; set; }
+
+        // For pickup orders only
+
+        /// <summary>
+        /// Source of the pickup order, taken from enum
+        /// </summary>
+        public int Source { get; set; }
+        /// <summary>
+        /// The reference number for online orders
+        /// </summary>
+        public string ReferenceNo { get; set; }
+        /// <summary>
+        /// The id for delivery staff who has delivered the order
+        /// </summary>
+        public int DeliveryPerson { get; set; }
+
     }
 }

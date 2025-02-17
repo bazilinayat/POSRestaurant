@@ -59,5 +59,9 @@ namespace POSRestaurant.Models
         public decimal GrandTotal { get; set; }
         public string FassaiNo { get; set; }
         public string QRCode { get; set; }
+
+        public string Source { get; set; }
+        public string ReferenceNo { get; set; }
+        public string DeliveryPersonName { get; set; }
     }
 }

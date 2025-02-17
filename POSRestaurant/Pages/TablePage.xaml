@@ -10,9 +10,34 @@
              Title="Table View"
              x:DataType="vm:TableViewModel">
 
-    <Grid RowDefinitions="Auto, *">
+    <Grid RowDefinitions="Auto, Auto, *">
         <Label Grid.Row="0" Text="Welcome my friend, Welcome!!" />
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Tables}">
+        <Border Grid.Row="1" HorizontalOptions="Start" WidthRequest="100" Stroke="Orange" StrokeShape="RoundRectangle 10" Margin="5">
+            <Label Text="Pickup" TextColor="Orange" HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=MakePickupOrderCommand}"
+                  CommandParameter="{Binding .}" />
+            </Border.GestureRecognizers>
+        </Border>
+        <HorizontalStackLayout Grid.Row="1" Spacing="20" HorizontalOptions="End" Margin="20">
+            <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Free Table to Put Order">
+                <Rectangle Fill="Maroon" HeightRequest="20" WidthRequest="20" />
+                <Label Text="Free" FontSize="12" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Can Add New Items">
+                <Rectangle Fill="Yellow" HeightRequest="20" WidthRequest="20" />
+                <Label Text="Running" FontSize="12" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Order Confirmed, Ready for Printing">
+                <Rectangle Fill="Orange" HeightRequest="20" WidthRequest="20" />
+                <Label Text="Confirmed" FontSize="12" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Printed, Ready for Saving">
+                <Rectangle Fill="Green" HeightRequest="20" WidthRequest="20" />
+                <Label Text="Printed" FontSize="12" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </HorizontalStackLayout>
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Tables}">
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="5"
                      HorizontalItemSpacing="10"
@@ -45,7 +70,8 @@
                             </Border.GestureRecognizers>
                         </Border>
                         <ImageButton Source="{Binding ActionButtonImageIcon}" 
-                                     IsEnabled="{Binding ActionButtonEnabled}" 
+                                     IsEnabled="{Binding ActionButtonEnabled}"
+                                     ToolTipProperties.Text="{Binding ActionButtonToolTipText}"
                                      HeightRequest="25" 
                                      WidthRequest="25"
                                      Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableActionButtonCommand}"

@@ -170,7 +170,7 @@ namespace POSRestaurant.Service
             Table table = new Table(new float[] { 1, 1 })
                         .UseAllAvailableWidth();
 
-            table.AddCell(new Cell(1, 1).Add(new Paragraph($"Date #: {data.TimeStamp}").SetFontSize(8))
+            table.AddCell(new Cell(1, 1).Add(new Paragraph($"Date: {data.TimeStamp}").SetFontSize(8))
                 .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
 
             if (data.OrderType == Data.OrderTypes.DineIn)
@@ -182,13 +182,26 @@ namespace POSRestaurant.Service
 
             table.AddCell(new Cell(1, 1).Add(new Paragraph($"Order #: {data.BillNo}").SetFontSize(8))
                 .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-            table.AddCell(new Cell(1, 1).Add(new Paragraph($"Token #: {data.TokenNos}").SetFontSize(8))
+            table.AddCell(new Cell(1, 1).Add(new Paragraph($"Token: {data.TokenNos}").SetFontSize(8))
                 .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
 
-            table.AddCell(new Cell(1, 1).Add(new Paragraph($"Cashier #: {data.Cashier}").SetFontSize(8))
+            if (data.OrderType == Data.OrderTypes.DineIn)
+            {
+                table.AddCell(new Cell(1, 1).Add(new Paragraph($"Cashier: {data.Cashier}").SetFontSize(8))
                 .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-            table.AddCell(new Cell(1, 1).Add(new Paragraph($"Waiter #: {data.WaiterAssigned}").SetFontSize(8))
+                table.AddCell(new Cell(1, 1).Add(new Paragraph($"Waiter: {data.WaiterAssigned}").SetFontSize(8))
+                    .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
+            }
+            else if (data.OrderType == Data.OrderTypes.Pickup)
+            {
+                table.AddCell(new Cell(1, 1).Add(new Paragraph($"Source: {data.Source}").SetFontSize(8))
                 .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
+                table.AddCell(new Cell(1, 1).Add(new Paragraph($"Reference No.: {data.ReferenceNo}").SetFontSize(8))
+                    .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
+
+                table.AddCell(new Cell(1, 1).Add(new Paragraph($"Delivery: {data.DeliveryPersonName}").SetFontSize(8))
+                .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
+            }
 
             document.Add(table);
         }

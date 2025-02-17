@@ -60,9 +60,16 @@ namespace POSRestaurant.ViewModels
         {
             _databaseService = databaseService;
 
-            ExpenseTypes = Enum.GetValues(typeof(ExpenseItemTypes))
+            var expenseTypes = Enum.GetValues(typeof(ExpenseItemTypes))
                .Cast<ExpenseItemTypes>()
                .Select(t => new ExpenseTypeModel { Id = (int)t, ExpenseTypeName = t.ToString(), IsSelected = false }).ToList();
+
+            ExpenseTypes = new List<ExpenseTypeModel>();
+            foreach(var expenseType in expenseTypes)
+            {
+                if (expenseType.Id == 0) continue;
+                ExpenseTypes.Add(expenseType);
+            }
         }
 
         /// <summary>

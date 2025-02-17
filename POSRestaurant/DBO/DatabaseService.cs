@@ -69,6 +69,12 @@ namespace POSRestaurant.DBO
         {
             _settingService = settingService;
             _seedData = new SeedData(_settingService);
+
+            if (!Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data"))) 
+            {
+                Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data"));
+            }
+
             var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data",  "RestPOS.db3");
             _connection = new SQLiteAsyncConnection(dbPath, 
                 SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.SharedCache);
@@ -126,6 +132,10 @@ namespace POSRestaurant.DBO
             await _connection.InsertAllAsync(categories);
             await _connection.InsertAllAsync(menuItems);
             await _connection.InsertAllAsync(tables);
+
+            await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Swiggy", PhoneNumber = "NA", Role = StaffRole.Delivery });
+            await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Zomato", PhoneNumber = "NA", Role = StaffRole.Delivery });
+            await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Self", PhoneNumber = "NA", Role = StaffRole.Delivery });
         }
 
         /// <summary>
@@ -231,6 +241,86 @@ namespace POSRestaurant.DBO
             await _connection.UpdateAsync(orderModel);
 
             return null;
+        }
+
+        /// <summary>
+        /// Method to place pickup orders
+        /// </summary>
+        /// <param name="orderModel">Order to be placed, with items</param>
+        /// <returns>Returns Error Message or null (in case of success)</returns>
+        public async Task<string?> PlacePickupOrderAsync(OrderModel orderModel)
+        {
+            var order = new Order()
+            {
+                OrderNumber = orderModel.OrderNumber,
+                TableId = orderModel.TableId,
+                OrderDate = orderModel.OrderDate,
+                TotalItemCount = orderModel.TotalItemCount,
+                TotalAmount = orderModel.TotalAmount,
+                PaymentMode = orderModel.PaymentMode,
+                OrderStatus = orderModel.OrderStatus,
+                OrderType = orderModel.OrderType,
+                
+                NumberOfPeople = orderModel.NumberOfPeople,
+                WaiterId = orderModel.WaiterId,
+                
+                IsDiscountGiven = orderModel.IsDiscountGiven,
+                IsFixedBased = orderModel.IsFixedBased,
+                IsPercentageBased = orderModel.IsPercentageBased,
+                DiscountFixed = orderModel.DiscountFixed,
+                DiscountPercentage = orderModel.DiscountPercentage,
+                TotalAmountAfterDiscount = orderModel.TotalAmountAfterDiscount,
+                
+                UsingGST = orderModel.UsingGST,
+                CGST = orderModel.CGST,
+                SGST = orderModel.SGST,
+                CGSTAmount = orderModel.CGSTAmount,
+                SGSTAmount = orderModel.SGSTAmount,
+
+                RoundOff = orderModel.RoundOff,
+                GrandTotal = orderModel.GrandTotal,
+
+                Source = orderModel.Source,
+                ReferenceNo = orderModel.ReferenceNo,
+                DeliveryPerson = orderModel.DeliveryPersion,
+            };
+
+            if (await _connection.InsertAsync(order) > 0)
+            {
+                // Order inserted successfully, add kots
+                foreach (var kotItem in orderModel.KOTs)
+                {
+                    var kot = new KOT()
+                    {
+                        OrderId = order.Id,
+                        KOTNumber = 1,
+                        KOTDateTime = kotItem.KOTDateTime,
+                        TotalItemCount = kotItem.TotalItemCount,
+                        TotalPrice = kotItem.TotalPrice
+                    };
+
+                    if (await _connection.InsertAsync(kot) > 0)
+                    {
+                        foreach (var item in kotItem.Items)
+                        {
+                            item.KOTId = kot.Id;
+                        }
+                        if (await _connection.InsertAllAsync(kotItem.Items) == 0)
+                        {
+                            // Order items ooperation failed
+                            // Remove the associated order
+                            await DeleteOrderAsync(order);
+                            return "Error in inserting order items";
+                        }
+                    }
+                }
+                orderModel.Id = order.Id;
+                return null;
+            }
+            else
+            {
+                return "Error in inserting the order";
+            }
         }
 
         /// <summary>

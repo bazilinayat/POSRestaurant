@@ -1,4 +1,5 @@
-﻿using POSRestaurant.Models;
+﻿using Ghostscript.NET;
+using POSRestaurant.Models;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -199,6 +200,29 @@ namespace POSRestaurant.Data
         /// <summary>
         /// Cook working in org
         /// </summary>
-        Cashier = 7
+        Cashier = 7,
+        /// <summary>
+        /// Guys who make the delivery
+        /// </summary>
+        Delivery = 8
+    }
+
+    /// <summary>
+    /// Different sources from where you can get order for pickup
+    /// </summary>
+    public enum PickupSource
+    {
+        /// <summary>
+        /// For orders received from swiggy
+        /// </summary>
+        Swiggy = 1,
+        /// <summary>
+        /// For orders received from zomato
+        /// </summary>
+        Zomato = 2,
+        /// <summary>
+        /// For orders received directly to restaurant
+        /// </summary>
+        Direct = 3
     }
 }

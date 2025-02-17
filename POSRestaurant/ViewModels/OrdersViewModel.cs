@@ -626,6 +626,25 @@ namespace POSRestaurant.ViewModels
             return true;
         }
 
+        /// <summary>
+        /// Command to place a pickup order
+        /// </summary>
+        /// <param name="cartItems">List of items in the cart</param>
+        /// <returns>Returns true if successful, false otherwise</returns>
+        public async Task<bool> PlacePickupAsync(OrderModel orderModel)
+        {
+            var errorMessage = await _databaseService.PlacePickupOrderAsync(orderModel);
+
+            if (errorMessage != null)
+            {
+                await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
+                return false;
+            }
+
+            await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
+            return true;
+        }
+
         #endregion
     }
 }

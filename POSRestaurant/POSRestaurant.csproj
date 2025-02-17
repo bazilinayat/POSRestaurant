@@ -97,6 +97,9 @@
 	  <Compile Update="Pages\ItemReportPage.xaml.cs">
 	    <DependentUpon>ItemReportPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Pages\PickupPage.xaml.cs">
+	    <DependentUpon>PickupPage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -149,6 +152,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\ItemReportPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\PickupPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\ManageMenuItemPage.xaml">

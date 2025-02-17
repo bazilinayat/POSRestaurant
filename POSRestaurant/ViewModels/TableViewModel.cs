@@ -67,6 +67,11 @@ namespace POSRestaurant.ViewModels
         private readonly SettingService _settingService;
 
         /// <summary>
+        /// DIed PickupViewModel
+        /// </summary>
+        private readonly PickupViewModel _pickupViewModel;
+
+        /// <summary>
         /// Constructor for the TablesViewModel
         /// </summary>
         /// <param name="serviceProvider">DI for IServiceProvider</param>
@@ -74,7 +79,10 @@ namespace POSRestaurant.ViewModels
         /// <param name="homeViewModel">DI for HomeViewModel</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public TableViewModel(IServiceProvider serviceProvider, LogService logger, DatabaseService databaseService, HomeViewModel homeViewModel, OrdersViewModel ordersViewModel, SettingService settingService)
+        public TableViewModel(IServiceProvider serviceProvider, LogService logger, 
+            DatabaseService databaseService, HomeViewModel homeViewModel, 
+            OrdersViewModel ordersViewModel, SettingService settingService,
+            PickupViewModel pickupViewModel)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -82,6 +90,7 @@ namespace POSRestaurant.ViewModels
             _ordersViewModel = ordersViewModel;
             _homeViewModel = homeViewModel;
             _settingService = settingService;
+            _pickupViewModel = pickupViewModel;
 
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<TableChangedMessage>(this);
@@ -185,6 +194,16 @@ namespace POSRestaurant.ViewModels
                 return;
 
             await Application.Current.MainPage.Navigation.PushAsync(new MainPage(_homeViewModel, tableModel));
+        }
+
+        /// <summary>
+        /// When pickup button is clicked, to go to pickup page for placing order
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        [RelayCommand]
+        private async Task MakePickupOrder()
+        {
+            await Application.Current.MainPage.Navigation.PushAsync(new PickupPage(_pickupViewModel));
         }
 
         /// <summary>

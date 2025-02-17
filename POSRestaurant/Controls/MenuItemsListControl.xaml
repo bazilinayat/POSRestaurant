@@ -12,7 +12,7 @@
         ItemsSource="{Binding MenuItems}">
         <CollectionView.ItemsLayout>
             <GridItemsLayout Orientation="Vertical" 
-                         Span="4"
+                         Span="2"
                          HorizontalItemSpacing="10"
                          VerticalItemSpacing="10"/>
         </CollectionView.ItemsLayout>

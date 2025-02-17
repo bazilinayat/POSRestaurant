@@ -49,9 +49,16 @@ namespace POSRestaurant.ViewModels
         {
             _databaseService = databaseService;
 
-            Roles = Enum.GetValues(typeof(StaffRole))
+            var roles = Enum.GetValues(typeof(StaffRole))
                .Cast<StaffRole>()
                .Select(t => new RoleModel { Id = (int)t, RoleName = t.ToString(), IsSelected = false }).ToList();
+
+            Roles = new List<RoleModel>();
+            foreach (RoleModel role in  roles)
+            {
+                if (role.Id == 0) continue;
+                Roles.Add(role);
+            }
         }
 
         /// <summary>

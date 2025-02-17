@@ -36,6 +36,10 @@ namespace POSRestaurant.Models
         /// </summary>
         public bool ActionButtonEnabled { get; set; }
         /// <summary>
+        /// Tool tip to know what the action button is meant for
+        /// </summary>
+        public string ActionButtonToolTipText { get; set; }
+        /// <summary>
         /// Will keep track for how long the table was running
         /// </summary>
         public TimeOnly RunningTime { get; set; }
