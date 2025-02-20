@@ -99,9 +99,9 @@ public partial class SaveMenuItemFormControl : ContentView
             return;
         }
         
-        if (string.IsNullOrEmpty(Item.Name) || string.IsNullOrWhiteSpace(Item.Description))
+        if (string.IsNullOrEmpty(Item.Name) || string.IsNullOrWhiteSpace(Item.ShortCode))
         {
-            await ErrorAlertAsync("Item name and description are mandatory");
+            await ErrorAlertAsync("Item name and shortcode are mandatory");
             return;
         }
 

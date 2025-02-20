@@ -207,6 +207,27 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
+        /// When add new table button is clicked, confirm and add a new table
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        [RelayCommand]
+        private async Task AddNewTable()
+        {
+            if (await Shell.Current.DisplayAlert("Add Table", $"Do you really want to add a new table?", "Yes", "No"))
+            {
+                var errorMessage = await _databaseService.TableOperations.AddNewTableAsync();
+
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                    return;
+                }
+
+                await GetTablesAsync();
+            }
+        }
+
+        /// <summary>
         /// To receive the table change message coming from different places
         /// </summary>
         /// <param name="tableChangedMessage">Table details changed</param>

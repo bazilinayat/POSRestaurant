@@ -42,5 +42,29 @@ namespace POSRestaurant.DBO
         /// <returns>Returns a Order Payment Object</returns>
         public async Task<OrderPayment> GetOrderPaymentById(long orderId) =>
             await _connection.Table<OrderPayment>().FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+        /// <summary>
+        /// Get a array of all the order payments, if needed, you can apply paging here
+        /// </summary>
+        /// <param name="selectedDate">Date filter</param>
+        /// <param name="orderType">Order Type filter</param>
+        /// <returns>Array of filtered orders</returns>
+        public async Task<OrderPayment[]> GetFilteredOrderPaymentsAsync(DateTime selectedDate, int orderType)
+        {
+            var yesterday = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, 0, 0, 0);
+            var oneDateMore = selectedDate.AddDays(1);
+            var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
+
+            var ordersOnDate = await _connection.Table<OrderPayment>().Where(o => o.SettlementDate > yesterday && o.SettlementDate < tomorrow).ToListAsync();
+
+            if (orderType == 0)
+            {
+                return ordersOnDate.ToArray();
+            }
+            else
+            {
+                return ordersOnDate.Where(o => o.OrderType == (OrderTypes)orderType).ToArray();
+            }
+        }
     }
 }

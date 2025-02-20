@@ -12,6 +12,13 @@
 
     <Grid RowDefinitions="Auto, Auto, *">
         <Label Grid.Row="0" Text="Welcome my friend, Welcome!!" />
+        <Border Grid.Row="0" HorizontalOptions="End" WidthRequest="100" Stroke="Gray" StrokeShape="RoundRectangle 10" Margin="5">
+            <Label Text="+ Add Table" TextColor="Gray" HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=AddNewTableCommand}"
+          CommandParameter="{Binding .}" />
+            </Border.GestureRecognizers>
+        </Border>
         <Border Grid.Row="1" HorizontalOptions="Start" WidthRequest="100" Stroke="Orange" StrokeShape="RoundRectangle 10" Margin="5">
             <Label Text="Pickup" TextColor="Orange" HorizontalOptions="Center" VerticalOptions="Center"/>
             <Border.GestureRecognizers>

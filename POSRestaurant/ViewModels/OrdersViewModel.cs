@@ -254,6 +254,30 @@ namespace POSRestaurant.ViewModels
         private bool _usingGST;
 
         /// <summary>
+        /// To know if the order type is pickup or not
+        /// </summary>
+        [ObservableProperty]
+        private bool _isPickup;
+
+        /// <summary>
+        /// To know where the order came from
+        /// </summary>
+        [ObservableProperty]
+        private string _pickupSource;
+
+        /// <summary>
+        /// To know who took the order for delivery
+        /// </summary>
+        [ObservableProperty]
+        private string _pickupDelivery;
+
+        /// <summary>
+        /// To know the reference number in case of online order
+        /// </summary>
+        [ObservableProperty]
+        private string _referenceNumber;
+
+        /// <summary>
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
@@ -347,6 +371,10 @@ namespace POSRestaurant.ViewModels
 
                     RoundOff = o.RoundOff,
                     GrandTotal = o.GrandTotal,
+
+                    Source = o.Source,
+                    ReferenceNo = o.ReferenceNo,
+                    DeliveryPersion = o.DeliveryPerson,
                 });
             }
 
@@ -427,6 +455,7 @@ namespace POSRestaurant.ViewModels
 
             IsLoading = true;
             orderModel.IsSelected = true;
+            IsPickup = orderModel.OrderType == Data.OrderTypes.Pickup ? true : false;
             // Get Order KOTs for More Details
             OrderKOTs = (await _databaseService.GetOrderKotsAsync(orderModel.Id))
                             .Select(KOTModel.FromEntity)
@@ -494,8 +523,18 @@ namespace POSRestaurant.ViewModels
             GrandTotal = orderModel.GrandTotal;
             RoundOff = orderModel.RoundOff;
 
-            WaiterName = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.WaiterId);
-            TableNo = await _databaseService.TableOperations.GetTableNoAsync(orderModel.TableId);
+            if (IsPickup)
+            {
+                PickupSource = EnumExtensions.GetDescription((PickupSource)orderModel.Source);
+                PickupDelivery = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.DeliveryPersion);
+                ReferenceNumber = orderModel.ReferenceNo;
+            }
+            else
+            {
+                WaiterName = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.WaiterId);
+                TableNo = await _databaseService.TableOperations.GetTableNoAsync(orderModel.TableId);
+            }
+            
             OrderToShow = orderModel;
 
             var orderPayment = await _databaseService.OrderPaymentOperations.GetOrderPaymentById(orderModel.Id);

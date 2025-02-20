@@ -225,4 +225,26 @@ namespace POSRestaurant.Data
         /// </summary>
         Direct = 3
     }
+
+    /// <summary>
+    /// List of modes which can be used to make payments in expenses
+    /// </summary>
+    public enum ExpensePaymentModes
+    {
+        /// <summary>
+        /// Choose when payment method is cash
+        /// </summary>
+        [Description("Cash")]
+        Cash = 1,
+        /// <summary>
+        /// Choose when payment method is online
+        /// </summary>
+        [Description("Online")]
+        Online = 2,
+        /// <summary>
+        /// Choose when payment method is card
+        /// </summary>
+        [Description("Bank")]
+        Bank = 3
+    }
 }

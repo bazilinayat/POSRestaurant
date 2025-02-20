@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ghostscript.NET;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
@@ -66,6 +67,30 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         [ObservableProperty]
         private ValueForPicker _selectedPayer;
+
+        /// <summary>
+        /// To know the total amount spent on the select date
+        /// </summary>
+        [ObservableProperty]
+        private double _totalSpent;
+
+        /// <summary>
+        /// To know the total amount spent in cash on the select date
+        /// </summary>
+        [ObservableProperty]
+        private double _totalCash;
+
+        /// <summary>
+        /// To know the total amount spent online on the select date
+        /// </summary>
+        [ObservableProperty]
+        private double _totalOnline;
+
+        /// <summary>
+        /// To know the total amount spent by bank or card on the select date
+        /// </summary>
+        [ObservableProperty]
+        private double _totalBank;
 
         /// <summary>
         /// Constructor for the OrdersViewModel
@@ -137,6 +162,7 @@ namespace POSRestaurant.ViewModels
         private async ValueTask MakeInventoryReport()
         {
             InventoryReportData.Clear();
+            TotalSpent = TotalCash = TotalOnline = TotalBank = 0;
             var inventoryEntries = await _databaseService.InventoryOperations.GetInventoryItemsAsync(SelectedDate, SelectedItem.Key, SelectedPayer.Key);
 
             if (inventoryEntries.Length > 0)
@@ -146,6 +172,19 @@ namespace POSRestaurant.ViewModels
 
                 foreach (var inventory in inventoryItems)
                 {
+                    TotalSpent += inventory.TotalPrice;
+                    switch (inventory.PaymentMode)
+                    {
+                        case ExpensePaymentModes.Cash:
+                            TotalCash += inventory.TotalPrice;
+                                break;
+                        case ExpensePaymentModes.Online:
+                            TotalOnline += inventory.TotalPrice;
+                            break;
+                        case ExpensePaymentModes.Bank:
+                            TotalBank += inventory.TotalPrice;
+                            break;
+                    }
                     InventoryReportData.Add(inventory);
                 }
             }

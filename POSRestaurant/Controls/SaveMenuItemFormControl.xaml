@@ -28,6 +28,10 @@
                 <Entry Text="{Binding Item.Price}" Placeholder="Enter price" Style="{StaticResource txt}"/>
             </VerticalStackLayout>
             <VerticalStackLayout Spacing="5">
+                <Label Text="Shortcode" Style="{StaticResource lbl}"/>
+                <Entry Text="{Binding Item.ShortCode}" Placeholder="Enter Shortcode" Style="{StaticResource txt}"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="5">
                 <Label Text="Description" Style="{StaticResource lbl}"/>
                 <Entry Text="{Binding Item.Description}" Placeholder="Enter description" Style="{StaticResource txt}" MinimumHeightRequest="100"/>
             </VerticalStackLayout>

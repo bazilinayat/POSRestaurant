@@ -161,6 +161,7 @@ namespace POSRestaurant.ViewModels
                 Name = itemOnMenu.Name,
                 Price = itemOnMenu.Price,
                 Id = itemOnMenu.Id,
+                ShortCode = itemOnMenu.ShortCode
             };
 
             if (itemOnMenu.Id != 0)
@@ -207,6 +208,8 @@ namespace POSRestaurant.ViewModels
             if (errorMessage != null)
             {
                 await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                IsLoading = false;
+                return;
             }
             else
             {
@@ -225,6 +228,9 @@ namespace POSRestaurant.ViewModels
 
                 Cancel();
             }
+            await _menuService.LoadCategoryItems();
+            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+            AddNewItemMenuItem();
 
             IsLoading = false;
         }
@@ -259,6 +265,9 @@ namespace POSRestaurant.ViewModels
                     IsDeleted = true,
                     ItemModel = item
                 }));
+                await _menuService.LoadCategoryItems();
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+                AddNewItemMenuItem();
 
                 Cancel();
             }

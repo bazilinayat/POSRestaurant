@@ -208,8 +208,10 @@ namespace POSRestaurant.ViewModels
             var orderPayment = new OrderPayment
             {
                 OrderId = TableModel.RunningOrderId,
+                SettlementDate = DateTime.Now,
                 PaidByCustomer = PaidByCustomer,
                 PaymentMode = PaymentMode,
+                OrderType = OrderTypes.DineIn,
                 Tip = Tip,
                 Total = TableModel.OrderTotal,
                 IsCardForPart = IsCardForPart,

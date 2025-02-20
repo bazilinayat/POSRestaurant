@@ -24,6 +24,7 @@
                     <VerticalStackLayout Spacing="10">
                         <Label Text="{Binding Name}" 
                            FontAttributes="Bold"/>
+                        <Label Text="{Binding ShortCode}"/>
                         <FlexLayout JustifyContent="SpaceBetween">
                             <Label Text="{Binding Price, StringFormat='{0:C}'}"
                                FontAttributes="Bold"

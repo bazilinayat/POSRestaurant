@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
@@ -7,13 +9,14 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace POSRestaurant.ViewModels
 {
     /// <summary>
     /// ViewModel for Item Report operations
     /// </summary>
-    public partial class InventoryViewModel : ObservableObject
+    public partial class InventoryViewModel : ObservableObject, IRecipient<StaffChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -52,6 +55,11 @@ namespace POSRestaurant.ViewModels
         public ObservableCollection<Staff> StaffMembers { get; set; } = new();
 
         /// <summary>
+        /// Type of payment mode, we need to choose one
+        /// </summary>
+        public ObservableCollection<ValueForPicker> PaymentModes { get; set; } = new();
+
+        /// <summary>
         /// Constructor for the InventoryViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
@@ -59,7 +67,7 @@ namespace POSRestaurant.ViewModels
         {
             _databaseService = databaseService;
 
-            InitializeAsync();
+            WeakReferenceMessenger.Default.Register<StaffChangedMessage>(this);
         }
 
         /// <summary>
@@ -69,11 +77,14 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            if (_isInitialized)
-                return;
 
             _isInitialized = true;
             IsLoading = true;
+
+            ExpenseItemTypes.Clear();
+            ExpenseItems.Clear();
+            StaffMembers.Clear();
+            PaymentModes.Clear();
 
             // Populate ExpenseItemTypes
             foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<ExpenseItemTypes>())
@@ -95,6 +106,13 @@ namespace POSRestaurant.ViewModels
                 StaffMembers.Add(coowner);
             }
 
+            // Populate ExpenseItemTypes
+            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<ExpensePaymentModes>())
+            {
+                PaymentModes.Add(desc);
+            }
+
+            Rows.Clear();
             InitializeRows(10);
 
             IsLoading = false;
@@ -113,8 +131,29 @@ namespace POSRestaurant.ViewModels
                 {
                     ExpenseItemTypes = ExpenseItemTypes,
                     ExpenseItems = new ObservableCollection<ExpenseItem> { new ExpenseItem { Id = 0, Name = "Select Item" } },
-                    StaffMembers = StaffMembers
+                    StaffMembers = StaffMembers,
+                    PaymentModes = PaymentModes
                 });
+            }
+        }
+
+        /// <summary>
+        /// Refresh staff details when received
+        /// </summary>
+        /// <param name="message">StaffChangedMessage</param>
+        public async void Receive(StaffChangedMessage message)
+        {
+            StaffMembers.Clear();
+            // Populate StaffMembers (mock data for now)
+            var coowners = await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.CoOwner);
+            foreach (var coowner in coowners)
+            {
+                StaffMembers.Add(coowner);
+            }
+
+            for (int i = 0; i < Rows.Count; i++)
+            {
+                Rows[i].StaffMembers = StaffMembers;
             }
         }
 
@@ -125,6 +164,55 @@ namespace POSRestaurant.ViewModels
         private void AddRows()
         {
             InitializeRows(10);
+        }
+
+        // Add this method to InventoryViewModel.cs
+        private bool IsRowValid(InventoryRowModel row)
+        {
+            return row.SelectedExpenseItemType != null
+                && row.SelectedExpenseItem != null
+                && row.WeightOrQuantity > 0
+                && row.AmountPaid > 0
+                && row.SelectedPaymentMode != null
+                && row.SelectedPayer != null
+                && !row.IsSaved; // Only validate unsaved rows
+        }
+
+        [RelayCommand]
+        private async Task SaveAll()
+        {
+            try
+            {
+                var validRows = Rows.Where(IsRowValid).ToList();
+
+                if (!validRows.Any())
+                {
+                    await Shell.Current.DisplayAlert(
+                        "Save Failed",
+                        "No valid rows found to save. Please ensure all required fields are filled.",
+                        "OK");
+                    return;
+                }
+
+                foreach (var row in validRows)
+                {
+                    await row.Save();
+                }
+
+                await Shell.Current.DisplayAlert(
+                    "Success",
+                    $"Successfully saved {validRows.Count} rows.",
+                    "OK");
+
+                await InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert(
+                    "Error",
+                    $"An error occurred while saving: {ex.Message}",
+                    "OK");
+            }
         }
     }
 }

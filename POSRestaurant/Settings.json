@@ -3,7 +3,7 @@
   "Phone": "123456789",
   "Email": "abc@gmail.com",
   "WebsiteURL": "https://google.com",
-  "NumberOfTables": 10,
+  "NumberOfTables": 12,
   "PaytmInfo": {
     "CreateQR": "https://securegw-stage.paytm.in/paymentservices/qr/create",
     "TransactionStatus": "https://securegw-stage.paytm.in/v3/order/status",

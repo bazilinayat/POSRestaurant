@@ -54,6 +54,16 @@ namespace POSRestaurant.Models
         public string StaffName { get; set; }
 
         /// <summary>
+        /// To know the payment mode used
+        /// </summary>
+        public ExpensePaymentModes PaymentMode { get; set; }
+
+        /// <summary>
+        /// To know the payment mode used for name
+        /// </summary>
+        public string PaymentModeName { get; set; }
+
+        /// <summary>
         /// Date of record entry
         /// </summary>
         public DateTime EntryDate { get; set; }
@@ -76,6 +86,8 @@ namespace POSRestaurant.Models
                 StaffId = entity.StaffId,
                 ExpenseItemName = entity.ExpenseItemName,
                 StaffName = entity.StaffName,
+                PaymentMode = entity.PaymentMode,
+                PaymentModeName = entity.PaymentModeName
             };
     }
 }

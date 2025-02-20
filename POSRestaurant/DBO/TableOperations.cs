@@ -36,5 +36,32 @@ namespace POSRestaurant.DBO
         /// <returns>Int, table number</returns>
         public async Task<int> GetTableNoAsync(int tableId) =>
             (await _connection.Table<Table>().FirstOrDefaultAsync(o => o.Id == tableId)).TableNo;
+
+        /// <summary>
+        /// Method to get all the tables from database
+        /// </summary>
+        /// <returns>Array of Table</returns>
+        public async Task<string?> AddNewTableAsync()
+        {
+            string? errorMessage = null;
+            try
+            {
+                var tables = await GetTablesAsync();
+
+                Table table = new Table
+                {
+                    TableNo = tables.Count() + 1
+                };
+
+                await _connection.InsertAsync(table);
+
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+
+            return errorMessage;
+        }
     }
 }

@@ -56,6 +56,16 @@ namespace POSRestaurant.Data
         public string StaffName { get; set; }
 
         /// <summary>
+        /// To know the payment mode used
+        /// </summary>
+        public ExpensePaymentModes PaymentMode { get; set; }
+
+        /// <summary>
+        /// To know the payment mode used for name
+        /// </summary>
+        public string PaymentModeName { get; set; }
+
+        /// <summary>
         /// Date of record entry
         /// </summary>
         public DateTime EntryDate { get; set; }

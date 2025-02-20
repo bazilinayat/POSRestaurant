@@ -5,6 +5,7 @@
              xmlns:data="clr-namespace:POSRestaurant.Data"
              xmlns:models="clr-namespace:POSRestaurant.Models"
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
              x:Class="POSRestaurant.Pages.OrdersPage"
              Title="OrdersPage"
              Shell.NavBarIsVisible="True"
@@ -12,6 +13,7 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <Style TargetType="Label" x:Key="th">
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="FontAttributes" Value="Bold" />
@@ -95,7 +97,7 @@
 
         <ScrollView Grid.Column="1">
             <Grid RowDefinitions="Auto, Auto, Auto" IsVisible="{Binding OrderDetailsVisible}" Padding="20">
-                <Grid Grid.Row="0" RowDefinitions="Auto, Auto, Auto, Auto">
+                <Grid Grid.Row="0" RowDefinitions="Auto, Auto, Auto, Auto, Auto">
                     <HorizontalStackLayout Grid.Row="0" Spacing="100">
                         <HorizontalStackLayout Spacing="5">
                             <Label Text="Order No.:" />
@@ -111,9 +113,13 @@
                             <Label Text="Order Type:" />
                             <Label Text="{Binding OrderToShow.OrderTypeString}" />
                         </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="5">
+                        <HorizontalStackLayout Spacing="5" IsVisible="{Binding IsPickup, Converter={StaticResource InverseBooleanConverter}}">
                             <Label Text="Order TableNo.:" />
                             <Label Text="{Binding TableNo}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5" IsVisible="{Binding IsPickup}">
+                            <Label Text="Pickup Source.:" />
+                            <Label Text="{Binding PickupSource}" />
                         </HorizontalStackLayout>
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Grid.Row="2" Spacing="100">
@@ -121,12 +127,22 @@
                             <Label Text="Token No.:" />
                             <Label Text="{Binding OrderKOTIds}" />
                         </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="5">
+                        <HorizontalStackLayout Spacing="5" IsVisible="{Binding IsPickup, Converter={StaticResource InverseBooleanConverter}}">
                             <Label Text="Assign To:" />
                             <Label Text="{Binding WaiterName}" />
                         </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="5" IsVisible="{Binding IsPickup}">
+                            <Label Text="Pickup Delivery.:" />
+                            <Label Text="{Binding PickupDelivery}" />
+                        </HorizontalStackLayout>
                     </HorizontalStackLayout>
-                    <HorizontalStackLayout Grid.Row="3" Spacing="100">
+                    <HorizontalStackLayout Grid.Row="3" Spacing="100" IsVisible="{Binding IsPickup}">
+                        <HorizontalStackLayout Spacing="5">
+                            <Label Text="Pickup Reference No.:" />
+                            <Label Text="{Binding ReferenceNumber}" />
+                        </HorizontalStackLayout>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Row="4" Spacing="100">
                         <HorizontalStackLayout Spacing="5">
                             <Label Text="Payment Mode:" />
                             <Label Text="{Binding PaymentMode}" />

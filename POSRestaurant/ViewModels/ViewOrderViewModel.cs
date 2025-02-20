@@ -612,7 +612,8 @@ namespace POSRestaurant.ViewModels
                 }
                 else if (EnablePercentageDiscount)
                 {
-                    order.TotalAmountAfterDiscount = order.TotalAmount * DiscountPercentage / 100;
+                    var amount = order.TotalAmount * DiscountPercentage / 100;
+                    order.TotalAmountAfterDiscount = order.TotalAmount - amount;
                 }
             }
             else

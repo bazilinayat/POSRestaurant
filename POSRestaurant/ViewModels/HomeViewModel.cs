@@ -489,11 +489,14 @@ namespace POSRestaurant.ViewModels
 
                 // check if this item still has a mapping to selected category
                 // can be used for delete part
-                if (isDeleted && menuItem.Category.Id == SelectedCategory.Id)
+                if (SelectedCategory != null)
                 {
-                    // this item is deleted, should not be displayed here anymore
-                    // remove this item from the current UI menu items list
-                    MenuItems = [.. MenuItems.Where(m => m.Id != menuItem.Id)];
+                    if (isDeleted && menuItem.Category.Id == SelectedCategory.Id)
+                    {
+                        // this item is deleted, should not be displayed here anymore
+                        // remove this item from the current UI menu items list
+                        MenuItems = [.. MenuItems.Where(m => m.Id != menuItem.Id)];
+                    }
                 }
 
                 // update details of existing item on the screen

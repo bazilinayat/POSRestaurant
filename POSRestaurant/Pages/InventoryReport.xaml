@@ -30,7 +30,7 @@
     </ContentPage.Resources>
 
     <Grid Padding="10" Margin="10">
-        <Grid RowDefinitions="Auto, Auto, *" RowSpacing="15">
+        <Grid RowDefinitions="Auto, Auto, Auto, *" RowSpacing="15">
             <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Inventory Report"/>
             <HorizontalStackLayout Grid.Row="1" Spacing="10">
                 <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
@@ -50,10 +50,17 @@
                 </HorizontalStackLayout>
             </HorizontalStackLayout>
 
-            <Grid Grid.Row="2" Margin="5">
+            <HorizontalStackLayout Grid.Row="2" HorizontalOptions="End">
+                <Label Text="{Binding TotalSpent, StringFormat='Total Spent: {0:C}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalCash, StringFormat='Paid In Cash: {0:C}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalOnline, StringFormat='Paid Online: {0:C}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalBank, StringFormat='Paid By Bank: {0:C}'}" Style="{StaticResource th}" />
+            </HorizontalStackLayout>
+
+            <Grid Grid.Row="3" Margin="5">
                 <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="Auto, *">
                     <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
-                        <Grid BackgroundColor="Gray" ColumnDefinitions="*, *, *, *, *">
+                        <Grid BackgroundColor="Gray" ColumnDefinitions="*, *, *, *, *, *">
                             <Label Grid.Column="0" Text="Expense Type" 
                                Style="{StaticResource th}" />
                             <Label Grid.Column="1" Text="Item Name"
@@ -62,33 +69,38 @@
                                Style="{StaticResource th}" />
                             <Label Grid.Column="3" Text="Amount" 
                                Style="{StaticResource th}" />
-                            <Label Grid.Column="4" Text="Paid By" 
+                            <Label Grid.Column="4" Text="Payment Mode" 
+                                   Style="{StaticResource th}" />
+                            <Label Grid.Column="5" Text="Paid By" 
                                Style="{StaticResource th}" />
                         </Grid>
                     </Border>
                     <CollectionView ItemsSource="{Binding InventoryReportData}" Grid.Row="1">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:InventoryReportModel">
-                                <Grid ColumnDefinitions="*, *, *, *, *" RowDefinitions="*, Auto">
+                                <Grid ColumnDefinitions="*, *, *, *, *, *" RowDefinitions="*, Auto">
                                         <Label Grid.Column="0"
-                             Text="{Binding ItemType}"
-                             Style="{StaticResource td}"/>
+                                             Text="{Binding ItemType}"
+                                             Style="{StaticResource td}"/>
                                         <Label Grid.Column="1"
-                             Text="{Binding ExpenseItemName}"
-                             Style="{StaticResource td}"/>
+                                             Text="{Binding ExpenseItemName}"
+                                             Style="{StaticResource td}"/>
                                         <Label Grid.Column="2"
-                             Text="{Binding QuantityOrWeight}"
-                             Style="{StaticResource td}"/>
+                                             Text="{Binding QuantityOrWeight}"
+                                             Style="{StaticResource td}"/>
                                         <Label Grid.Column="3"
-                             Text="{Binding TotalPrice}"
-                             Style="{StaticResource td}"/>
+                                             Text="{Binding TotalPrice}"
+                                             Style="{StaticResource td}"/>
                                         <Label Grid.Column="4"
-                             Text="{Binding StaffName}"
-                             Style="{StaticResource td}"/>
+                                             Text="{Binding PaymentModeName}"
+                                             Style="{StaticResource td}"/>
+                                    <Label Grid.Column="5"
+                                             Text="{Binding StaffName}"
+                                             Style="{StaticResource td}"/>
                                     <BoxView Grid.Row="1"
-         Grid.ColumnSpan="6"
-         HeightRequest="1"
-         Color="LightGray"/>
+                                             Grid.ColumnSpan="6"
+                                             HeightRequest="1"
+                                             Color="LightGray"/>
                                     </Grid>
 
                             </DataTemplate>

@@ -34,6 +34,8 @@
 
             <!-- Add Rows Button -->
             <Button Grid.Row="1" Text="Add 10 Rows" Command="{Binding AddRowsCommand}" HorizontalOptions="Start"/>
+            <!-- Save Button -->
+            <Button Grid.Row="1" Text="Save" Command="{Binding SaveAllCommand}" HorizontalOptions="End" />
 
             <!-- Table -->
             <Grid Grid.Row="2" Margin="5">
@@ -60,15 +62,16 @@
                                     VerticalOptions="Center"
                                     HorizontalOptions="Center"
                                     Style="{StaticResource th}"/>
-                            <Label Grid.Column="4" Text="Payer"
+                            <Label Grid.Column="4" Text="Payment Mode"
                                     Padding="10"
                                     VerticalOptions="Center"
                                     HorizontalOptions="Center"
                                     Style="{StaticResource th}"/>
-                            <Label Grid.Column="5" Padding="10"
-                                   VerticalOptions="Center"
-                                   HorizontalOptions="Center"
-                                   Style="{StaticResource th}"/>
+                            <Label Grid.Column="5" Text="Payer"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource th}"/>
                         </Grid>
                     </Border>
                     <!-- Data Rows -->
@@ -117,8 +120,18 @@
                                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
                                     </HorizontalStackLayout>
 
+                                    <!--PaymentMode Picker-->
+                                    <Picker Grid.Column="4" ItemsSource="{Binding PaymentModes}" 
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                            BackgroundColor="Wheat"
+                                            WidthRequest="200"
+                                            ItemDisplayBinding="{Binding Value}" 
+                                            SelectedItem="{Binding SelectedPaymentMode}"
+                                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
+
                                     <!-- Payer Picker -->
-                                    <Picker Grid.Column="4" ItemsSource="{Binding StaffMembers}" 
+                                    <Picker Grid.Column="5" ItemsSource="{Binding StaffMembers}" 
                                             VerticalOptions="Center"
                                             HorizontalOptions="Center"
                                             BackgroundColor="Wheat"
@@ -127,12 +140,6 @@
                                             SelectedItem="{Binding SelectedPayer}"
                                             IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
 
-                                    <!-- Save Button -->
-                                    <Button Grid.Column="5" Text="Save" 
-                                            VerticalOptions="Center"
-                                            HorizontalOptions="Center"
-                                            Command="{Binding SaveCommand}" 
-                                            IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
                                     <BoxView Grid.Row="1"
                                              Grid.ColumnSpan="6"
                                              HeightRequest="1"

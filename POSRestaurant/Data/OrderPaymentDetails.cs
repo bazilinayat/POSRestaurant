@@ -23,6 +23,10 @@ namespace POSRestaurant.Data
         /// </summary>
         public long OrderId { get; set; }
         /// <summary>
+        /// To know the date of the settlement
+        /// </summary>
+        public DateTime SettlementDate { get; set; }
+        /// <summary>
         /// Total amout of the order after tax
         /// To be paid by the customer
         /// </summary>
@@ -43,6 +47,10 @@ namespace POSRestaurant.Data
         /// To be paid by the customer
         /// </summary>
         public decimal Tip { get; set; }
+        /// <summary>
+        /// OrderType, which was used to pay
+        /// </summary>
+        public OrderTypes OrderType { get; set; }
         /// <summary>
         /// PaymentMode, which was used to pay
         /// </summary>

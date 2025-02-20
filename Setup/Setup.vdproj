@@ -13,12 +13,6 @@
 "SccProvider" = "8:"
     "Hierarchy"
     {
-        "Entry"
-        {
-        "MsmKey" = "8:_EA38F3CED04A4AD199A26369203195F8"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
     }
     "Configurations"
     {
@@ -44,6 +38,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -68,6 +70,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
     }
@@ -75,34 +85,6 @@
     {
         "CustomAction"
         {
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_1E424FF2DE6C4F558D00E6C4B9B7302A"
-            {
-            "Name" = "8:Primary output from POSRestaurant (Active)"
-            "Condition" = "8:"
-            "Object" = "8:_EA38F3CED04A4AD199A26369203195F8"
-            "FileType" = "3:1"
-            "InstallAction" = "3:1"
-            "Arguments" = "8:"
-            "EntryPoint" = "8:"
-            "Sequence" = "3:1"
-            "Identifier" = "8:_9303D0FF_D3B5_4B5C_9482_8B063634A5F6"
-            "InstallerClass" = "11:TRUE"
-            "CustomActionData" = "8:"
-            }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_34D2D27ECFFA42A0B26059F2852C345C"
-            {
-            "Name" = "8:Primary output from POSRestaurant (Active)"
-            "Condition" = "8:"
-            "Object" = "8:_EA38F3CED04A4AD199A26369203195F8"
-            "FileType" = "3:1"
-            "InstallAction" = "3:4"
-            "Arguments" = "8:"
-            "EntryPoint" = "8:"
-            "Sequence" = "3:1"
-            "Identifier" = "8:_720CA9CE_3B84_4A41_987C_BD43E55885E0"
-            "InstallerClass" = "11:TRUE"
-            "CustomActionData" = "8:"
-            }
         }
         "DefaultFeature"
         {
@@ -114,6 +96,16 @@
         {
             "LaunchCondition"
             {
+                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_475936A07693476C8668B865369C627F"
+                {
+                "Name" = "8:.NET Core"
+                "Message" = "8:[VSDNETCOREMSG]"
+                "AllowLaterVersions" = "11:FALSE"
+                "InstallUrl" = "8:https://dotnet.microsoft.com/download/dotnet-core/[NetCoreVerMajorDotMinor]"
+                "IsNETCore" = "11:TRUE"
+                "Architecture" = "2:0"
+                "Runtime" = "2:0"
+                }
                 "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_873608997254415697FCE14CF4390AB2"
                 {
                 "Name" = "8:.NET Framework"
@@ -702,9 +694,9 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_EA38F3CED04A4AD199A26369203195F8"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_3A652442C49742F7942D096673522123"
             {
-            "SourcePath" = "8:..\\POSRestaurant\\obj\\Debug\\net8.0-maccatalyst\\maccatalyst-x64\\POSRestaurant.dll"
+            "SourcePath" = "8:"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_0B16764F58C64FD6B70257C97F068652"
@@ -723,7 +715,7 @@
             "IsolateTo" = "8:"
             "ProjectOutputGroupRegister" = "3:1"
             "OutputConfiguration" = "8:"
-            "OutputGroupCanonicalName" = "8:Built"
+            "OutputGroupCanonicalName" = "8:PublishItems"
             "OutputProjectGuid" = "8:{910AD3E2-29FD-4728-901B-E49099FDC85F}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"

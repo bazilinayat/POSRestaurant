@@ -79,6 +79,7 @@ namespace POSRestaurant.DBO
                 Description = itemModel.Description,
                 MenuCategoryId = itemModel.Category.Id,
                 Price = itemModel.Price,
+                ShortCode = itemModel.ShortCode
             };
 
             if (menuItem.Id == 0)

@@ -18,7 +18,7 @@ namespace POSRestaurant.Models
     /// <summary>
     /// Model for inventory row, to edit and save in inventory table
     /// </summary>
-    public partial class InventoryRowModel : INotifyPropertyChanged
+    public partial class InventoryRowModel : ObservableObject, INotifyPropertyChanged
     {
         /// <summary>
         /// To pass and use for items and saving the data
@@ -41,6 +41,11 @@ namespace POSRestaurant.Models
         public ObservableCollection<Staff> StaffMembers { get; set; } = new();
 
         /// <summary>
+        /// List of payment modes for expense items to choose from
+        /// </summary>
+        public ObservableCollection<ValueForPicker> PaymentModes { get; set; } = new();
+
+        /// <summary>
         /// Expense Iten Type, which is selected from Picker
         /// </summary>
 
@@ -56,7 +61,8 @@ namespace POSRestaurant.Models
             {
                 _selectedExpenseItemType = value;
                 OnPropertyChanged();
-                UpdateExpenseItems(value.Key);
+                if (value != null)
+                    UpdateExpenseItems(value.Key);
             }
         }
 
@@ -88,6 +94,16 @@ namespace POSRestaurant.Models
         {
             get => _amountPaid;
             set { _amountPaid = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>
+        /// To handle the payment mode entry
+        /// </summary>
+        private ValueForPicker _selectedPaymentMode;
+        public ValueForPicker SelectedPaymentMode
+        {
+            get => _selectedPaymentMode;
+            set { _selectedPaymentMode = value; OnPropertyChanged(); }
         }
 
         /// <summary>
@@ -124,7 +140,7 @@ namespace POSRestaurant.Models
         /// </summary>
         /// <returns>Returns a Task object</returns>
         [RelayCommand]
-        private async Task Save()
+        public async Task Save()
         {
             Inventory inventory = new Inventory
             {
@@ -137,6 +153,8 @@ namespace POSRestaurant.Models
                 TotalPrice = AmountPaid,
                 ExpenseItemName = SelectedExpenseItem.Name,
                 StaffName = SelectedPayer.Name,
+                PaymentMode = (ExpensePaymentModes)SelectedPaymentMode.Key,
+                PaymentModeName = SelectedPaymentMode.Value
             };
 
             var error = await _databaseService.InventoryOperations.SaveInventoryEntryAsync(inventory);

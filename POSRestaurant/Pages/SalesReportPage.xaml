@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             x:Class="POSRestaurant.Pages.SalesReportPage"
+             Title="SalesReportPage"
+             Shell.NavBarIsVisible="True"
+             x:DataType="vm:SalesReportViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label" x:Key="th">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="Black" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
+            </Style>
+            <Style TargetType="Label" x:Key="td">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid Padding="10" Margin="10">
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, *" RowSpacing="15">
+            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Sales Report"/>
+            <HorizontalStackLayout Grid.Row="1" Spacing="10">
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Select Date:" Style="{StaticResource th}" />
+                    <DatePicker Date="{Binding SelectedDate}" BackgroundColor="{StaticResource DropDownBackground}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Select Order Type:" Style="{StaticResource th}" />
+                    <Picker WidthRequest="100" ItemsSource="{Binding OrderTypes}" SelectedItem="{Binding SelectedType, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout>
+                    <Button Text="Search" Command="{Binding SearchCommand}" />
+                </HorizontalStackLayout>
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Grid.Row="2" HorizontalOptions="End">
+                <Label Text="{Binding TotalPickup, StringFormat='Total Pickups: {0}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalDine, StringFormat='Total Dine Ins: {0}'}" Style="{StaticResource th}" />
+            </HorizontalStackLayout>
+            
+            <HorizontalStackLayout Grid.Row="3" HorizontalOptions="End">
+                <Label Text="{Binding TotalSpent, StringFormat='Total Received: {0:C}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalCash, StringFormat='Received In Cash: {0:C}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalOnline, StringFormat='Received Online: {0:C}'}" Style="{StaticResource th}" />
+                <Label Text="{Binding TotalBank, StringFormat='Received By Card: {0:C}'}" Style="{StaticResource th}" />
+            </HorizontalStackLayout>
+
+            <Grid Grid.Row="4" Margin="5">
+                <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid BackgroundColor="Gray" ColumnDefinitions="*, *, *, *">
+                            <Label Grid.Column="0" Text="Order Id" 
+                           Style="{StaticResource th}" />
+                            <Label Grid.Column="1" Text="Order Type"
+                           Style="{StaticResource th}" />
+                            <Label Grid.Column="2" Text="Payment Mode" 
+                                   Style="{StaticResource th}" />
+                            <Label Grid.Column="3" Text="Order Total"
+                                   Style="{StaticResource th}" />
+                        </Grid>
+                    </Border>
+                    <CollectionView ItemsSource="{Binding SalesReportData}" Grid.Row="1">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="data:OrderPayment">
+                                <Grid ColumnDefinitions="*, *, *, *" RowDefinitions="*, Auto">
+                                    <Label Grid.Column="0"
+                                         Text="{Binding OrderId}"
+                                         Style="{StaticResource td}"/>
+                                    <Label Grid.Column="1"
+                                         Text="{Binding OrderType}"
+                                         Style="{StaticResource td}"/>
+                                    <Label Grid.Column="2"
+                                         Text="{Binding PaymentMode}"
+                                         Style="{StaticResource td}"/>
+                                    <Label Grid.Column="3"
+                                         Text="{Binding Total}"
+                                         Style="{StaticResource td}"/>
+                                    <BoxView Grid.Row="1"
+                                         Grid.ColumnSpan="6"
+                                         HeightRequest="1"
+                                         Color="LightGray"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentPage>
