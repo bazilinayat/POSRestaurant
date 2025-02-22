@@ -37,6 +37,7 @@
                            CancelButtonColor="Red"
                            HorizontalTextAlignment="Start"
                            Placeholder="Search Items..."
+                           TextColor="White"
                            Margin="20"/>
                 <controls:MenuItemsListControl Grid.Row="1" MenuItems="{Binding MenuItems}" OnMenuItemSelected="MenuItemsListControl_OnMenuItemSelected"/>
                 <Border Grid.Row="2" 
@@ -45,17 +46,8 @@
                         StrokeShape="RoundRectangle 10"
                         IsEnabled="{Binding OrderTypeEnable}"
                         BackgroundColor="{StaticResource AllBackground}">
-                    <Grid ColumnDefinitions="0.33*, 0.33*, 0.33*">
+                    <Grid ColumnDefinitions="0.50*, 0.50*">
                         <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
-                            <RadioButton GroupName="OrderType" Content="Dine In" 
-                                         IsChecked="{Binding SelectedOrderType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
-                            </RadioButton>
-                            <RadioButton GroupName="OrderType" Content="Pickup"
-                                         IsChecked="{Binding SelectedOrderType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
-                            </RadioButton>
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
                             <Label Text="Number of People" FontSize="16" VerticalOptions="Center"/>
                             <ImageButton 
                                          Source="minus_regular_24.png"
@@ -83,7 +75,7 @@
                                          Padding="5"
                                          Command="{Binding IncreaseNumberOfPeopleCommand}"/>
                         </HorizontalStackLayout>
-                        <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center">
+                        <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
                             <Label Text="Waiter" FontSize="16" VerticalOptions="Center"/>
                             <Picker ItemsSource="{Binding Waiters}"
                                     SelectedItem="{Binding SelectedWaiter, Mode=TwoWay}"
@@ -115,7 +107,10 @@
             <VerticalStackLayout Grid.Row="0" 
                                  Spacing="5"
                                  Padding="10, 0">
-                <Label Text="Current Order Items"
+                    <Label Text="{Binding TableNumber, StringFormat='Table: {0}'}"
+                            FontSize="25"
+                            FontAttributes="Bold"/>
+                    <Label Text="Current Order Items"
                        FontSize="25"
                        FontAttributes="Bold"/>
                 <controls:CurrentDateTimeControl />
@@ -233,7 +228,7 @@
                               ColumnDefinitions="Auto, *, Auto, Auto"
                               ColumnSpacing="10">
                             <Button Grid.Column="0"
-                                    Text="X"
+                                    Text="Clear"
                                     HorizontalOptions="Start"
                                     VerticalOptions="Center"
                                     CornerRadius="5"
@@ -242,7 +237,7 @@
                                     BackgroundColor="Red"
                                     Command="{Binding ClearCartCommand}"/>
                             <Button Grid.Column="2"
-                                    Text="Cash"
+                                    Text="Save"
                                     HorizontalOptions="End"
                                     VerticalOptions="Center"
                                     CornerRadius="5"

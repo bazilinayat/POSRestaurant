@@ -84,6 +84,30 @@ namespace POSRestaurant.Data
     }
 
     /// <summary>
+    /// To list down the different settings we have
+    /// </summary>
+    public enum ApplicationSettings
+    {
+        [Description("Restaurant Info")]
+        RestaurantInfo = 0,
+        [Description("Expense Types")]
+        ExpenseItems = 1
+    }
+
+    /// <summary>
+    /// The different discount options to select from
+    /// </summary>
+    public enum DiscountOptions
+    {
+        [Description("No Discount")]
+        NoDiscount = 0,
+        [Description("Percentage")]
+        Percentage = 1,
+        [Description("Fixed")]
+        Fixed = 2
+    }
+
+    /// <summary>
     /// List of Payment Modes
     /// </summary>
     public enum PaymentModes
@@ -210,7 +234,7 @@ namespace POSRestaurant.Data
     /// <summary>
     /// Different sources from where you can get order for pickup
     /// </summary>
-    public enum PickupSource
+    public enum PickupSources
     {
         /// <summary>
         /// For orders received from swiggy

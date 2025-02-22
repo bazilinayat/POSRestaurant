@@ -48,7 +48,7 @@
                             <Border BackgroundColor="{StaticResource AllBackground}"
                                 StrokeShape="RoundRectangle 10"
                                 HeightRequest="40">
-                                <Label Text="{Binding ExpenseTypeName}" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Label Text="{Binding Name}" HorizontalOptions="Center" VerticalOptions="Center">
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
                                             <Setter Property="TextColor" Value="White" />

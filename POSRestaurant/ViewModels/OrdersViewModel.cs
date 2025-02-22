@@ -260,6 +260,12 @@ namespace POSRestaurant.ViewModels
         private bool _isPickup;
 
         /// <summary>
+        /// To know if the order type is pickup or not
+        /// </summary>
+        [ObservableProperty]
+        private bool _showReference;
+
+        /// <summary>
         /// To know where the order came from
         /// </summary>
         [ObservableProperty]
@@ -523,10 +529,15 @@ namespace POSRestaurant.ViewModels
             GrandTotal = orderModel.GrandTotal;
             RoundOff = orderModel.RoundOff;
 
+            ShowReference = false;
             if (IsPickup)
             {
-                PickupSource = EnumExtensions.GetDescription((PickupSource)orderModel.Source);
+                PickupSource = EnumExtensions.GetDescription((PickupSources)orderModel.Source);
                 PickupDelivery = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.DeliveryPersion);
+
+                if (PickupSource == EnumExtensions.GetDescription(PickupSources.Swiggy) || PickupSource == EnumExtensions.GetDescription(PickupSources.Zomato))
+                    ShowReference = true;
+
                 ReferenceNumber = orderModel.ReferenceNo;
             }
             else

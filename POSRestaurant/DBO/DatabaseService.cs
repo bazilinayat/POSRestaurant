@@ -110,6 +110,7 @@ namespace POSRestaurant.DBO
 
             await _connection.CreateTableAsync<OrderPayment>();
             await _connection.CreateTableAsync<RestaurantInfo>();
+            await _connection.CreateTableAsync<ExpenseTypes>();
 
             await SeedDataAsync();
         }
@@ -431,9 +432,8 @@ namespace POSRestaurant.DBO
         /// Method to get all the items in Kot
         /// </summary>
         /// <param name="selectedDate">Selected date for report/param>
-        /// <param name="itemId">item id to search</param>
         /// <returns>Array of KotItem</returns>
-        public async Task<KOTItem[]> GetAllKotItemsAsync(DateTime selectedDate, int itemId)
+        public async Task<KOTItem[]> GetAllKotItemsAsync(DateTime selectedDate)
         {
             var yesterday = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, 0, 0, 0);
             var oneDateMore = selectedDate.AddDays(1);
@@ -448,15 +448,8 @@ namespace POSRestaurant.DBO
             var kotIds = kotsOnDate.Select(o => o.Id).ToArray();
 
             var kotItems = await _connection.Table<KOTItem>().Where(o => kotIds.Contains(o.KOTId)).ToArrayAsync();
-
-            if (itemId == 0)
-            {
-                return kotItems;
-            }
-            else
-            {
-                return kotItems.Where(o => o.ItemId == itemId).ToArray();
-            }
+            
+            return kotItems;
         }
 
         /// <summary>
@@ -472,7 +465,7 @@ namespace POSRestaurant.DBO
         /// <param name="searchText">The item name to search</param>
         /// <returns>Returns a array of ItemOnMenu</returns>
         public async Task<ItemOnMenu[]> GetMenuItemBySearch(string searchText) =>
-            await _connection.Table<ItemOnMenu>().Where(o => o.ShortCode.Contains(searchText)).ToArrayAsync();
+            await _connection.Table<ItemOnMenu>().Where(o => o.ShortCode.Contains(searchText) || o.Name.ToLower().Contains(searchText.ToLower())).ToArrayAsync();
 
         /// <summary>
         /// To get the last KOT number for orderId, so we can number the new kots properly

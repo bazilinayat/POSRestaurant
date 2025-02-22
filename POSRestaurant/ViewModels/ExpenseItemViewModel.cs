@@ -62,7 +62,7 @@ namespace POSRestaurant.ViewModels
 
             var expenseTypes = Enum.GetValues(typeof(ExpenseItemTypes))
                .Cast<ExpenseItemTypes>()
-               .Select(t => new ExpenseTypeModel { Id = (int)t, ExpenseTypeName = t.ToString(), IsSelected = false }).ToList();
+               .Select(t => new ExpenseTypeModel { Id = (int)t, Name = t.ToString(), IsSelected = false }).ToList();
 
             ExpenseTypes = new List<ExpenseTypeModel>();
             foreach(var expenseType in expenseTypes)

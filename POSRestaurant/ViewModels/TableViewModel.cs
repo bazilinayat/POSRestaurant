@@ -257,7 +257,7 @@ namespace POSRestaurant.ViewModels
             switch (tableModel.Status)
             {
                 case TableOrderStatus.Running: // To view the whole order, with KOTs
-                    var vovm = _serviceProvider.GetRequiredService<ViewOrderViewModel>();
+                    var vovm = _serviceProvider.GetRequiredService<OrderViewViewModel>();
                     await Application.Current.MainPage.Navigation.PushAsync(new OrderViewPage(vovm, _ordersViewModel, tableModel));
                     break;
                 case TableOrderStatus.Confirmed:

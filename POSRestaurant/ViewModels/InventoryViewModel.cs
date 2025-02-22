@@ -5,6 +5,7 @@ using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.Pages;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -16,12 +17,17 @@ namespace POSRestaurant.ViewModels
     /// <summary>
     /// ViewModel for Item Report operations
     /// </summary>
-    public partial class InventoryViewModel : ObservableObject, IRecipient<StaffChangedMessage>
+    public partial class InventoryViewModel : ObservableObject, IRecipient<StaffChangedMessage>, IRecipient<ExpenseTypeChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// ServiceProvider for the DIs
+        /// </summary>
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// To indicate that the ViewModel data is loading
@@ -42,7 +48,7 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// Type of expense items, we need to choose one
         /// </summary>
-        public ObservableCollection<ValueForPicker> ExpenseItemTypes { get; set; } = new();
+        public ObservableCollection<ExpenseTypeModel> ExpenseItemTypes { get; set; } = new();
 
         /// <summary>
         /// List of expense items to choose from
@@ -63,11 +69,14 @@ namespace POSRestaurant.ViewModels
         /// Constructor for the InventoryViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public InventoryViewModel(DatabaseService databaseService)
+        /// <param name="databaseService">DI for DatabaseService</param>
+        public InventoryViewModel(IServiceProvider serviceProvider, DatabaseService databaseService)
         {
+            _serviceProvider = serviceProvider;
             _databaseService = databaseService;
 
             WeakReferenceMessenger.Default.Register<StaffChangedMessage>(this);
+            WeakReferenceMessenger.Default.Register<ExpenseTypeChangedMessage>(this);
         }
 
         /// <summary>
@@ -81,22 +90,31 @@ namespace POSRestaurant.ViewModels
             _isInitialized = true;
             IsLoading = true;
 
-            ExpenseItemTypes.Clear();
             ExpenseItems.Clear();
             StaffMembers.Clear();
             PaymentModes.Clear();
 
-            // Populate ExpenseItemTypes
-            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<ExpenseItemTypes>())
+            var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
+                                .Select(ExpenseTypeModel.FromEntity)
+                                .ToList();
+            ExpenseItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
+            foreach (var coowner in expenseItems)
             {
-                ExpenseItemTypes.Add(desc);
+                ExpenseItemTypes.Add(coowner);
             }
 
-            // Populate ExpenseItems (mock data for now)
-            var expenseItems = await _databaseService.InventoryOperations.GetAllExpenseItemsAsync();
-            foreach(var expenseItem in expenseItems)
+            if (ExpenseItemTypes.Count() == 1)
             {
-                ExpenseItems.Add(expenseItem);
+                await Shell.Current.DisplayAlert(
+                    "Error",
+                    $"Add Expense Types in Settings",
+                    "OK");
+                var settingVM = _serviceProvider.GetRequiredService<SettingsViewModel>();
+                await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage(settingVM));
+            }
+            else
+            {
+                ExpenseItemTypes[0].IsSelected = true;
             }
 
             // Populate StaffMembers (mock data for now)
@@ -130,7 +148,7 @@ namespace POSRestaurant.ViewModels
                 Rows.Add(new InventoryRowModel(_databaseService)
                 {
                     ExpenseItemTypes = ExpenseItemTypes,
-                    ExpenseItems = new ObservableCollection<ExpenseItem> { new ExpenseItem { Id = 0, Name = "Select Item" } },
+                    ExpenseItem = "",
                     StaffMembers = StaffMembers,
                     PaymentModes = PaymentModes
                 });
@@ -158,6 +176,29 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
+        /// Refresh expense type details when received
+        /// </summary>
+        /// <param name="message">StaffChangedMessage</param>
+        public async void Receive(ExpenseTypeChangedMessage message)
+        {
+            ExpenseItemTypes.Clear();
+            var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
+                                .Select(ExpenseTypeModel.FromEntity)
+                                .ToList();
+            ExpenseItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
+            foreach (var coowner in expenseItems)
+            {
+                ExpenseItemTypes.Add(coowner);
+            }
+            ExpenseItemTypes[0].IsSelected = true;
+
+            for (int i = 0; i < Rows.Count; i++)
+            {
+                Rows[i].ExpenseItemTypes = ExpenseItemTypes;
+            }
+        }
+
+        /// <summary>
         /// To handle the add rows command from the UI
         /// </summary>
         [RelayCommand]
@@ -170,7 +211,7 @@ namespace POSRestaurant.ViewModels
         private bool IsRowValid(InventoryRowModel row)
         {
             return row.SelectedExpenseItemType != null
-                && row.SelectedExpenseItem != null
+                && !string.IsNullOrWhiteSpace(row.ExpenseItem)
                 && row.WeightOrQuantity > 0
                 && row.AmountPaid > 0
                 && row.SelectedPaymentMode != null

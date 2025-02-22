@@ -11,7 +11,7 @@ public partial class OrderViewPage : ContentPage
     /// <summary>
     /// DIed property to handle the HomeViewModel
     /// </summary>
-    private readonly ViewOrderViewModel _viewOrderViewModel;
+    private readonly OrderViewViewModel _viewOrderViewModel;
 
     /// <summary>
     /// DIed TableModel for table info and update
@@ -29,7 +29,7 @@ public partial class OrderViewPage : ContentPage
     /// <param name="viewOrderViewModel">ViewOrderViewModel for the content page and handle actions</param>
     /// <param name="orderViewModel">OrderViewModel for order related queries</param>
     /// <param name="tableModel">TableViewModel to add table details with orders</param>
-    public OrderViewPage(ViewOrderViewModel viewOrderViewModel, OrdersViewModel orderViewModel, TableModel tableModel)
+    public OrderViewPage(OrderViewViewModel viewOrderViewModel, OrdersViewModel orderViewModel, TableModel tableModel)
 	{
         InitializeComponent();
         _viewOrderViewModel = viewOrderViewModel;

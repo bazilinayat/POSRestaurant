@@ -13,6 +13,12 @@
 "SccProvider" = "8:"
     "Hierarchy"
     {
+        "Entry"
+        {
+        "MsmKey" = "8:_EDD2BDCA5CA04DA1A4FD87AEC1E273A7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -72,10 +78,15 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.NetCore.DesktopRuntime.8.0.x64"
                     {
-                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    "Name" = "8:.NET Desktop Runtime 8.0.8 (x64)"
+                    "ProductCode" = "8:Microsoft.NetCore.DesktopRuntime.8.0.x64"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Visual.C++.14.0.x64"
+                    {
+                    "Name" = "8:Visual C++ \"14\" Runtime Libraries (x64)"
+                    "ProductCode" = "8:Microsoft.Visual.C++.14.0.x64"
                     }
                 }
             }
@@ -175,7 +186,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:POSRestaurant"
         "ProductCode" = "8:{13060B29-08CB-494C-B09F-E6F3FA647ED3}"
-        "PackageCode" = "8:{2A43FD69-ECAC-476A-B960-4D73A9979391}"
+        "PackageCode" = "8:{F5B6D26A-AD09-469E-9378-93FC409C0BB0}"
         "UpgradeCode" = "8:{FAF262DC-3775-4376-A94C-11C238811799}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
@@ -694,9 +705,9 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_3A652442C49742F7942D096673522123"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_EDD2BDCA5CA04DA1A4FD87AEC1E273A7"
             {
-            "SourcePath" = "8:"
+            "SourcePath" = "8:..\\POSRestaurant\\obj\\Debug\\net8.0-windows10.0.19041.0\\win10-x64\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_0B16764F58C64FD6B70257C97F068652"

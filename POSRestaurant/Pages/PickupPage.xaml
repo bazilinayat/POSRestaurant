@@ -32,6 +32,7 @@
                            CancelButtonColor="Red"
                            HorizontalTextAlignment="Start"
                            Placeholder="Search Items..."
+                           TextColor="White"
                            Margin="20"/>
                 <controls:MenuItemsListControl Grid.Row="1" MenuItems="{Binding MenuItems}" OnMenuItemSelected="MenuItemsListControl_OnMenuItemSelected"/>
             </Grid>
@@ -180,41 +181,27 @@
                             <Label Text="{Binding TotalAmount, StringFormat='{0:C}'}" />
                         </HorizontalStackLayout>
                         <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2">
-                            <RadioButton GroupName="DiscountType" Content="Percentage" 
-                                     IsChecked="{Binding SelectedDiscountType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
-                            </RadioButton>
-                            <Label Text="{Binding DiscountPercentage, StringFormat='{0}%'}"
-                               Padding="5, 0"
-                               BackgroundColor="{StaticResource LightWheat}"
-                               IsEnabled="{Binding EnablePercentageDiscount}"
-                               VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding DiscountPercentageClickCommand}"/>
-                                </Label.GestureRecognizers>
-                            </Label>
-                            <RadioButton GroupName="DiscountType" Content="Fixed"
-                                     IsChecked="{Binding SelectedDiscountType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
-                            </RadioButton>
-                            <Label Text="{Binding DiscountFixed}"
-                               Padding="5, 0"
-                               BackgroundColor="{StaticResource LightWheat}"
-                               IsEnabled="{Binding EnableFixedDiscount}"
-                               VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding DiscountFixedClickCommand}"/>
-                                </Label.GestureRecognizers>
-                            </Label>
-                            <Button Grid.Column="0"
-                                Margin="10, 0"
-                                Text="Cancel"
-                                HorizontalOptions="Start"
-                                VerticalOptions="Center"
-                                CornerRadius="5"
-                                MinimumHeightRequest="25"
-                                MinimumWidthRequest="25"
-                                BackgroundColor="Red"
-                                Command="{Binding CancelDiscountCommand}"/>
-                        </HorizontalStackLayout>
+                                <Label Text="Discount:" VerticalOptions="Center"/>
+                                <!-- Expense Item Picker -->
+                                <Picker Grid.Column="1" ItemsSource="{Binding DiscountOptionsTS}" 
+                                        VerticalOptions="Center"
+                                        HorizontalOptions="Center"
+                                        BackgroundColor="Wheat"
+                                        WidthRequest="200"
+                                        ItemDisplayBinding="{Binding Value}" 
+                                        SelectedItem="{Binding SelectedDiscountType, Mode=TwoWay}"
+                                        TextColor="Black"
+                                        TitleColor="Black"/>
+                                <Label Text="{Binding DiscountAmount, StringFormat='{0}%'}"
+                                        Padding="5, 0"
+                                        BackgroundColor="{StaticResource LightWheat}"
+                                        IsVisible="{Binding EnableDiscount}"
+                                        VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding DiscountClickCommand}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </HorizontalStackLayout>
                         <HorizontalStackLayout Spacing="100" IsVisible="{Binding IsDiscountGiven}">
                             <Label Text="SubTotal After Discount:" />
                             <Label Text="{Binding TotalAmountAfterDiscount, StringFormat='{0:C}'}" />
@@ -249,75 +236,54 @@
                     <VerticalStackLayout>
                         <VerticalStackLayout Spacing="10"
                          Padding="20">
-                            <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
-                                <RadioButton GroupName="PaymentMode" Content="Cash" 
+                                <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                    <RadioButton GroupName="PaymentMode" Content="Cash" 
                                             IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
-                                </RadioButton>
-                                <RadioButton GroupName="PaymentMode" Content="Online"
+                                    </RadioButton>
+                                    <RadioButton GroupName="PaymentMode" Content="Online"
                                             IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
-                                </RadioButton>
-                                <RadioButton GroupName="PaymentMode" Content="Card"
+                                    </RadioButton>
+                                    <RadioButton GroupName="PaymentMode" Content="Card"
                                             IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=3}">
-                                </RadioButton>
-                                <RadioButton GroupName="PaymentMode" Content="Part"
+                                    </RadioButton>
+                                    <RadioButton GroupName="PaymentMode" Content="Part"
                                             IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=4}">
-                                </RadioButton>
-                            </HorizontalStackLayout>
-                            <VerticalStackLayout IsVisible="{Binding IsNotPartPayment}">
-                                <HorizontalStackLayout Spacing="50">
-                                    <Label Text="Paid By Customer:" FontSize="16" VerticalOptions="Center"/>
-                                    <Entry Text="{Binding PaidByCustomer}"
-                                           TextChanged="Entry_TextChanged"
-                                           Style="{StaticResource txt}"
-                                           BackgroundColor="{StaticResource AllBackground}"
-                                           VerticalOptions="Center"
-                                           WidthRequest="100"/>
+                                    </RadioButton>
                                 </HorizontalStackLayout>
-                            </VerticalStackLayout>
-                            <VerticalStackLayout IsVisible="{Binding IsPartPayment}">
-                                <HorizontalStackLayout Spacing="10">
-                                    <CheckBox IsChecked="{Binding IsCashForPart}" CheckedChanged="CheckBox_CheckedChanged" />
-                                    <Label Text="Cash" VerticalOptions="Center" />
-                                    <CheckBox IsChecked="{Binding IsCardForPart}" CheckedChanged="CheckBox_CheckedChanged" />
-                                    <Label Text="Card" VerticalOptions="Center" />
-                                    <CheckBox IsChecked="{Binding IsOnlineForPart}" CheckedChanged="CheckBox_CheckedChanged" />
-                                    <Label Text="Online" VerticalOptions="Center" />
-                                </HorizontalStackLayout>
-                                <VerticalStackLayout Spacing="10">
+                                <VerticalStackLayout IsVisible="{Binding IsPartPayment}">
                                     <HorizontalStackLayout Spacing="10">
-                                        <Label Text="Paid By Cash:" VerticalOptions="Center" />
-                                        <Entry IsEnabled="{Binding IsCashForPart}"
+                                        <CheckBox IsChecked="{Binding IsCashForPart}" CheckedChanged="CheckBox_CheckedChanged" />
+                                        <Label Text="Cash" VerticalOptions="Center" />
+                                        <CheckBox IsChecked="{Binding IsCardForPart}" CheckedChanged="CheckBox_CheckedChanged" />
+                                        <Label Text="Card" VerticalOptions="Center" />
+                                        <CheckBox IsChecked="{Binding IsOnlineForPart}" CheckedChanged="CheckBox_CheckedChanged" />
+                                        <Label Text="Online" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                    <VerticalStackLayout Spacing="10">
+                                        <HorizontalStackLayout Spacing="10">
+                                            <Label Text="Paid By Cash:" VerticalOptions="Center" />
+                                            <Entry IsEnabled="{Binding IsCashForPart}"
                                                TextChanged="Entry_TextChanged"
                                                Placeholder="Enter cash amount" 
                                                Text="{Binding PaidByCustomerInCash}" />
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Spacing="10">
-                                        <Label Text="Paid By Card:" VerticalOptions="Center" />
-                                        <Entry IsEnabled="{Binding IsCardForPart}"
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="10">
+                                            <Label Text="Paid By Card:" VerticalOptions="Center" />
+                                            <Entry IsEnabled="{Binding IsCardForPart}"
                                                TextChanged="Entry_TextChanged"
                                                Placeholder="Enter card amount"
                                                Text="{Binding PaidByCustomerInCard}" />
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Spacing="10">
-                                        <Label Text="Paid By Online:" VerticalOptions="Center" />
-                                        <Entry IsEnabled="{Binding IsOnlineForPart}" 
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="10">
+                                            <Label Text="Paid By Online:" VerticalOptions="Center" />
+                                            <Entry IsEnabled="{Binding IsOnlineForPart}" 
                                                TextChanged="Entry_TextChanged"
                                                Placeholder="Enter online amount"
                                                Text="{Binding PaidByCustomerInOnline}" />
-                                    </HorizontalStackLayout>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
                                 </VerticalStackLayout>
                             </VerticalStackLayout>
-                            <VerticalStackLayout>
-                                <HorizontalStackLayout Spacing="50">
-                                    <Label Text="Return:" FontSize="16" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Return}" Style="{StaticResource txt}" VerticalOptions="Center" TextColor="Red" BackgroundColor="{StaticResource LightWheat}"/>
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="50">
-                                    <Label Text="Tip:" FontSize="16" VerticalOptions="Center"/>
-                                    <Entry Text="{Binding Tip}" Style="{StaticResource txt}" VerticalOptions="Center" WidthRequest="100" BackgroundColor="{StaticResource AllBackground}"/>
-                                </HorizontalStackLayout>
-                            </VerticalStackLayout>
-                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
                 <VerticalStackLayout Spacing="10">

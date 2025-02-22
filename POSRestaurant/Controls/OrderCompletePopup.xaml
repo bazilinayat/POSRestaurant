@@ -75,17 +75,6 @@
                                  IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=4}">
                     </RadioButton>
                 </HorizontalStackLayout>
-                <VerticalStackLayout IsVisible="{Binding IsNotPartPayment}">
-                    <HorizontalStackLayout Spacing="50">
-                        <Label Text="Paid By Customer:" FontSize="16" VerticalOptions="Center"/>
-                        <Entry Text="{Binding PaidByCustomer}"
-                               TextChanged="Entry_TextChanged"
-                               Style="{StaticResource txt}"
-                               BackgroundColor="{StaticResource AllBackground}"
-                               VerticalOptions="Center"
-                               WidthRequest="100"/>
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
                 <VerticalStackLayout IsVisible="{Binding IsPartPayment}" Padding="10">
                     <HorizontalStackLayout Spacing="10">
                         <CheckBox IsChecked="{Binding IsCashForPart}" CheckedChanged="CheckBox_CheckedChanged" />
@@ -120,14 +109,6 @@
                     </VerticalStackLayout>
                 </VerticalStackLayout>
                 <VerticalStackLayout>
-                    <HorizontalStackLayout Spacing="50">
-                        <Label Text="Return:" FontSize="16" VerticalOptions="Center"/>
-                        <Label Text="{Binding Return}" Style="{StaticResource txt}" VerticalOptions="Center" TextColor="Red" BackgroundColor="{StaticResource LightWheat}"/>
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="50">
-                        <Label Text="Tip:" FontSize="16" VerticalOptions="Center"/>
-                        <Entry Text="{Binding Tip}" Style="{StaticResource txt}" VerticalOptions="Center" WidthRequest="100" BackgroundColor="{StaticResource AllBackground}"/>
-                    </HorizontalStackLayout>
                     <Grid ColumnDefinitions="*, *, *">
                         <Button Grid.Column="0"
                                 Text="Cancel"

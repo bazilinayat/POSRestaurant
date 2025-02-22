@@ -39,7 +39,7 @@
                 </HorizontalStackLayout>
                 <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                     <Label Text="Select Expense Type:" Style="{StaticResource th}" />
-                    <Picker WidthRequest="100" BackgroundColor="{StaticResource DropDownBackground}" ItemsSource="{Binding ItemTypes}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
+                    <Picker WidthRequest="100" BackgroundColor="{StaticResource DropDownBackground}" ItemsSource="{Binding ItemTypes}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemDisplayBinding="{Binding Name}" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                     <Label Text="Select Payer:" Style="{StaticResource th}" />
@@ -80,7 +80,7 @@
                             <DataTemplate x:DataType="models:InventoryReportModel">
                                 <Grid ColumnDefinitions="*, *, *, *, *, *" RowDefinitions="*, Auto">
                                         <Label Grid.Column="0"
-                                             Text="{Binding ItemType}"
+                                             Text="{Binding ExpenseTypeName}"
                                              Style="{StaticResource td}"/>
                                         <Label Grid.Column="1"
                                              Text="{Binding ExpenseItemName}"

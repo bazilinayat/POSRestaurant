@@ -8,7 +8,7 @@
              xmlns:converters="clr-namespace:POSRestaurant.Converters"
              x:Class="POSRestaurant.Pages.OrderViewPage"
              Shell.NavBarIsVisible="True"
-             x:DataType="vm:ViewOrderViewModel">
+             x:DataType="vm:OrderViewViewModel">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -40,6 +40,7 @@
                        CancelButtonColor="Red"
                        HorizontalTextAlignment="Start"
                        Placeholder="Search Items..."
+                       TextColor="White"
                        Margin="20"/>
                 <controls:MenuItemsListControl Grid.Row="1" MenuItems="{Binding MenuItems}" OnMenuItemSelected="MenuItemsListControl_OnMenuItemSelected"/>
                 <BoxView IsVisible="{Binding IsLoading}"
@@ -63,6 +64,9 @@
                 <VerticalStackLayout Grid.Row="0" 
                              Spacing="5"
                              Padding="10, 0">
+                    <Label Text="{Binding TableNumber, StringFormat='Table: {0}'}"
+                            FontSize="25"
+                            FontAttributes="Bold"/>
                     <Label Text="Order Items"
                    FontSize="25"
                    FontAttributes="Bold"/>
@@ -104,7 +108,7 @@
                                                              HeightRequest="30"
                                                              WidthRequest="30"
                                                              Padding="5"
-                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=DecreaseQuantityCommand}"
+                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:OrderViewViewModel}}, Path=DecreaseQuantityCommand}"
                                                              CommandParameter="{Binding .}"/>
                                                     <Label Grid.Column="1"
                                                        Text="{Binding Quantity}"
@@ -122,7 +126,7 @@
                                                              HeightRequest="30"
                                                              WidthRequest="30"
                                                              Padding="5"
-                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=IncreaseQuantityCommand}"
+                                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:OrderViewViewModel}}, Path=IncreaseQuantityCommand}"
                                                              CommandParameter="{Binding .}"/>
                                                 </Grid>
                                             </Grid>
@@ -136,7 +140,7 @@
                                              WidthRequest="25"
                                              BackgroundColor="Red"
                                              ToolTipProperties.Text="Remove Item"
-                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ViewOrderViewModel}}, Path=RemoveItemFromCartCommand}"
+                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:OrderViewViewModel}}, Path=RemoveItemFromCartCommand}"
                                              CommandParameter="{Binding .}">
                                         <ImageButton.Shadow>
                                             <Shadow Brush="Red"/>
@@ -168,23 +172,35 @@
                                HorizontalOptions="Center"
                                Text="{Binding SubTotal, StringFormat='{0:C}'}" />
                             <HorizontalStackLayout Grid.Row="1"
-                                               Grid.Column="0"
+                                                   Grid.ColumnSpan="2"
                                                Spacing="5">
                                 <Label Text="Discount:" VerticalOptions="Center"/>
+                                <!-- Expense Item Picker -->
+                                <Picker Grid.Column="1" ItemsSource="{Binding DiscountOptionsTS}" 
+                                        VerticalOptions="Center"
+                                        HorizontalOptions="Center"
+                                        BackgroundColor="Wheat"
+                                        WidthRequest="200"
+                                        ItemDisplayBinding="{Binding Value}" 
+                                        SelectedItem="{Binding SelectedDiscountType, Mode=TwoWay}"
+                                        TextColor="Black"
+                                        TitleColor="Black"/>
+                                <Label Text="{Binding DiscountAmount, StringFormat='{0}%'}"
+                                       Padding="5, 0"
+                                       BackgroundColor="{StaticResource LightWheat}"
+                                       IsVisible="{Binding EnableDiscount}"
+                                       VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding DiscountClickCommand}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2">
+                            
+                            <!--<HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2">
                                 <RadioButton GroupName="DiscountType" Content="Percentage" 
                                          IsChecked="{Binding SelectedDiscountType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
                                 </RadioButton>
-                                <Label Text="{Binding DiscountPercentage, StringFormat='{0}%'}"
-                                   Padding="5, 0"
-                                   BackgroundColor="{StaticResource LightWheat}"
-                                   IsEnabled="{Binding EnablePercentageDiscount}"
-                                   VerticalOptions="Center">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding DiscountPercentageClickCommand}"/>
-                                    </Label.GestureRecognizers>
-                                </Label>
+                                
                                 <RadioButton GroupName="DiscountType" Content="Fixed"
                                          IsChecked="{Binding SelectedDiscountType, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
                                 </RadioButton>
@@ -207,7 +223,7 @@
                                     MinimumWidthRequest="25"
                                     BackgroundColor="Red"
                                     Command="{Binding CancelDiscountCommand}"/>
-                            </HorizontalStackLayout>
+                            </HorizontalStackLayout>-->
                             <!--<Label Grid.Row="1"
                                Grid.Column="1"
                                HorizontalOptions="Center"
@@ -248,7 +264,7 @@
                                     BackgroundColor="Red"
                                     Clicked="CancelButton_Clicked"/>
                                 <Button Grid.Column="2"
-                                    Text="Save &amp; Print"
+                                    Text="Confirm"
                                     HorizontalOptions="End"
                                     VerticalOptions="Center"
                                     CornerRadius="5"

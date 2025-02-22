@@ -2,10 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Internals;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using System.Collections.ObjectModel;
 
 namespace POSRestaurant.ViewModels
 {
@@ -24,6 +26,18 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         [ObservableProperty]
         private bool _isLoading;
+
+        /// <summary>
+        /// To list the different settings options we have
+        /// </summary>
+        [ObservableProperty]
+        private ValueForPickerSelection[] _settings = [];
+
+        /// <summary>
+        /// Property to observe the selected category on UI
+        /// </summary>
+        [ObservableProperty]
+        private ValueForPickerSelection _selectedSetting;
 
         /// <summary>
         /// To know if restaurant is using Gst on the application
@@ -79,6 +93,24 @@ namespace POSRestaurant.ViewModels
         public bool InfoInitialized = false;
 
         /// <summary>
+        /// To show the restaurant info
+        /// </summary>
+        [ObservableProperty]
+        private bool _showInfo;
+
+        /// <summary>
+        /// To show the expense types
+        /// </summary>
+        [ObservableProperty]
+        private bool _showExpenseTypes;
+
+        /// <summary>
+        /// A list of expense type to display
+        /// </summary>
+        [ObservableProperty]
+        private ExpenseTypes[] _expenseTypesToDisplay = [];
+
+        /// <summary>
         /// Constructor for the view model
         /// </summary>
         /// <param name="databaseService">DIed Database Service</param>
@@ -93,6 +125,14 @@ namespace POSRestaurant.ViewModels
         /// <returns></returns>
         public async ValueTask InitializeAsync()
         {
+            Settings = EnumExtensions.GetAllDescriptions<ApplicationSettings>()
+                        .Select(ValueForPickerSelection.FromEntity)
+                        .ToArray();
+            Settings[0].IsSelected = true;
+            SelectedSetting = Settings[0];
+            ShowInfo = true;
+            ShowExpenseTypes = false;
+
             var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
 
             if (restaurantInfo == null)
@@ -112,6 +152,99 @@ namespace POSRestaurant.ViewModels
                 GstIn = restaurantInfo.GSTIN;
                 Cgst = restaurantInfo.CGST;
                 Sgst = restaurantInfo.SGST;
+            }
+        }
+
+        /// <summary>
+        /// When add new expense type button is clicked, take value and add new expense type
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        [RelayCommand]
+        private async Task AddExpenseType()
+        {
+            var result = await Shell.Current.DisplayPromptAsync("ExpenseType", "Enter the Expense Type name.", placeholder: "Enter Expense Type Name");
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                var errorMessage = await _databaseService.SettingsOperation.SaveExpenseType(result);
+                if (errorMessage == null)
+                {
+                    await Shell.Current.DisplayAlert("Success", $"{result} Added Successfully", "OK");
+                    await LoadExpenseTypes();
+                    WeakReferenceMessenger.Default.Send(ExpenseTypeChangedMessage.From(true));
+                    return;
+                }
+                await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Change data as per selected category
+        /// Working as a relay command
+        /// </summary>
+        /// <param name="settingId">CategoryId of the MenuCategory selected</param>
+        [RelayCommand]
+        private async Task SelectSettingAsync(int settingId)
+        {
+            if (SelectedSetting.Key == settingId) return;
+
+            IsLoading = true;
+
+            var existingSelectedCategory = Settings.First(o => o.IsSelected);
+            existingSelectedCategory.IsSelected = false;
+
+            var newSelectedCategory = Settings.First(o => o.Key == settingId);
+            newSelectedCategory.IsSelected = true;
+
+            SelectedSetting = newSelectedCategory;
+
+            switch (SelectedSetting.Key)
+            {
+                case (int)ApplicationSettings.RestaurantInfo:
+                    ShowInfo = true;
+                    ShowExpenseTypes = false;
+                    break;
+                case (int)ApplicationSettings.ExpenseItems:
+                    await LoadExpenseTypes();
+                    ShowInfo = false;
+                    ShowExpenseTypes = true;
+                    break;
+            }
+
+            IsLoading = false;
+        }
+
+        /// <summary>
+        /// To load all the expense types
+        /// </summary>
+        /// <returns>Returns a task</returns>
+        private async Task LoadExpenseTypes()
+        {
+            IsLoading = true;
+
+            ExpenseTypesToDisplay = await _databaseService.SettingsOperation.GetExpenseTypes();
+
+            IsLoading = false;
+        }
+
+        /// <summary>
+        /// Command to delete the expense type
+        /// </summary>
+        /// <param name="expenseType">Expense type to delete</param>
+        /// <returns>Returns a task</returns>
+        [RelayCommand]
+        private async Task DeleteExpenseTypeAsync(ExpenseTypes expenseType)
+        {
+            if (await Shell.Current.DisplayAlert("Delete?", $"Do you really want to delete this type?", "Yes", "No"))
+            {
+                var errorMessage = await _databaseService.SettingsOperation.DeleteExpenseType(expenseType);
+
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                    return;
+                }
+                await LoadExpenseTypes();
             }
         }
 

@@ -81,14 +81,7 @@ namespace POSRestaurant.ViewModels
         /// To keep track of the total amount of the bill
         /// </summary>
         public decimal Total => SubTotal;
-
-        /// <summary>
-        /// To track the order type on UI
-        /// Made observable for using in UI
-        /// </summary>
-        [ObservableProperty]
-        private OrderTypes _orderType = OrderTypes.DineIn;
-
+        
         /// <summary>
         /// To enable or disable the OrderType selection
         /// </summary>
@@ -129,35 +122,10 @@ namespace POSRestaurant.ViewModels
         public int _numberOfPeople = 1;
 
         /// <summary>
-        /// To manage the selected order type on main page
+        /// To keep track of the table number
         /// </summary>
-        private int _selectedOrderType;
-
-        /// <summary>
-        /// To manage the selected order type on main page
-        /// Should be handled by code as well
-        /// </summary>
-        public int SelectedOrderType
-        {
-            get => _selectedOrderType;
-            set
-            {
-                if (_selectedOrderType != value)
-                {
-                    _selectedOrderType = value;
-                    switch (Convert.ToInt32(_selectedOrderType))
-                    {
-                        case (int)OrderTypes.DineIn:
-                            OrderType = OrderTypes.DineIn;
-                            break;
-                        case (int)OrderTypes.Pickup:
-                            OrderType = OrderTypes.Pickup;
-                            break;
-                    }
-                    OnOrderTypeChanged();
-                }
-            }
-        }
+        [ObservableProperty]
+        public int _tableNumber;
 
         /// <summary>
         /// List of waiters to be assigned to the order
@@ -185,20 +153,6 @@ namespace POSRestaurant.ViewModels
                     OnPropertyChanged();
                 }
             }
-        }
-
-        /// <summary>
-        /// To handle the property changed event for the radio button switch
-        /// </summary>
-        public event PropertyChangedEventHandler OrderTypePropertyChanged;
-
-        /// <summary>
-        /// Called when OrderType is changed
-        /// </summary>
-        /// <param name="orderType">Selected OrderType name</param>
-        protected virtual void OnOrderTypeChanged([CallerMemberName] string orderType = null)
-        {
-            OrderTypePropertyChanged?.Invoke(this, new PropertyChangedEventArgs(orderType));
         }
 
         /// <summary>
@@ -232,9 +186,6 @@ namespace POSRestaurant.ViewModels
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<MenuItemChangedMessage>(this);
             WeakReferenceMessenger.Default.Register<StaffChangedMessage>(this);
-
-            // Set the initial selection
-            SelectedOrderType = 1; // Default to "Dine In"
         }
 
         /// <summary>
@@ -244,12 +195,12 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync(TableModel tableModel)
         {
+            TableNumber = tableModel.TableNo;
             if (tableModel.Status != TableOrderStatus.NoOrder)
             {
                 OrderTypeEnable = false;
                 NumberOfPeopleEnable = false;
                 NumberOfPeople = tableModel.NumberOfPeople;
-                SelectedOrderType = (int)tableModel.OrderType;
                 SelectedWaiter = tableModel.Waiter;
             }
             else
@@ -257,18 +208,18 @@ namespace POSRestaurant.ViewModels
                 OrderTypeEnable = true;
                 NumberOfPeopleEnable = true;
                 NumberOfPeople = 1;
-                SelectedOrderType = 1;
             }
+            
 
             if (_isInitialized)
             {
-                foreach(var category in Categories)
+                foreach (var category in Categories)
                 {
                     category.IsSelected = false;
                 }
                 Categories[0].IsSelected = true;
                 SelectedCategory = Categories[0];
-
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
                 return;
             }
 
@@ -434,12 +385,12 @@ namespace POSRestaurant.ViewModels
 
             if (tableModel.RunningOrderId == 0)
             {
-                tableModel.OrderType = OrderType;
+                tableModel.OrderType = OrderTypes.DineIn;
                 tableModel.Waiter = SelectedWaiter;
                 tableModel.NumberOfPeople = NumberOfPeople;
             }
 
-            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel, OrderType, SelectedWaiter))
+            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel, OrderTypes.DineIn, SelectedWaiter))
             {
                 CartItems.Clear();
 

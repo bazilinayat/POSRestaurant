@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Maui.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
@@ -17,7 +19,7 @@ namespace POSRestaurant.ViewModels
     /// <summary>
     /// ViewModel for OrderView Page
     /// </summary>
-    public partial class ViewOrderViewModel : ObservableObject
+    public partial class OrderViewViewModel : ObservableObject
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -90,7 +92,7 @@ namespace POSRestaurant.ViewModels
         /// Made observable for using in UI
         /// </summary>
         [ObservableProperty, NotifyPropertyChangedFor(nameof(DiscountPercentageAmount))]
-        private decimal _discountPercentage;
+        private decimal _discountAmount;
 
         /// <summary>
         /// To track the fixed discount given by user
@@ -101,7 +103,7 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// To keep track of the tax amount
         /// </summary>
-        public decimal DiscountPercentageAmount => (SubTotal * DiscountPercentage) / 100;
+        public decimal DiscountPercentageAmount => (SubTotal * DiscountAmount) / 100;
 
         /// <summary>
         /// To keep track of the total amount of the bill
@@ -161,15 +163,10 @@ namespace POSRestaurant.ViewModels
         private bool IsDiscountGiven {  get; set; }
 
         /// <summary>
-        /// To manage the selected order type on main page
-        /// </summary>
-        private int _selectedDiscountType;
-
-        /// <summary>
         /// To enable or disable percentage discount
         /// </summary>
         [ObservableProperty]
-        private bool _enablePercentageDiscount;
+        private bool _enableDiscount;
 
         /// <summary>
         /// To enable or disable fixed discount
@@ -178,10 +175,26 @@ namespace POSRestaurant.ViewModels
         private bool _enableFixedDiscount;
 
         /// <summary>
+        /// To keep track of the table number
+        /// </summary>
+        [ObservableProperty]
+        public int _tableNumber;
+
+        /// <summary>
+        /// To know different discount types in picker
+        /// </summary>
+        public ObservableCollection<ValueForPicker> DiscountOptionsTS { get; set; } = new();
+
+        /// <summary>
+        /// Selected type for filter
+        /// </summary>
+        private ValueForPicker _selectedDiscountType;
+
+        /// <summary>
         /// To manage the selected order type on main page
         /// Should be handled by code as well
         /// </summary>
-        public int SelectedDiscountType
+        public ValueForPicker SelectedDiscountType
         {
             get => _selectedDiscountType;
             set
@@ -190,19 +203,29 @@ namespace POSRestaurant.ViewModels
                 {
                     _selectedDiscountType = value;
 
-                    if (_selectedDiscountType == 1)
+                    if (_selectedDiscountType == null)
                     {
-                        EnablePercentageDiscount = true;
-                        EnableFixedDiscount = false;
+                        IsDiscountGiven = false;
+                        DiscountAmount = 0;
+                        EnableDiscount = false;
+                        OnPropertyChanged();
+                        return;
                     }
-                    else if (_selectedDiscountType == 2)
+
+                    if (_selectedDiscountType.Key == 0)
                     {
-                        EnablePercentageDiscount = false;
-                        EnableFixedDiscount = true;
+                        IsDiscountGiven = false;
+                        DiscountAmount = 0;
+                        EnableDiscount = false;
                     }
-                    IsDiscountGiven = true;
+                    else if (_selectedDiscountType.Key == 1 || _selectedDiscountType.Key == 2)
+                    {
+                        DiscountAmount = 0;
+                        EnableDiscount = true;
+                        IsDiscountGiven = true;
+                    }
                     OnPropertyChanged();
-                    if (_selectedDiscountType != 0)
+                    if (_selectedDiscountType.Key != 0)
                         CalculateTotal();
                 }
             }
@@ -228,7 +251,7 @@ namespace POSRestaurant.ViewModels
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public ViewOrderViewModel(DatabaseService databaseService, MenuService menuService, 
+        public OrderViewViewModel(DatabaseService databaseService, MenuService menuService, 
             OrdersViewModel ordersViewModel, SettingService settingService,
             TaxService taxService)
         {
@@ -251,6 +274,8 @@ namespace POSRestaurant.ViewModels
         {
             IsLoading = true;
 
+            TableNumber = TableModel.TableNo;
+
             OrderItems.Clear();
 
             Categories = await _menuService.GetMenuCategories();
@@ -259,6 +284,18 @@ namespace POSRestaurant.ViewModels
             SelectedCategory = Categories[0];
 
             MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+
+            DiscountOptionsTS.Clear();
+            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<DiscountOptions>())
+            {
+                DiscountOptionsTS.Add(desc);
+            }
+            var defaultItem = DiscountOptionsTS.FirstOrDefault(x => x.Key == 0);
+            if (defaultItem != null)
+            {
+                SelectedDiscountType = defaultItem;
+            }
+            _selectedDiscountType = DiscountOptionsTS.First();
 
             await GetOrderDetailsAsync();
             await GetOrderKOTsAsync();
@@ -439,43 +476,29 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <returns>A Task object</returns>
         [RelayCommand]
-        private async Task DiscountPercentageClickAsync()
+        private async Task DiscountClickAsync()
         {
-            var result = await Shell.Current.DisplayPromptAsync("Discount Percentage", "Enter the applicable discount percentage.", placeholder: "10", initialValue: DiscountPercentage.ToString());
+            var result = await Shell.Current.DisplayPromptAsync("Discount", "Enter the applicable discount in percentage / fixed amount.", placeholder: "10", initialValue: DiscountAmount.ToString());
             if (!string.IsNullOrWhiteSpace(result))
             {
 
-                if (!Decimal.TryParse(result, out decimal enteredDiscountPercentage))
+                if (!Decimal.TryParse(result, out decimal enteredDiscount))
                 {
-                    await Shell.Current.DisplayAlert("Invalid Value", "Entered discount percentage is invalid.", "Ok");
+                    await Shell.Current.DisplayAlert("Invalid Value", "Entered discount is invalid.", "Ok");
                     return;
                 }
 
-                DiscountPercentage = enteredDiscountPercentage;
-                Total = SubTotal - DiscountPercentageAmount;
-            }
-            IsUpdated = true;
-        }
-
-        /// <summary>
-        /// Command to open a dialog box for accepting tax percentage
-        /// </summary>
-        /// <returns>A Task object</returns>
-        [RelayCommand]
-        private async Task DiscountFixedClickAsync()
-        {
-            var result = await Shell.Current.DisplayPromptAsync("Discount Fixed", "Enter the applicable discount amount.", placeholder: "10", initialValue: DiscountFixed.ToString());
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-
-                if (!Decimal.TryParse(result, out decimal enteredFixedDiscount))
+                if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
                 {
-                    await Shell.Current.DisplayAlert("Invalid Value", "Entered discount amount is invalid.", "Ok");
-                    return;
+                    DiscountAmount = enteredDiscount;
+                    Total = SubTotal - DiscountAmount;
                 }
-
-                DiscountFixed = enteredFixedDiscount;
-                Total = SubTotal - DiscountFixed;
+                else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
+                {
+                    DiscountAmount = (SubTotal * enteredDiscount) / 100;
+                    DiscountAmount = enteredDiscount;
+                    Total = SubTotal - DiscountPercentageAmount;
+                }
             }
             IsUpdated = true;
         }
@@ -571,9 +594,9 @@ namespace POSRestaurant.ViewModels
                 {
                     OrderId = TableModel.RunningOrderId,
                     IsFixedBased = EnableFixedDiscount,
-                    IsPercentageBased = EnablePercentageDiscount,
-                    DiscountFixed = DiscountFixed,
-                    DiscountPercentage = DiscountPercentage,
+                    IsPercentageBased = EnableDiscount,
+                    DiscountFixed = DiscountAmount,
+                    DiscountPercentage = DiscountAmount,
                 };
                 await _databaseService.DiscountOperations.SaveDiscountAsync(discount);
             }
@@ -600,19 +623,19 @@ namespace POSRestaurant.ViewModels
             var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
 
             order.IsDiscountGiven = IsDiscountGiven;
-            order.IsFixedBased = EnableFixedDiscount;
-            order.IsPercentageBased = EnablePercentageDiscount;
-            order.DiscountFixed = DiscountFixed;
-            order.DiscountPercentage = DiscountPercentage;
+            order.IsFixedBased = SelectedDiscountType.Key == (int)DiscountOptions.Fixed ? true : false;
+            order.IsPercentageBased = SelectedDiscountType.Key == (int)DiscountOptions.Percentage ? true : false; ;
+            order.DiscountFixed = DiscountAmount;
+            order.DiscountPercentage = DiscountAmount;
             if (IsDiscountGiven)
             {
-                if (EnableFixedDiscount)
+                if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
                 {
-                    order.TotalAmountAfterDiscount = order.TotalAmount - DiscountFixed;
+                    order.TotalAmountAfterDiscount = order.TotalAmount - DiscountAmount;
                 }
-                else if (EnablePercentageDiscount)
+                else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
                 {
-                    var amount = order.TotalAmount * DiscountPercentage / 100;
+                    var amount = order.TotalAmount * DiscountAmount / 100;
                     order.TotalAmountAfterDiscount = order.TotalAmount - amount;
                 }
             }
@@ -644,27 +667,17 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
-        /// Command to cancel given discount
-        /// </summary>
-        [RelayCommand]
-        private void CancelDiscount()
-        {
-            IsDiscountGiven = false;
-            EnableFixedDiscount = false;
-            EnablePercentageDiscount = false;
-        }
-
-        /// <summary>
         /// To calculate the total amount
         /// </summary>
         private void CalculateTotal()
         {
+            if (SelectedDiscountType == null) return;
             Total = SubTotal;
-            if (SelectedDiscountType == 1)
+            if (SelectedDiscountType.Key == 1)
             {
                 Total = SubTotal - DiscountPercentageAmount;
             }
-            else if (SelectedDiscountType == 2)
+            else if (SelectedDiscountType.Key == 2)
             {
                 Total = SubTotal - DiscountFixed;
             }

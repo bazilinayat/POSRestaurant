@@ -1,5 +1,6 @@
 ﻿using POSRestaurant.Data;
 using SQLite;
+using Windows.UI.Core.AnimationMetrics;
 
 namespace POSRestaurant.DBO
 {
@@ -53,6 +54,47 @@ namespace POSRestaurant.DBO
 
                 return "Error in saving restaurant info";
             }
+        }
+
+        /// <summary>
+        /// To get all the expense types 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ExpenseTypes[]> GetExpenseTypes() =>
+            await _connection.Table<ExpenseTypes>().ToArrayAsync();
+
+        /// <summary>
+        /// To save the expense type
+        /// </summary>
+        /// <param name="info">Restaurant Info to be saved in the database</param>
+        /// <returns>Returns error message in failure, else null</returns>
+        public async Task<string?> SaveExpenseType(string name)
+        {
+            var expenseType = await _connection.Table<ExpenseTypes>().Where(o => o.Name.ToLower() == name.ToLower()).FirstOrDefaultAsync();
+            if (expenseType != null)
+            {
+                return "Expense Type Already Exists!";
+            }
+            else
+            {
+                if (await _connection.InsertAsync(new ExpenseTypes { Name = name }) > 0)
+                    return null;
+
+                return "Error in Saving Expense Type";
+            }
+        }
+
+        /// <summary>
+        /// To delete the exisitng expense type
+        /// </summary>
+        /// <param name="expenseType">Expense type to delete</param>
+        /// <returns>Returns error message in failure, else null</returns>
+        public async Task<string?> DeleteExpenseType(ExpenseTypes expenseType)
+        {
+            if (await _connection.DeleteAsync(expenseType) > 0)
+                return null;
+
+            return "Error in Deleting Expense Type";
         }
     }
 }

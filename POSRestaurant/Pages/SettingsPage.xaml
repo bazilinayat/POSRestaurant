@@ -22,57 +22,138 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid Margin="5">
-        <VerticalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
-            <HorizontalStackLayout Spacing="10">
-                <Label Text="Restaurant Name:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding Name}" Placeholder="Enter Name" Style="{StaticResource txt}"/>
-            </HorizontalStackLayout>
+    <Grid ColumnDefinitions=".25*, .75*">
+        <CollectionView Grid.Column="0"
+            ItemsSource="{Binding Settings}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ValueForPickerSelection">
+                    <Border Padding="20" StrokeThickness="0">
+                        <HorizontalStackLayout>
+                            <Label Text="{Binding Value}" 
+                                   VerticalOptions="Center" 
+                                   Padding="10">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" 
+                                                 Binding="{Binding IsSelected}" 
+                                                 Value="True">
+                                        <Setter Property="TextColor"  Value="#FFFF00"/>
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </HorizontalStackLayout>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" 
+                                         Binding="{Binding IsSelected}" 
+                                         Value="True">
+                                <Setter Property="BackgroundColor"  Value="{StaticResource Tertiary}"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=SelectSettingCommand}"
+                                                  CommandParameter="{Binding Key}" />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <Grid Grid.Column="1" Margin="5">
+            <Grid IsVisible="{Binding ShowInfo}">
+                <VerticalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Restaurant Name:" Style="{StaticResource lbl}"/>
+                        <Entry Text="{Binding Name}" Placeholder="Enter Name" Style="{StaticResource txt}"/>
+                    </HorizontalStackLayout>
 
-            <HorizontalStackLayout Spacing="10">
-                <Label Text="Restaurant Address:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding Address}" Placeholder="Enter Address" Style="{StaticResource txt}"/>
-            </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Restaurant Address:" Style="{StaticResource lbl}"/>
+                        <Entry Text="{Binding Address}" Placeholder="Enter Address" Style="{StaticResource txt}"/>
+                    </HorizontalStackLayout>
 
-            <HorizontalStackLayout Spacing="10">
-                <Label Text="Restaurant Contact:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding Phone}" Placeholder="Enter Contact" Style="{StaticResource txt}"/>
-            </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Restaurant Contact:" Style="{StaticResource lbl}"/>
+                        <Entry Text="{Binding Phone}" Placeholder="Enter Contact" Style="{StaticResource txt}"/>
+                    </HorizontalStackLayout>
 
-            <HorizontalStackLayout Spacing="10">
-                <Label Text="Restaurant FASSAI:" Style="{StaticResource lbl}"/>
-                <Entry Text="{Binding Fassai}" Placeholder="Enter FASSAI" Style="{StaticResource txt}"/>
-            </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Restaurant FASSAI:" Style="{StaticResource lbl}"/>
+                        <Entry Text="{Binding Fassai}" Placeholder="Enter FASSAI" Style="{StaticResource txt}"/>
+                    </HorizontalStackLayout>
 
-            <HorizontalStackLayout Spacing="10">
-                <Label Text="Restaurant Using GST?:" Style="{StaticResource lbl}"/>
-                <CheckBox IsChecked="{Binding UsingGST}"/>
-            </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Restaurant Using GST?:" Style="{StaticResource lbl}"/>
+                        <CheckBox IsChecked="{Binding UsingGST}"/>
+                    </HorizontalStackLayout>
 
-            <VerticalStackLayout IsVisible="{Binding UsingGST}" Spacing="10">
+                    <VerticalStackLayout IsVisible="{Binding UsingGST}" Spacing="10">
 
-                <HorizontalStackLayout Spacing="10">
-                    <Label Text="Restaurant GST Number:" Style="{StaticResource lbl}"/>
-                    <Entry Text="{Binding GstIn}" Placeholder="Enter GST Number" Style="{StaticResource txt}"/>
-                </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Restaurant GST Number:" Style="{StaticResource lbl}"/>
+                            <Entry Text="{Binding GstIn}" Placeholder="Enter GST Number" Style="{StaticResource txt}"/>
+                        </HorizontalStackLayout>
 
-                <HorizontalStackLayout Spacing="10">
-                    <Label Text="CGST (In %):" Style="{StaticResource lbl}"
-                           ToolTipProperties.Text="This value will be applied as SGST to the bills."/>
-                    <Entry Text="{Binding Cgst}" Placeholder="Enter CGST" Style="{StaticResource txt}"/>
-                </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="CGST (In %):" Style="{StaticResource lbl}"
+                                    ToolTipProperties.Text="This value will be applied as SGST to the bills."/>
+                            <Entry Text="{Binding Cgst}" Placeholder="Enter CGST" Style="{StaticResource txt}"/>
+                        </HorizontalStackLayout>
 
-                <HorizontalStackLayout Spacing="10">
-                    <Label Text="SGST (In %):" Style="{StaticResource lbl}"
-                           ToolTipProperties.Text="This value will be applied as SGST to the bills."/>
-                    <Entry Text="{Binding Sgst}" Placeholder="Enter SGST" Style="{StaticResource txt}"/>
-                </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="SGST (In %):" Style="{StaticResource lbl}"
+                                    ToolTipProperties.Text="This value will be applied as SGST to the bills."/>
+                            <Entry Text="{Binding Sgst}" Placeholder="Enter SGST" Style="{StaticResource txt}"/>
+                        </HorizontalStackLayout>
 
-            </VerticalStackLayout>
-            
-            <Button Text="Save" Command="{Binding SaveRestaurantInfoCommand}"></Button>
-        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                    <Button Text="Save" Command="{Binding SaveRestaurantInfoCommand}"></Button>
+                </VerticalStackLayout>
+            </Grid>
+            <Grid RowDefinitions="Auto, *" IsVisible="{Binding ShowExpenseTypes}">
+                <Border HorizontalOptions="End" WidthRequest="100" Stroke="Gray" StrokeShape="RoundRectangle 10" Margin="5">
+                    <Label Text="+ Add Expense Type" TextColor="Gray" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=AddExpenseTypeCommand}" CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                </Border>
+                <CollectionView Grid.Row="2" ItemsSource="{Binding ExpenseTypesToDisplay}">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Span="5"
+                                         HorizontalItemSpacing="10"
+                                         VerticalItemSpacing="10"
+                                         Orientation="Vertical"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="data:ExpenseTypes">
+                            <VerticalStackLayout Spacing="5">
+                                <Border Padding="10"
+                                        Stroke="Gray"
+                                        StrokeThickness="5"
+                                        StrokeShape="RoundRectangle 10"
+                                        StrokeDashOffset="2">
+                                    <VerticalStackLayout Spacing="10">
+                                        <Label Text="{Binding Name}"
+                                                   FontAttributes="Bold"
+                                                   HorizontalOptions="Center"/>
+
+                                        <ImageButton Source="x_regular_24.png"
+                                                    ToolTipProperties.Text="Delete Expense Type"
+                                                    HeightRequest="25" 
+                                                    WidthRequest="25"
+                                                    Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=DeleteExpenseTypeCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Grid>
     </Grid>
+    
 
 
 </ContentPage>

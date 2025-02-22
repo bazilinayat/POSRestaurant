@@ -25,10 +25,11 @@
                         <Label Text="{Binding Name}" 
                            FontAttributes="Bold"/>
                         <Label Text="{Binding ShortCode}"/>
+                        <Label Text="{Binding Description}" FontSize="10" />
                         <FlexLayout JustifyContent="SpaceBetween">
                             <Label Text="{Binding Price, StringFormat='{0:C}'}"
                                FontAttributes="Bold"
-                               TextColor="LightGreen"/>
+                               TextColor="MediumSeaGreen"/>
                             <ImageButton Source="{Binding Source={x:Reference this}, Path=ActionIcon}"
                                      BackgroundColor="{StaticResource LightWheat}"
                                      CornerRadius="50"

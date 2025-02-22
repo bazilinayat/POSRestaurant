@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using POSRestaurant.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,15 +16,23 @@ namespace POSRestaurant.Models
         /// <summary>
         /// Id of the role
         /// </summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
         /// <summary>
         /// Role name
         /// </summary>
-        public string ExpenseTypeName { get; set; }
+        public string Name { get; set; }
         /// <summary>
         /// To see if this role is selected
         /// </summary>
         [ObservableProperty]
         private bool _isSelected;
+
+        public static ExpenseTypeModel FromEntity(ExpenseTypes entity) =>
+            new()
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                IsSelected = false
+            };
     }
 }

@@ -17,7 +17,12 @@ namespace POSRestaurant.Data
         /// <summary>
         /// Type of the item added
         /// </summary>
-        public ExpenseItemTypes ItemType { get; set; }
+        public long ExpenseTypeId { get; set; }
+
+        /// <summary>
+        /// Type of the item added
+        /// </summary>
+        public string ExpenseTypeName { get; set; }
 
         /// <summary>
         /// Expense Item to be added

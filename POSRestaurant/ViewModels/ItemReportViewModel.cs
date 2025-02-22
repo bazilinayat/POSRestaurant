@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.Service;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,6 +23,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+        
+        /// <summary>
+        /// DIed variable for MenuService
+        /// </summary>
+        private readonly MenuService _menuService;
 
         /// <summary>
         /// To indicate that the ViewModel data is loading
@@ -38,7 +44,7 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// To add order types in picker
         /// </summary>
-        public ObservableCollection<ValueForPicker> Items { get; set; } = new();
+        public ObservableCollection<ValueForPicker> Categories { get; set; } = new();
 
         /// <summary>
         /// ObservableCollection for KotItems
@@ -52,7 +58,7 @@ namespace POSRestaurant.ViewModels
         /// Selected type for filter
         /// </summary>
         [ObservableProperty]
-        private ValueForPicker _selectedItem;
+        private ValueForPicker _selectedCategory;
 
         /// <summary>
         /// To show the total number of items
@@ -81,13 +87,14 @@ namespace POSRestaurant.ViewModels
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public ItemReportViewModel(DatabaseService databaseService)
+        public ItemReportViewModel(DatabaseService databaseService, MenuService menuService)
         {
             _databaseService = databaseService;
+            _menuService = menuService;
 
             var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
-            if (Items.Where(o => o.Key == 0) != null)
-                SelectedItem = defaultOrderType;
+            if (Categories.Where(o => o.Key == 0) != null)
+                SelectedCategory = defaultOrderType;
         }
 
         /// <summary>
@@ -101,8 +108,8 @@ namespace POSRestaurant.ViewModels
             var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
             if (_isInitialized)
             {
-                if (Items.Where(o => o.Key == 0) != null)
-                    SelectedItem = defaultOrderType;
+                if (Categories.Where(o => o.Key == 0) != null)
+                    SelectedCategory = defaultOrderType;
 
                 ItemReportData.Clear();
                 TotalItems = 0;
@@ -115,15 +122,15 @@ namespace POSRestaurant.ViewModels
             _isInitialized = true;
             IsLoading = true;
 
-            var items = await _databaseService.GetMenuItemBySearch();
+            var categories = await _menuService.GetMenuCategories();
 
-            Items.Add(defaultOrderType);
-            foreach (var item in items)
+            Categories.Add(defaultOrderType);
+            foreach (var category in categories)
             {
-                Items.Add(new ValueForPicker
+                Categories.Add(new ValueForPicker
                 {
-                    Key = item.Id,
-                    Value = item.Name
+                    Key = category.Id,
+                    Value = category.Name
                 });
             }
 
@@ -139,30 +146,35 @@ namespace POSRestaurant.ViewModels
         private async ValueTask MakeItemReport()
         {
             ItemReportData.Clear();
-            var kotItems = await _databaseService.GetAllKotItemsAsync(SelectedDate, SelectedItem.Key);
+            var kotItems = await _databaseService.GetAllKotItemsAsync(SelectedDate);
 
             var groupedItems = kotItems.GroupBy(o => o.ItemId).ToDictionary(group => group.Key, group => group.ToArray());
 
             foreach (var kotItem in groupedItems)
             {
-                var kotItemsList = new List<KOTItem>();
-                kotItemsList.Add(new KOTItem
-                {
-                    ItemId = kotItem.Key,
-                    Name = kotItem.Value.First().Name,
-                    Price = kotItem.Value.First().Price,
-                    Quantity = kotItem.Value.Sum(o => o.Quantity)
-                });
-
                 var category = await _databaseService.MenuOperations.GetCategoryOfMenuItem(kotItem.Key);
 
-                if (ItemReportData.Any(o => o.CategoryName == category.Name)) 
+                if (category.Id != SelectedCategory.Key)
+                    continue;
+
+                var totalQuantity = kotItem.Value.Sum(o => o.Quantity);
+                var itemPrice = kotItem.Value.First().Price;
+
+                var kotItemsList = new List<KOTItem>
                 {
-                    var toAdd = ItemReportData.Where(o => o.CategoryName == category.Name).FirstOrDefault();
-                    if (toAdd != null)
+                    new KOTItem
                     {
-                        toAdd.KOTItems.AddRange(kotItemsList);
+                        ItemId = kotItem.Key,
+                        Name = kotItem.Value.First().Name,
+                        Price = itemPrice,
+                        Quantity = totalQuantity,
                     }
+                };
+
+                var existingCategory = ItemReportData.FirstOrDefault(o => o.CategoryName == category.Name);
+                if (existingCategory != null)
+                {
+                    existingCategory.KOTItems.AddRange(kotItemsList);
                 }
                 else
                 {
@@ -171,13 +183,13 @@ namespace POSRestaurant.ViewModels
                         CategoryName = category.Name,
                         KOTItems = kotItemsList
                     });
-
                 }
             }
 
-            //TotalItems = KOTItems.Count;
-            //TotalQuantity = KOTItems.Sum(o => o.Quantity);
-            //TotalAmount = KOTItems.Sum(o => o.Amount);
+            // Calculate totals
+            TotalItems = ItemReportData.Sum(category => category.KOTItems.Count);
+            TotalQuantity = ItemReportData.Sum(category => category.KOTItems.Sum(item => item.Quantity));
+            TotalAmount = ItemReportData.Sum(category => category.KOTItems.Sum(item => item.Amount));
         }
 
         /// <summary>
@@ -186,7 +198,7 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async void Search()
         {
-            if (SelectedItem == null)
+            if (SelectedCategory == null)
             {
                 await Shell.Current.DisplayAlert("Search Error", "Select a item", "Ok");
                 return;

@@ -39,7 +39,7 @@
                 </HorizontalStackLayout>
                 <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                     <Label Text="Select Order Type:" Style="{StaticResource th}" />
-                    <Picker WidthRequest="100" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
+                    <Picker WidthRequest="100" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" ItemDisplayBinding="{Binding Value}" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout>
                     <Button Text="Search" Command="{Binding SearchCommand}" />
@@ -66,35 +66,25 @@
                     <CollectionView ItemsSource="{Binding ItemReportData}" Grid.Row="1">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:ItemReportModel">
-                                <Grid RowDefinitions="*, Auto">
+                                <VerticalStackLayout Spacing="5" Margin="0, 10, 0, 10">
                                     <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
-                                        <Label Text="{Binding CategoryName, StringFormat='Category: {0}'}" BackgroundColor="Gray"/>
+                                        <Label Text="{Binding CategoryName, StringFormat='Category: {0}'}" BackgroundColor="Gray" Padding="10"/>
                                     </Border>
-                                    <CollectionView ItemsSource="{Binding KOTItems}" Grid.Row="1">
-                                        <CollectionView.ItemTemplate>
+
+                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding KOTItems}">
+                                        <BindableLayout.ItemTemplate>
                                             <DataTemplate x:DataType="data:KOTItem">
-                                                <Grid ColumnSpacing="1" ColumnDefinitions="*, *, *, *, *" RowDefinitions="*, Auto">
-                                                    <Label Grid.Column="0"
-                                                           Text="{Binding ItemId}"
-                                                           Style="{StaticResource td}"/>
-                                                    <Label Grid.Column="1"
-                                                           Text="{Binding Name}"
-                                                           Style="{StaticResource td}"/>
-                                                    <Label Grid.Column="2"
-                                                           Text="{Binding Price}"
-                                                           Style="{StaticResource td}"/>
-                                                    <Label Grid.Column="3"
-                                                           Text="{Binding Quantity}"
-                                                           Style="{StaticResource td}"/>
-                                                    <Label Grid.Column="4"
-                                                           Text="{Binding Amount}"
-                                                           Style="{StaticResource td}"/>
+                                                <Grid ColumnDefinitions="*, *, *, *, *" Padding="5">
+                                                    <Label Grid.Column="0" Text="{Binding ItemId}" Style="{StaticResource td}"/>
+                                                    <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource td}"/>
+                                                    <Label Grid.Column="2" Text="{Binding Price}" Style="{StaticResource td}"/>
+                                                    <Label Grid.Column="3" Text="{Binding Quantity}" Style="{StaticResource td}"/>
+                                                    <Label Grid.Column="4" Text="{Binding Amount}" Style="{StaticResource td}"/>
                                                 </Grid>
                                             </DataTemplate>
-                                        </CollectionView.ItemTemplate>
-                                    </CollectionView>
-                                </Grid>
-
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>

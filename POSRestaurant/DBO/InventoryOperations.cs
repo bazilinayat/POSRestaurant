@@ -1,6 +1,7 @@
 ﻿using POSRestaurant.Data;
 using POSRestaurant.Models;
 using SQLite;
+using Windows.System.Profile;
 
 namespace POSRestaurant.DBO
 {
@@ -132,7 +133,7 @@ namespace POSRestaurant.DBO
         /// <param name="expenseType">Int, Expense type of the entry</param>
         /// <param name="paidByWho">Paid by who, staffId of person</param>
         /// <returns>Array of Inventory</returns>
-        public async Task<Inventory[]> GetInventoryItemsAsync(DateTime selectedDate, int expenseType, int paidByWho)
+        public async Task<Inventory[]> GetInventoryItemsAsync(DateTime selectedDate, long expenseType, int paidByWho)
         {
             var yesterday = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, 0, 0, 0);
             var oneDateMore = selectedDate.AddDays(1);
@@ -144,7 +145,7 @@ namespace POSRestaurant.DBO
 
             if (expenseType != 0)
             {
-                filteredData = filteredData.Where(o => o.ItemType == (ExpenseItemTypes)expenseType).ToArray();
+                filteredData = filteredData.Where(o => o.Id == expenseType).ToArray();
             }
 
             if (paidByWho != 0)

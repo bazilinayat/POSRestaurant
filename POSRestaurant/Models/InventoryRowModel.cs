@@ -28,12 +28,12 @@ namespace POSRestaurant.Models
         /// <summary>
         /// Types of expense item, to category
         /// </summary>
-        public ObservableCollection<ValueForPicker> ExpenseItemTypes { get; set; } = new();
+        public ObservableCollection<ExpenseTypeModel> ExpenseItemTypes { get; set; } = new();
 
         /// <summary>
-        /// List of expense items to choose from, will be given values when type is selected
+        /// To entry the expense item which we are buying
         /// </summary>
-        public ObservableCollection<ExpenseItem> ExpenseItems { get; set; } = new();
+        public string ExpenseItem { get; set; }
 
         /// <summary>
         /// List of staff members, co-owner
@@ -49,31 +49,19 @@ namespace POSRestaurant.Models
         /// Expense Iten Type, which is selected from Picker
         /// </summary>
 
-        private ValueForPicker _selectedExpenseItemType;
+        private ExpenseTypeModel _selectedExpenseItemType;
 
         /// <summary>
         /// To load the items when type is selected
         /// </summary>
-        public ValueForPicker SelectedExpenseItemType
+        public ExpenseTypeModel SelectedExpenseItemType
         {
             get => _selectedExpenseItemType;
             set
             {
                 _selectedExpenseItemType = value;
                 OnPropertyChanged();
-                if (value != null)
-                    UpdateExpenseItems(value.Key);
             }
-        }
-
-        /// <summary>
-        /// To handle change of selection of expense item from Picker
-        /// </summary>
-        private ExpenseItem _selectedExpenseItem;
-        public ExpenseItem SelectedExpenseItem
-        {
-            get => _selectedExpenseItem;
-            set { _selectedExpenseItem = value; OnPropertyChanged(); }
         }
 
         /// <summary>
@@ -145,13 +133,13 @@ namespace POSRestaurant.Models
             Inventory inventory = new Inventory
             {
                 EntryDate = DateTime.Now,
-                ExpenseItemId = SelectedExpenseItem.Id,
                 IsWeighted = true,
-                ItemType = (ExpenseItemTypes)SelectedExpenseItemType.Key,
+                ExpenseTypeId = SelectedExpenseItemType.Id,
+                ExpenseTypeName = SelectedExpenseItemType.Name,
                 QuantityOrWeight = WeightOrQuantity,
                 StaffId = SelectedPayer.Id,
                 TotalPrice = AmountPaid,
-                ExpenseItemName = SelectedExpenseItem.Name,
+                ExpenseItemName = ExpenseItem,
                 StaffName = SelectedPayer.Name,
                 PaymentMode = (ExpensePaymentModes)SelectedPaymentMode.Key,
                 PaymentModeName = SelectedPaymentMode.Value
@@ -166,32 +154,6 @@ namespace POSRestaurant.Models
 
             // Logic to save the row
             IsSaved = true;
-        }
-
-        /// <summary>
-        /// To update the list of expense items
-        /// </summary>
-        /// <param name="expenseType">Int, expense type</param>
-        private void UpdateExpenseItems(int expenseType)
-        {
-            PopulateItems(expenseType);
-        }
-
-        /// <summary>
-        /// Database call and load items
-        /// </summary>
-        /// <param name="expenseType">Int, expense type</param>
-        /// <returns>Returns a Task object</returns>
-        private async Task PopulateItems(int expenseType)
-        {
-            var items = await _databaseService.InventoryOperations.GetExpenseItemBasedOnTypeAsync((ExpenseItemTypes)expenseType);
-
-            ExpenseItems.Clear();
-
-            foreach(var item in items)
-            {
-                ExpenseItems.Add(item);
-            }
         }
 
         /// <summary>

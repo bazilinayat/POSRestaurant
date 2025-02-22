@@ -15,7 +15,12 @@ namespace POSRestaurant.Models
         /// <summary>
         /// Type of the item added
         /// </summary>
-        public ExpenseItemTypes ItemType { get; set; }
+        public long ExpenseTypeId { get; set; }
+
+        /// <summary>
+        /// Type of the item added
+        /// </summary>
+        public string ExpenseTypeName { get; set; }
 
         /// <summary>
         /// Expense Item to be added
@@ -77,7 +82,8 @@ namespace POSRestaurant.Models
             new()
             {
                 Id = entity.Id,
-                ItemType = entity.ItemType,
+                ExpenseTypeId = entity.ExpenseTypeId,
+                ExpenseTypeName = entity.ExpenseTypeName,
                 EntryDate = entity.EntryDate,
                 ExpenseItemId = entity.ExpenseItemId,
                 IsWeighted = entity.IsWeighted,

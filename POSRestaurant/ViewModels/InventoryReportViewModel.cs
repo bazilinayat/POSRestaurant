@@ -1,17 +1,20 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Ghostscript.NET;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using System.Collections.ObjectModel;
+using Windows.ApplicationModel.Email.DataProvider;
 
 namespace POSRestaurant.ViewModels
 {
     /// <summary>
     /// ViewModel for Inventory Report operations
     /// </summary>
-    public partial class InventoryReportViewModel : ObservableObject
+    public partial class InventoryReportViewModel : ObservableObject, IRecipient<ExpenseTypeChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -38,7 +41,8 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// To add expense types in picker
         /// </summary>
-        public ObservableCollection<ValueForPicker> ItemTypes { get; set; } = new();
+        [ObservableProperty]
+        private ObservableCollection<ExpenseTypeModel> _itemTypes;
 
         /// <summary>
         /// To add payers in picker
@@ -60,7 +64,7 @@ namespace POSRestaurant.ViewModels
         /// Selected type for filter
         /// </summary>
         [ObservableProperty]
-        private ValueForPicker _selectedItem;
+        private ExpenseTypeModel _selectedItem;
 
         /// <summary>
         /// Selected payer for filter
@@ -101,11 +105,11 @@ namespace POSRestaurant.ViewModels
             _databaseService = databaseService;
 
             var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
-            if (ItemTypes.Where(o => o.Key == 0) != null)
-                SelectedItem = defaultOrderType;
 
             if (Payers.Where(o => o.Key == 0) != null)
                 SelectedPayer = defaultOrderType;
+
+            WeakReferenceMessenger.Default.Register<ExpenseTypeChangedMessage>(this);
         }
 
         /// <summary>
@@ -120,8 +124,6 @@ namespace POSRestaurant.ViewModels
             if (_isInitialized)
             {
                 SelectedDate= DateTime.Now;
-                if (ItemTypes.Where(o => o.Key == 0) != null)
-                    SelectedItem = defaultOrderType;
 
                 if (Payers.Where(o => o.Key == 0) != null)
                     SelectedPayer = defaultOrderType;
@@ -134,10 +136,15 @@ namespace POSRestaurant.ViewModels
             _isInitialized = true;
             IsLoading = true;
 
-            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<ExpenseItemTypes>())
+            var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
+                                .Select(ExpenseTypeModel.FromEntity)
+                                .ToList();
+            ItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
+            foreach (var coowner in expenseItems)
             {
-                ItemTypes.Add(desc);
+                ItemTypes.Add(coowner);
             }
+            ItemTypes[0].IsSelected = true;
 
             Payers.Add(defaultOrderType);
             var payers = await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.CoOwner);
@@ -163,7 +170,7 @@ namespace POSRestaurant.ViewModels
         {
             InventoryReportData.Clear();
             TotalSpent = TotalCash = TotalOnline = TotalBank = 0;
-            var inventoryEntries = await _databaseService.InventoryOperations.GetInventoryItemsAsync(SelectedDate, SelectedItem.Key, SelectedPayer.Key);
+            var inventoryEntries = await _databaseService.InventoryOperations.GetInventoryItemsAsync(SelectedDate, SelectedItem == null ? 0 : SelectedItem.Id, SelectedPayer.Key);
 
             if (inventoryEntries.Length > 0)
             {
@@ -207,6 +214,24 @@ namespace POSRestaurant.ViewModels
             }
 
             await MakeInventoryReport();
+        }
+
+        /// <summary>
+        /// Refresh expense type details when received
+        /// </summary>
+        /// <param name="message">StaffChangedMessage</param>
+        public async void Receive(ExpenseTypeChangedMessage message)
+        {
+            ItemTypes.Clear();
+            var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
+                                .Select(ExpenseTypeModel.FromEntity)
+                                .ToList();
+            ItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
+            foreach (var coowner in expenseItems)
+            {
+                ItemTypes.Add(coowner);
+            }
+            ItemTypes[0].IsSelected = true;
         }
     }
 }

@@ -89,16 +89,13 @@
                                             HorizontalOptions="Center"
                                             SelectedItem="{Binding SelectedExpenseItemType}" 
                                             IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"
-                                            ItemDisplayBinding="{Binding Value}"/>
+                                            ItemDisplayBinding="{Binding Name}"/>
 
-                                    <!-- Expense Item Picker -->
-                                    <Picker Grid.Column="1" ItemsSource="{Binding ExpenseItems}" 
-                                            VerticalOptions="Center"
+                                    <Entry Grid.Column="1" Text="{Binding ExpenseItem}" 
+                                           VerticalOptions="Center"
                                             HorizontalOptions="Center"
                                             BackgroundColor="Wheat"
                                             WidthRequest="200"
-                                            ItemDisplayBinding="{Binding Name}" 
-                                            SelectedItem="{Binding SelectedExpenseItem}"
                                             IsEnabled="{Binding IsSaved, Converter={StaticResource InverseBooleanConverter}}"/>
 
                                     <!-- Weight/Quantity Entry -->

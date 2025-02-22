@@ -8,6 +8,7 @@ using iText.Layout;
 using iText.Layout.Borders;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using POSRestaurant.Data;
 using POSRestaurant.Models;
 using System.Diagnostics;
 using System.Drawing;
@@ -47,7 +48,7 @@ namespace POSRestaurant.Service
         /// <summary>
         /// The paper height in mm
         /// </summary>
-        private const int PAPER_HEIGHT_MM = 297;
+        private const int PAPER_HEIGHT_MM = 3276;
 
         /// <summary>
         /// The scale at which we will print, so the text does not blur out
@@ -119,10 +120,10 @@ namespace POSRestaurant.Service
         private float CalculateEstimatedHeight(BillModel data)
         {
             // Basic height calculation (adjust based on your needs)
-            float height = 150; // Header space
-            height += data.Items.Count * 10; // Items space
+            float height = 100; // Header space
+            height += data.Items.Count * 5; // Items space
             height += 50; // Totals space
-            height += 60; // Footer space
+            height += 5; // Footer space
             return height;
         }
 
@@ -167,7 +168,7 @@ namespace POSRestaurant.Service
             document.Add(new Paragraph($"Name: {data.CustomerName}")
                 .SetFontSize(8));
 
-            Table table = new Table(new float[] { 1, 1 })
+            iText.Layout.Element.Table table = new iText.Layout.Element.Table(new float[] { 1, 1 })
                         .UseAllAvailableWidth();
 
             table.AddCell(new Cell(1, 1).Add(new Paragraph($"Date: {data.TimeStamp}").SetFontSize(8))
@@ -196,7 +197,9 @@ namespace POSRestaurant.Service
             {
                 table.AddCell(new Cell(1, 1).Add(new Paragraph($"Source: {data.Source}").SetFontSize(8))
                 .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-                table.AddCell(new Cell(1, 1).Add(new Paragraph($"Reference No.: {data.ReferenceNo}").SetFontSize(8))
+
+                if (data.Source == EnumExtensions.GetDescription(PickupSources.Swiggy) || data.Source == EnumExtensions.GetDescription(PickupSources.Zomato))
+                    table.AddCell(new Cell(1, 1).Add(new Paragraph($"Reference No.: {data.ReferenceNo}").SetFontSize(8))
                     .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
 
                 table.AddCell(new Cell(1, 1).Add(new Paragraph($"Delivery: {data.DeliveryPersonName}").SetFontSize(8))
@@ -213,7 +216,7 @@ namespace POSRestaurant.Service
         /// <param name="items">List of KOTItemBillModel to add in pdf</param>
         private void AddItems(Document document, List<KOTItemBillModel> items)
         {
-            Table table = new Table(new float[] { 3, 1, 1, 1 })
+            iText.Layout.Element.Table table = new iText.Layout.Element.Table(new float[] { 3, 1, 1, 1 })
                 .SetWidth(UnitValue.CreatePercentValue(100));
 
             LineSeparator topLine = new LineSeparator(new SolidLine());

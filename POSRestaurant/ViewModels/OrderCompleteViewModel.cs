@@ -25,27 +25,6 @@ namespace POSRestaurant.ViewModels
         public TableModel TableModel { get; set; }
 
         /// <summary>
-        /// Tip given by customer
-        /// To be taken from UI
-        /// </summary>
-        [ObservableProperty]
-        private decimal _tip;
-
-        /// <summary>
-        /// Amount to return to customer
-        /// To be taken from UI
-        /// </summary>
-        [ObservableProperty]
-        private decimal _return;
-
-        /// <summary>
-        /// Amount received from customer
-        /// To be taken from UI
-        /// </summary>
-        [ObservableProperty]
-        private decimal _paidByCustomer;
-
-        /// <summary>
         /// To track the payment mode on UI
         /// </summary>
         private PaymentModes PaymentMode;
@@ -128,7 +107,6 @@ namespace POSRestaurant.ViewModels
                     {
                         IsPartPayment = false;
                         IsNotPartPayment = true;
-                        PaidByCustomer = 0;
                     }
                     CalculateReturn();
                     OnPaymenModeChanged();
@@ -155,7 +133,6 @@ namespace POSRestaurant.ViewModels
 
             IsPartPayment = false;
             IsNotPartPayment = true;
-            PaidByCustomer = 0;
             IsCashForPart = IsCardForPart = IsOnlineForPart = false;
             PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
         }
@@ -190,11 +167,6 @@ namespace POSRestaurant.ViewModels
                     PaidByCustomerInOnline = 0;
 
                 var totalPaid = PaidByCustomerInCash + PaidByCustomerInCard + PaidByCustomerInOnline;
-                Return = totalPaid - TableModel.OrderTotal;
-            }
-            else
-            {
-                Return = PaidByCustomer - TableModel.OrderTotal;
             }
         }
 
@@ -209,10 +181,8 @@ namespace POSRestaurant.ViewModels
             {
                 OrderId = TableModel.RunningOrderId,
                 SettlementDate = DateTime.Now,
-                PaidByCustomer = PaidByCustomer,
                 PaymentMode = PaymentMode,
                 OrderType = OrderTypes.DineIn,
-                Tip = Tip,
                 Total = TableModel.OrderTotal,
                 IsCardForPart = IsCardForPart,
                 IsCashForPart = IsCashForPart,
