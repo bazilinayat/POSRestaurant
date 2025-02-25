@@ -1,5 +1,5 @@
 ﻿using POSRestaurant.Data;
-using SettingLibrary;
+using POSRestaurant.Service.SettingService;
 using System.Text.Json;
 
 namespace POSRestaurant.DBO

@@ -1,13 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using LoggerService;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
-using SettingLibrary;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.SettingService;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -25,6 +25,9 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         private readonly DatabaseService _databaseService;
 
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
         private readonly LogService _logger;
 
         /// <summary>
@@ -195,50 +198,58 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync(TableModel tableModel)
         {
-            TableNumber = tableModel.TableNo;
-            if (tableModel.Status != TableOrderStatus.NoOrder)
+            try
             {
-                OrderTypeEnable = false;
-                NumberOfPeopleEnable = false;
-                NumberOfPeople = tableModel.NumberOfPeople;
-                SelectedWaiter = tableModel.Waiter;
-            }
-            else
-            {
-                OrderTypeEnable = true;
-                NumberOfPeopleEnable = true;
-                NumberOfPeople = 1;
-            }
-            
-
-            if (_isInitialized)
-            {
-                foreach (var category in Categories)
+                TableNumber = tableModel.TableNo;
+                if (tableModel.Status != TableOrderStatus.NoOrder)
                 {
-                    category.IsSelected = false;
+                    OrderTypeEnable = false;
+                    NumberOfPeopleEnable = false;
+                    NumberOfPeople = tableModel.NumberOfPeople;
+                    SelectedWaiter = tableModel.Waiter;
                 }
+                else
+                {
+                    OrderTypeEnable = true;
+                    NumberOfPeopleEnable = true;
+                    NumberOfPeople = 1;
+                }
+
+
+                if (_isInitialized)
+                {
+                    foreach (var category in Categories)
+                    {
+                        category.IsSelected = false;
+                    }
+                    Categories[0].IsSelected = true;
+                    SelectedCategory = Categories[0];
+                    MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+                    return;
+                }
+
+                _isInitialized = true;
+
+                IsLoading = true;
+
+                Categories = await _menuService.GetMenuCategories();
+
                 Categories[0].IsSelected = true;
                 SelectedCategory = Categories[0];
+
                 MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
-                return;
+
+                await LoadWaiters();
+
+                CartItems.Clear();
+
+                IsLoading = false;
             }
-
-            _isInitialized = true;
-
-            IsLoading = true;
-
-            Categories = await _menuService.GetMenuCategories();
-
-            Categories[0].IsSelected = true;
-            SelectedCategory = Categories[0];
-
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
-
-            await LoadWaiters();
-
-            CartItems.Clear();
-
-            IsLoading = false;
+            catch (Exception ex)
+            {
+                _logger.LogError("HomeVM-InitializeAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -249,21 +260,29 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SelectCategoryAsync(int categoryId)
         {
-            if (SelectedCategory.Id == categoryId) return;
+            try
+            {
+                if (SelectedCategory.Id == categoryId) return;
 
-            IsLoading = true;
+                IsLoading = true;
 
-            var existingSelectedCategory = Categories.First(o => o.IsSelected);
-            existingSelectedCategory.IsSelected = false;
+                var existingSelectedCategory = Categories.First(o => o.IsSelected);
+                existingSelectedCategory.IsSelected = false;
 
-            var newSelectedCategory = Categories.First(o => o.Id == categoryId);
-            newSelectedCategory.IsSelected = true;
+                var newSelectedCategory = Categories.First(o => o.Id == categoryId);
+                newSelectedCategory.IsSelected = true;
 
-            SelectedCategory = newSelectedCategory;
+                SelectedCategory = newSelectedCategory;
 
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
 
-            IsLoading = false;
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("HomeVM-SelectCategoryAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -273,24 +292,32 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private void AddToCart(ItemOnMenu menuItem)
         {
-            var cartItem = CartItems.FirstOrDefault(o => o.ItemId == menuItem.Id);
-            if (cartItem == null)
+            try
             {
-                // Item does not exist in cart, add to cart
-                CartItems.Add(new CartItemModel()
+                var cartItem = CartItems.FirstOrDefault(o => o.ItemId == menuItem.Id);
+                if (cartItem == null)
                 {
-                    ItemId = menuItem.Id,
-                    Name = menuItem.Name,
-                    Icon = menuItem.Icon,
-                    Price = menuItem.Price,
-                    Quantity = 1
-                });
+                    // Item does not exist in cart, add to cart
+                    CartItems.Add(new CartItemModel()
+                    {
+                        ItemId = menuItem.Id,
+                        Name = menuItem.Name,
+                        Icon = menuItem.Icon,
+                        Price = menuItem.Price,
+                        Quantity = 1
+                    });
+                }
+                else
+                {
+                    // Item already exists in cart, Increase quantity for this item in cart
+                    cartItem.Quantity++;
+                    ReCalculateAmount();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Item already exists in cart, Increase quantity for this item in cart
-                cartItem.Quantity++;
-                ReCalculateAmount();
+                _logger.LogError("HomeVM-AddToCart Error", ex);
+                throw;
             }
         }
 
@@ -333,7 +360,15 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         private void ReCalculateAmount()
         {
-            SubTotal = CartItems.Sum(o => o.Amount);
+            try
+            {
+                SubTotal = CartItems.Sum(o => o.Amount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("HomeVM-ReCalculateAmount Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -368,39 +403,47 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task PlaceOrderAsync(TableModel tableModel)
         {
-            if (NumberOfPeople == 0)
+            try
             {
-                await Shell.Current.DisplayAlert("Order Error", "Number of people should be greater than 0.", "Ok");
-                return;
-            }
+                if (NumberOfPeople == 0)
+                {
+                    await Shell.Current.DisplayAlert("Order Error", "Number of people should be greater than 0.", "Ok");
+                    return;
+                }
 
-            if (SelectedWaiter == null)
+                if (SelectedWaiter == null)
+                {
+                    await Shell.Current.DisplayAlert("Order Error", "Assign a waiter to the order.", "Ok");
+                    return;
+                }
+
+
+                IsLoading = true;
+
+                if (tableModel.RunningOrderId == 0)
+                {
+                    tableModel.OrderType = OrderTypes.DineIn;
+                    tableModel.Waiter = SelectedWaiter;
+                    tableModel.NumberOfPeople = NumberOfPeople;
+                }
+
+                if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel, OrderTypes.DineIn, SelectedWaiter))
+                {
+                    CartItems.Clear();
+
+                    // Push for change in table info
+                    WeakReferenceMessenger.Default.Send(TableChangedMessage.From(tableModel));
+                }
+
+                IsLoading = false;
+
+                await Application.Current.MainPage.Navigation.PopAsync();
+            }
+            catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Order Error", "Assign a waiter to the order.", "Ok");
-                return;
+                _logger.LogError("HomeVM-PlaceOrderAsync Error", ex);
+                throw;
             }
-
-
-            IsLoading = true;
-
-            if (tableModel.RunningOrderId == 0)
-            {
-                tableModel.OrderType = OrderTypes.DineIn;
-                tableModel.Waiter = SelectedWaiter;
-                tableModel.NumberOfPeople = NumberOfPeople;
-            }
-
-            if (await _ordersViewModel.PlaceKOTAsync([.. CartItems], tableModel, OrderTypes.DineIn, SelectedWaiter))
-            {
-                CartItems.Clear();
-
-                // Push for change in table info
-                WeakReferenceMessenger.Default.Send(TableChangedMessage.From(tableModel));
-            }
-
-            IsLoading = false;
-
-            await Application.Current.MainPage.Navigation.PopAsync();
         }
 
         /// <summary>
@@ -410,18 +453,26 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private void SearchItems(string? textSearch)
         {
-            if (string.IsNullOrWhiteSpace(textSearch) || textSearch.Length < 3)
-                return;
-
-            Task.Run(async () =>
+            try
             {
-                var result = await _databaseService.GetMenuItemBySearch(textSearch);
+                if (string.IsNullOrWhiteSpace(textSearch) || textSearch.Length < 3)
+                    return;
 
-                MainThread.BeginInvokeOnMainThread(() =>
+                Task.Run(async () =>
                 {
-                    MenuItems = result;
+                    var result = await _databaseService.GetMenuItemBySearch(textSearch);
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        MenuItems = result;
+                    });
                 });
-            });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("HomeVM-SearchItems Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -430,45 +481,53 @@ namespace POSRestaurant.ViewModels
         /// <param name="message">ItemOnMenuModel published from other parts of the application</param>
         public void Receive(MenuItemChangedMessage message)
         {
-            var changedItem = message.Value;
-            var menuItem = changedItem.ItemModel;
-            bool isDeleted = changedItem.IsDeleted;
-
-            if (menuItem != null)
+            try
             {
-                // This menu item is on the screen right now
+                var changedItem = message.Value;
+                var menuItem = changedItem.ItemModel;
+                bool isDeleted = changedItem.IsDeleted;
 
-                // check if this item still has a mapping to selected category
-                // can be used for delete part
-                if (SelectedCategory != null)
+                if (menuItem != null)
                 {
-                    if (isDeleted && menuItem.Category.Id == SelectedCategory.Id)
+                    // This menu item is on the screen right now
+
+                    // check if this item still has a mapping to selected category
+                    // can be used for delete part
+                    if (SelectedCategory != null)
                     {
-                        // this item is deleted, should not be displayed here anymore
-                        // remove this item from the current UI menu items list
-                        MenuItems = [.. MenuItems.Where(m => m.Id != menuItem.Id)];
+                        if (isDeleted && menuItem.Category.Id == SelectedCategory.Id)
+                        {
+                            // this item is deleted, should not be displayed here anymore
+                            // remove this item from the current UI menu items list
+                            MenuItems = [.. MenuItems.Where(m => m.Id != menuItem.Id)];
+                        }
                     }
-                }
 
-                // update details of existing item on the screen
-                menuItem.Price = menuItem.Price;
-                menuItem.Name = menuItem.Name;
-                menuItem.Description = menuItem.Description;
-                MenuItems = [.. MenuItems];
-            }
-            else
-            {
-                // model is newly added
-                // add this menu item to current UI menu items list
-                var item = new ItemOnMenu
+                    // update details of existing item on the screen
+                    menuItem.Price = menuItem.Price;
+                    menuItem.Name = menuItem.Name;
+                    menuItem.Description = menuItem.Description;
+                    MenuItems = [.. MenuItems];
+                }
+                else
                 {
-                    Id = menuItem.Id,
-                    Description = menuItem.Description,
-                    Name = menuItem.Name,
-                    Price = menuItem.Price,
-                    MenuCategoryId = menuItem.Category.Id
-                };
-                MenuItems = [.. MenuItems, item];
+                    // model is newly added
+                    // add this menu item to current UI menu items list
+                    var item = new ItemOnMenu
+                    {
+                        Id = menuItem.Id,
+                        Description = menuItem.Description,
+                        Name = menuItem.Name,
+                        Price = menuItem.Price,
+                        MenuCategoryId = menuItem.Category.Id
+                    };
+                    MenuItems = [.. MenuItems, item];
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("HomeVM-Receive MenuItemChangedMessage Error", ex);
+                throw;
             }
         }
 
@@ -508,9 +567,17 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a task object</returns>
         private async Task LoadWaiters()
         {
-            Waiters = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Waiter))
-                            .Select(StaffModel.FromEntity)
-                            .ToArray();
+            try
+            {
+                Waiters = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Waiter))
+                                    .Select(StaffModel.FromEntity)
+                                    .ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("HomeVM-LoadWaiters Error", ex);
+                throw;
+            }
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using PaymentService.Models.Paytm.CreateQR;
+﻿using POSRestaurant.PaymentService.Models.Paytm;
 using System.Text.Json.Serialization;
 
-namespace PaymentService.Models.Paytm.TansactionStatus
+namespace POSRestaurant.PaymentService.Models.Paytm.CreateQR
 {
     /// <summary>
-    /// To store the response we get from transaction status api
+    /// To store the response we get from create qr api
     /// </summary>
-    public class TSResponse
+    public class CreateResponse
     {
         /// <summary>
         /// head of the response

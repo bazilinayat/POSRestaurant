@@ -6,6 +6,7 @@ using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
+using POSRestaurant.Service.LoggerService;
 using System.Collections.ObjectModel;
 
 namespace POSRestaurant.ViewModels
@@ -19,6 +20,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// ObservableCollection for orders
@@ -288,8 +294,9 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="taxService">DI for TaxService</param>
-        public OrdersViewModel(DatabaseService databaseService)
+        public OrdersViewModel(LogService logger, DatabaseService databaseService)
         {
+            _logger = logger;
             _databaseService = databaseService;
         }
 
@@ -309,23 +316,31 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            if (_isInitialized)
+            try
             {
-                SelectedType = OrderTypes[0];
-                return;
+                if (_isInitialized)
+                {
+                    SelectedType = OrderTypes[0];
+                    return;
+                }
+
+                _isInitialized = true;
+                IsLoading = true;
+
+                foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<OrderTypes>())
+                {
+                    OrderTypes.Add(desc);
+                }
+
+                await GetOrdersAsync();
+
+                IsLoading = false;
             }
-
-            _isInitialized = true;
-            IsLoading = true;
-
-            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<OrderTypes>())
+            catch (Exception ex)
             {
-                OrderTypes.Add(desc);
+                _logger.LogError("OrdersVM-InitializeAsync Error", ex);
+                throw;
             }
-
-            await GetOrdersAsync();
-
-            IsLoading = false;
         }
 
         /// <summary>
@@ -334,57 +349,65 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task Object</returns>
         private async ValueTask GetOrdersAsync()
         {
-            Orders.Clear();
-            var filteredOrders = await _databaseService.GetFilteredOrderssAsync(SelectedDate, SelectedType != null ? SelectedType.Key : 0);
-
-            if (filteredOrders.Length == 0)
+            try
             {
-                await Shell.Current.DisplayAlert("Search Error", "No orders on this date", "Ok");
-                return;
-            }
+                Orders.Clear();
+                var filteredOrders = await _databaseService.GetFilteredOrderssAsync(SelectedDate, SelectedType != null ? SelectedType.Key : 0);
 
-            int startIndex = (_currentPage - 1) * PageSize;
-            var paginatedOrders = filteredOrders.Skip(startIndex).Take(PageSize);
-
-            foreach(var o in paginatedOrders)
-            {
-                Orders.Add(new OrderModel
+                if (filteredOrders.Length == 0)
                 {
-                    Id = o.Id,
-                    TableId = o.TableId,
-                    OrderDate = o.OrderDate,
-                    TotalItemCount = o.TotalItemCount,
-                    TotalAmount = o.TotalAmount,
-                    PaymentMode = o.PaymentMode,
-                    OrderStatus = o.OrderStatus,
-                    OrderType = o.OrderType,
-                    NumberOfPeople = o.NumberOfPeople,
-                    OrderNumber = o.OrderNumber,
-                    WaiterId = o.WaiterId,
+                    await Shell.Current.DisplayAlert("Search Error", "No orders on this date", "Ok");
+                    return;
+                }
 
-                    IsDiscountGiven = o.IsDiscountGiven,
-                    IsFixedBased = o.IsFixedBased,
-                    IsPercentageBased = o.IsPercentageBased,
-                    DiscountFixed = o.DiscountFixed,
-                    DiscountPercentage = o.DiscountPercentage,
-                    TotalAmountAfterDiscount = o.TotalAmountAfterDiscount,
+                int startIndex = (_currentPage - 1) * PageSize;
+                var paginatedOrders = filteredOrders.Skip(startIndex).Take(PageSize);
 
-                    UsingGST = o.UsingGST,
-                    CGST = o.CGST,
-                    SGST = o.SGST,
-                    CGSTAmount = o.CGSTAmount,
-                    SGSTAmount = o.SGSTAmount,
+                foreach (var o in paginatedOrders)
+                {
+                    Orders.Add(new OrderModel
+                    {
+                        Id = o.Id,
+                        TableId = o.TableId,
+                        OrderDate = o.OrderDate,
+                        TotalItemCount = o.TotalItemCount,
+                        TotalAmount = o.TotalAmount,
+                        PaymentMode = o.PaymentMode,
+                        OrderStatus = o.OrderStatus,
+                        OrderType = o.OrderType,
+                        NumberOfPeople = o.NumberOfPeople,
+                        OrderNumber = o.OrderNumber,
+                        WaiterId = o.WaiterId,
 
-                    RoundOff = o.RoundOff,
-                    GrandTotal = o.GrandTotal,
+                        IsDiscountGiven = o.IsDiscountGiven,
+                        IsFixedBased = o.IsFixedBased,
+                        IsPercentageBased = o.IsPercentageBased,
+                        DiscountFixed = o.DiscountFixed,
+                        DiscountPercentage = o.DiscountPercentage,
+                        TotalAmountAfterDiscount = o.TotalAmountAfterDiscount,
 
-                    Source = o.Source,
-                    ReferenceNo = o.ReferenceNo,
-                    DeliveryPersion = o.DeliveryPerson,
-                });
+                        UsingGST = o.UsingGST,
+                        CGST = o.CGST,
+                        SGST = o.SGST,
+                        CGSTAmount = o.CGSTAmount,
+                        SGSTAmount = o.SGSTAmount,
+
+                        RoundOff = o.RoundOff,
+                        GrandTotal = o.GrandTotal,
+
+                        Source = o.Source,
+                        ReferenceNo = o.ReferenceNo,
+                        DeliveryPersion = o.DeliveryPerson,
+                    });
+                }
+
+                CurrentPageLabel = $"Page: {_currentPage}";
             }
-
-            CurrentPageLabel = $"Page: {_currentPage}";
+            catch (Exception ex)
+            {
+                _logger.LogError("OrdersVM-GetOrdersAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -422,11 +445,19 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async void NextPage()
         {
-            var totalOrders = (await _databaseService.GetFilteredOrderssAsync(SelectedDate, SelectedType.Key)).Length;
-            if (_currentPage * PageSize < totalOrders)
+            try
             {
-                _currentPage++;
-                await GetOrdersAsync();
+                var totalOrders = (await _databaseService.GetFilteredOrderssAsync(SelectedDate, SelectedType.Key)).Length;
+                if (_currentPage * PageSize < totalOrders)
+                {
+                    _currentPage++;
+                    await GetOrdersAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrdersVM-NextPage Error", ex);
+                throw;
             }
         }
 
@@ -438,136 +469,144 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SelectOrderAsync(OrderModel? orderModel)
         {
-            ShowDiscountVariables = false;
-            IsPartPayment = false;
-            if (orderModel == null || orderModel.Id == 0)
+            try
             {
-                OrderItems = [];
-                return;
-            }
-
-            var prevSelectedOrder = Orders.FirstOrDefault(o => o.IsSelected);
-            if (prevSelectedOrder != null)
-            {
-                prevSelectedOrder.IsSelected = false;
-                if (prevSelectedOrder.Id == orderModel.Id)
+                ShowDiscountVariables = false;
+                IsPartPayment = false;
+                if (orderModel == null || orderModel.Id == 0)
                 {
                     OrderItems = [];
-
-                    OrderDetailsVisible = false;
                     return;
                 }
-            }
 
-            IsLoading = true;
-            orderModel.IsSelected = true;
-            IsPickup = orderModel.OrderType == Data.OrderTypes.Pickup ? true : false;
-            // Get Order KOTs for More Details
-            OrderKOTs = (await _databaseService.GetOrderKotsAsync(orderModel.Id))
-                            .Select(KOTModel.FromEntity)
-                            .ToList();
-
-            OrderKOTIds = string.Join(',', OrderKOTs.Select(o => o.Id).ToArray());
-
-            /*
-             * Get Order KOT Items
-             * Group them together
-             * Calculcate totals
-             */
-            var kotItems = new List<KOTItemModel>();
-            OrderKOTItems.Clear();
-
-            foreach (var kot in OrderKOTs)
-            {
-                var items = (await _databaseService.GetKotItemsAsync(kot.Id))
-                            .Select(KOTItemModel.FromEntity)
-                            .ToList();
-
-                kotItems.AddRange(items);
-            }
-
-            // Group items together
-            var dict = kotItems.GroupBy(o => o.ItemId).ToDictionary(g => g.Key, g => g.Select(o => o));
-
-            foreach (var groupedItems in dict)
-            {
-                OrderKOTItems.Add(new KOTItemBillModel
+                var prevSelectedOrder = Orders.FirstOrDefault(o => o.IsSelected);
+                if (prevSelectedOrder != null)
                 {
-                    ItemId = groupedItems.Key,
-                    Name = groupedItems.Value.First().Name,
-                    Quantity = groupedItems.Value.Sum(o => o.Quantity),
-                    Price = groupedItems.Value.First().Price,
-                });
-            }
+                    prevSelectedOrder.IsSelected = false;
+                    if (prevSelectedOrder.Id == orderModel.Id)
+                    {
+                        OrderItems = [];
 
-            // Calculate totals
-            TotalQuantity = orderModel.TotalItemCount;
-            SubTotal = orderModel.TotalAmount;
-            SubTotalAfterDiscount = SubTotal;
-
-            if (orderModel.IsDiscountGiven)
-            {
-                ShowDiscountVariables = true;
-                if (orderModel.IsFixedBased)
-                {
-                    DiscountAmount = orderModel.DiscountFixed;
+                        OrderDetailsVisible = false;
+                        return;
+                    }
                 }
-                else if (orderModel.IsPercentageBased)
+
+                IsLoading = true;
+                orderModel.IsSelected = true;
+                IsPickup = orderModel.OrderType == Data.OrderTypes.Pickup ? true : false;
+                // Get Order KOTs for More Details
+                OrderKOTs = (await _databaseService.GetOrderKotsAsync(orderModel.Id))
+                                .Select(KOTModel.FromEntity)
+                                .ToList();
+
+                OrderKOTIds = string.Join(',', OrderKOTs.Select(o => o.Id).ToArray());
+
+                /*
+                 * Get Order KOT Items
+                 * Group them together
+                 * Calculcate totals
+                 */
+                var kotItems = new List<KOTItemModel>();
+                OrderKOTItems.Clear();
+
+                foreach (var kot in OrderKOTs)
                 {
-                    DiscountAmount = SubTotal * orderModel.DiscountPercentage / 100;
+                    var items = (await _databaseService.GetKotItemsAsync(kot.Id))
+                                .Select(KOTItemModel.FromEntity)
+                                .ToList();
+
+                    kotItems.AddRange(items);
                 }
-                SubTotalAfterDiscount = SubTotal - DiscountAmount;
-            }
 
-            UsingGST = orderModel.UsingGST;
-            CGST = orderModel.CGST;
-            SGST = orderModel.SGST;
+                // Group items together
+                var dict = kotItems.GroupBy(o => o.ItemId).ToDictionary(g => g.Key, g => g.Select(o => o));
 
-            CGSTAmount = orderModel.CGSTAmount;
-            SGSTAmount = orderModel.SGSTAmount;   
-            
-            GrandTotal = orderModel.GrandTotal;
-            RoundOff = orderModel.RoundOff;
-
-            ShowReference = false;
-            if (IsPickup)
-            {
-                PickupSource = EnumExtensions.GetDescription((PickupSources)orderModel.Source);
-                PickupDelivery = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.DeliveryPersion);
-
-                if (PickupSource == EnumExtensions.GetDescription(PickupSources.Swiggy) || PickupSource == EnumExtensions.GetDescription(PickupSources.Zomato))
-                    ShowReference = true;
-
-                ReferenceNumber = orderModel.ReferenceNo;
-            }
-            else
-            {
-                WaiterName = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.WaiterId);
-                TableNo = await _databaseService.TableOperations.GetTableNoAsync(orderModel.TableId);
-            }
-            
-            OrderToShow = orderModel;
-
-            var orderPayment = await _databaseService.OrderPaymentOperations.GetOrderPaymentById(orderModel.Id);
-
-            if (orderPayment != null)
-            {
-                PaymentMode = EnumExtensions.GetDescription(orderPayment.PaymentMode);
-
-                if (orderPayment.PaymentMode == PaymentModes.Part)
+                foreach (var groupedItems in dict)
                 {
-                    IsPartPayment = true;
-                    IsCashForPart = orderPayment.IsCashForPart;
-                    IsCardForPart = orderPayment.IsCardForPart;
-                    IsOnlineForPart = orderPayment.IsOnlineForPart;
-                    PaidByCustomerInCash = orderPayment.PartPaidInCash;
-                    PaidByCustomerInCard = orderPayment.PartPaidInCard;
-                    PaidByCustomerInOnline = orderPayment.PartPaidInOnline;
+                    OrderKOTItems.Add(new KOTItemBillModel
+                    {
+                        ItemId = groupedItems.Key,
+                        Name = groupedItems.Value.First().Name,
+                        Quantity = groupedItems.Value.Sum(o => o.Quantity),
+                        Price = groupedItems.Value.First().Price,
+                    });
                 }
-            }
 
-            OrderDetailsVisible = true;
-            IsLoading = false;
+                // Calculate totals
+                TotalQuantity = orderModel.TotalItemCount;
+                SubTotal = orderModel.TotalAmount;
+                SubTotalAfterDiscount = SubTotal;
+
+                if (orderModel.IsDiscountGiven)
+                {
+                    ShowDiscountVariables = true;
+                    if (orderModel.IsFixedBased)
+                    {
+                        DiscountAmount = orderModel.DiscountFixed;
+                    }
+                    else if (orderModel.IsPercentageBased)
+                    {
+                        DiscountAmount = SubTotal * orderModel.DiscountPercentage / 100;
+                    }
+                    SubTotalAfterDiscount = SubTotal - DiscountAmount;
+                }
+
+                UsingGST = orderModel.UsingGST;
+                CGST = orderModel.CGST;
+                SGST = orderModel.SGST;
+
+                CGSTAmount = orderModel.CGSTAmount;
+                SGSTAmount = orderModel.SGSTAmount;
+
+                GrandTotal = orderModel.GrandTotal;
+                RoundOff = orderModel.RoundOff;
+
+                ShowReference = false;
+                if (IsPickup)
+                {
+                    PickupSource = EnumExtensions.GetDescription((PickupSources)orderModel.Source);
+                    PickupDelivery = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.DeliveryPersion);
+
+                    if (PickupSource == EnumExtensions.GetDescription(PickupSources.Swiggy) || PickupSource == EnumExtensions.GetDescription(PickupSources.Zomato))
+                        ShowReference = true;
+
+                    ReferenceNumber = orderModel.ReferenceNo;
+                }
+                else
+                {
+                    WaiterName = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.WaiterId);
+                    TableNo = await _databaseService.TableOperations.GetTableNoAsync(orderModel.TableId);
+                }
+
+                OrderToShow = orderModel;
+
+                var orderPayment = await _databaseService.OrderPaymentOperations.GetOrderPaymentById(orderModel.Id);
+
+                if (orderPayment != null)
+                {
+                    PaymentMode = EnumExtensions.GetDescription(orderPayment.PaymentMode);
+
+                    if (orderPayment.PaymentMode == PaymentModes.Part)
+                    {
+                        IsPartPayment = true;
+                        IsCashForPart = orderPayment.IsCashForPart;
+                        IsCardForPart = orderPayment.IsCardForPart;
+                        IsOnlineForPart = orderPayment.IsOnlineForPart;
+                        PaidByCustomerInCash = orderPayment.PartPaidInCash;
+                        PaidByCustomerInCard = orderPayment.PartPaidInCard;
+                        PaidByCustomerInOnline = orderPayment.PartPaidInOnline;
+                    }
+                }
+
+                OrderDetailsVisible = true;
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrdersVM-SelectOrderAsync Error", ex);
+                throw;
+            }
         }
         
         /// <summary>
@@ -598,82 +637,90 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns true if successful, false otherwise</returns>
         public async Task<bool> PlaceKOTAsync(CartItemModel[] cartItems, TableModel tableModel, OrderTypes orderType, StaffModel selectedWaiter)
         {
-            var kotItems = cartItems.Select(o => new KOTItem
+            try
             {
-                Icon = o.Icon,
-                ItemId = o.ItemId,
-                Name = o.Name,
-                Price = o.Price,
-                Quantity = o.Quantity
-            }).ToArray();
-
-            var kotModel = new KOTModel
-            {
-                KOTDateTime = DateTime.Now,
-                TotalItemCount = cartItems.Sum(x => x.Quantity),
-                TotalPrice = cartItems.Sum(x => x.Amount),
-                Items = kotItems
-            };
-
-            List<KOTModel> kots = new List<KOTModel>();
-            kots.Add(kotModel);
-
-            string? errorMessage;
-
-            if (tableModel.RunningOrderId != 0)
-            {
-                var lastKOTNumber = await _databaseService.GetLastKOTNumberForOrderId(tableModel.RunningOrderId);
-
-                for (int i = 0; i < kots.Count; i++)
+                var kotItems = cartItems.Select(o => new KOTItem
                 {
-                    lastKOTNumber += 1;
-                    kots[i].KOTNumber = lastKOTNumber;
-                }
+                    Icon = o.Icon,
+                    ItemId = o.ItemId,
+                    Name = o.Name,
+                    Price = o.Price,
+                    Quantity = o.Quantity
+                }).ToArray();
 
-                // existing order, add kot
-                errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), tableModel.RunningOrderId);
-
-                if (errorMessage != null)
+                var kotModel = new KOTModel
                 {
-                    await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
-                    return false;
-                }
-
-                await GetOrdersAsync();
-            }
-            else
-            {
-                var lastOrderNumber = await _databaseService.GetLastestOrderNumberForToday();
-
-                // new order, place order
-                var orderModel = new OrderModel
-                {
-                    TableId = tableModel.Id,
-                    OrderDate = DateTime.Now,
-                    TotalItemCount = kots.Sum(x => x.TotalItemCount),
-                    TotalAmount = kots.Sum(x => x.TotalPrice),
-                    KOTs = kots.ToArray(),
-                    OrderStatus = TableOrderStatus.Running,
-                    OrderNumber = lastOrderNumber + 1,
-                    OrderType = orderType,
-                    NumberOfPeople = tableModel.NumberOfPeople,
-                    WaiterId = selectedWaiter.Id,
+                    KOTDateTime = DateTime.Now,
+                    TotalItemCount = cartItems.Sum(x => x.Quantity),
+                    TotalPrice = cartItems.Sum(x => x.Amount),
+                    Items = kotItems
                 };
 
-                errorMessage = await _databaseService.PlaceOrderAsync(orderModel);
+                List<KOTModel> kots = new List<KOTModel>();
+                kots.Add(kotModel);
 
-                if (errorMessage != null)
+                string? errorMessage;
+
+                if (tableModel.RunningOrderId != 0)
                 {
-                    await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
-                    return false;
+                    var lastKOTNumber = await _databaseService.GetLastKOTNumberForOrderId(tableModel.RunningOrderId);
+
+                    for (int i = 0; i < kots.Count; i++)
+                    {
+                        lastKOTNumber += 1;
+                        kots[i].KOTNumber = lastKOTNumber;
+                    }
+
+                    // existing order, add kot
+                    errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), tableModel.RunningOrderId);
+
+                    if (errorMessage != null)
+                    {
+                        await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
+                        return false;
+                    }
+
+                    await GetOrdersAsync();
+                }
+                else
+                {
+                    var lastOrderNumber = await _databaseService.GetLastestOrderNumberForToday();
+
+                    // new order, place order
+                    var orderModel = new OrderModel
+                    {
+                        TableId = tableModel.Id,
+                        OrderDate = DateTime.Now,
+                        TotalItemCount = kots.Sum(x => x.TotalItemCount),
+                        TotalAmount = kots.Sum(x => x.TotalPrice),
+                        KOTs = kots.ToArray(),
+                        OrderStatus = TableOrderStatus.Running,
+                        OrderNumber = lastOrderNumber + 1,
+                        OrderType = orderType,
+                        NumberOfPeople = tableModel.NumberOfPeople,
+                        WaiterId = selectedWaiter.Id,
+                    };
+
+                    errorMessage = await _databaseService.PlaceOrderAsync(orderModel);
+
+                    if (errorMessage != null)
+                    {
+                        await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
+                        return false;
+                    }
+
+                    tableModel.RunningOrderId = orderModel.Id;
+                    tableModel.Status = TableOrderStatus.Running;
                 }
 
-                tableModel.RunningOrderId = orderModel.Id;
-                tableModel.Status = TableOrderStatus.Running;
+                await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
+                return true;
             }
-
-            await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
-            return true;
+            catch (Exception ex)
+            {
+                _logger.LogError("OrdersVM-PlaceKOTAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -683,16 +730,24 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns true if successful, false otherwise</returns>
         public async Task<bool> PlacePickupAsync(OrderModel orderModel)
         {
-            var errorMessage = await _databaseService.PlacePickupOrderAsync(orderModel);
-
-            if (errorMessage != null)
+            try
             {
-                await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
-                return false;
-            }
+                var errorMessage = await _databaseService.PlacePickupOrderAsync(orderModel);
 
-            await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
-            return true;
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
+                    return false;
+                }
+
+                await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrdersVM-PlacePickupAsync Error", ex);
+                throw;
+            }
         }
 
         #endregion

@@ -5,6 +5,7 @@ using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.Service.LoggerService;
 using System.Collections.ObjectModel;
 
 namespace POSRestaurant.ViewModels
@@ -18,6 +19,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// To indicate that the ViewModel data is loading
@@ -45,8 +51,9 @@ namespace POSRestaurant.ViewModels
         /// Constructor for the StaffManagementViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public StaffManagementViewModel(DatabaseService databaseService)
+        public StaffManagementViewModel(LogService logger, DatabaseService databaseService)
         {
+            _logger = logger;
             _databaseService = databaseService;
 
             var roles = Enum.GetValues(typeof(StaffRole))
@@ -68,29 +75,37 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            IsLoading = true;
-
-            StaffMembers.Clear();
-            var allStaff = await _databaseService.StaffOperaiotns.GetAllStaff();
-            var staffMembers = allStaff.Select(o => new StaffModel
+            try
             {
-                Id = o.Id,
-                Name = o.Name,
-                PhoneNumber = o.PhoneNumber,
-                Role = o.Role,
-                IsSelected = false
-            });
+                IsLoading = true;
 
-            foreach (var staff in staffMembers)
-            {
-                StaffMembers.Add(staff);
+                StaffMembers.Clear();
+                var allStaff = await _databaseService.StaffOperaiotns.GetAllStaff();
+                var staffMembers = allStaff.Select(o => new StaffModel
+                {
+                    Id = o.Id,
+                    Name = o.Name,
+                    PhoneNumber = o.PhoneNumber,
+                    Role = o.Role,
+                    IsSelected = false
+                });
+
+                foreach (var staff in staffMembers)
+                {
+                    StaffMembers.Add(staff);
+                }
+                foreach (var role in Roles)
+                {
+                    role.IsSelected = false;
+                }
+
+                IsLoading = false;
             }
-            foreach (var role in Roles)
+            catch (Exception ex)
             {
-                role.IsSelected = false;
+                _logger.LogError("StaffManagementVM-InitializeAsync Error", ex);
+                throw;
             }
-
-            IsLoading = false;
         }
 
         /// <summary>
@@ -100,34 +115,42 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SelectStaffAsync(StaffModel staffModel)
         {
-            var prevSelectedOrder = StaffMembers.FirstOrDefault(o => o.IsSelected);
-            if (prevSelectedOrder != null)
+            try
             {
-                prevSelectedOrder.IsSelected = false;
-                if (prevSelectedOrder.Id == staffModel.Id)
+                var prevSelectedOrder = StaffMembers.FirstOrDefault(o => o.IsSelected);
+                if (prevSelectedOrder != null)
                 {
-                    Cancel();
-                    return;
+                    prevSelectedOrder.IsSelected = false;
+                    if (prevSelectedOrder.Id == staffModel.Id)
+                    {
+                        Cancel();
+                        return;
+                    }
                 }
+
+                staffModel.IsSelected = true;
+
+                foreach (var role in Roles)
+                {
+                    if (role.Id == (int)staffModel.Role)
+                        role.IsSelected = true;
+                    else
+                        role.IsSelected = false;
+                }
+
+                StaffMember = new StaffEditModel
+                {
+                    Id = staffModel.Id,
+                    Name = staffModel.Name,
+                    PhoneNumber = staffModel.PhoneNumber,
+                    Role = staffModel.Role
+                };
             }
-
-            staffModel.IsSelected = true;
-
-            foreach(var role in Roles)
+            catch (Exception ex)
             {
-                if (role.Id == (int)staffModel.Role)
-                    role.IsSelected = true;
-                else
-                    role.IsSelected = false;
+                _logger.LogError("StaffManagementVM-SelectStaffAsync Error", ex);
+                throw;
             }
-
-            StaffMember = new StaffEditModel
-            {
-                Id = staffModel.Id,
-                Name = staffModel.Name,
-                PhoneNumber = staffModel.PhoneNumber,
-                Role = staffModel.Role
-            };
         }
 
         /// <summary>
@@ -138,35 +161,43 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SaveStaffAsync(StaffEditModel staff)
         {
-            IsLoading = true;
-
-            var staffModel = new StaffModel
+            try
             {
-                Id = staff.Id,
-                Name = staff.Name,
-                PhoneNumber = staff.PhoneNumber,
-                Role = staff.Role,
-            };
+                IsLoading = true;
 
-            var errorMessage = await _databaseService.StaffOperaiotns.SaveStaffAsync(staffModel);
+                var staffModel = new StaffModel
+                {
+                    Id = staff.Id,
+                    Name = staff.Name,
+                    PhoneNumber = staff.PhoneNumber,
+                    Role = staff.Role,
+                };
 
-            if (errorMessage != null)
-            {
-                await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                var errorMessage = await _databaseService.StaffOperaiotns.SaveStaffAsync(staffModel);
+
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert("Successful", "Staff saved successfully", "OK");
+
+                    await InitializeAsync();
+
+                    // Push for change in staff info
+                    WeakReferenceMessenger.Default.Send(StaffChangedMessage.From(staffModel));
+
+                    Cancel();
+                }
+
+                IsLoading = false;
             }
-            else
+            catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Successful", "Staff saved successfully", "OK");
-
-                await InitializeAsync();
-
-                // Push for change in staff info
-                WeakReferenceMessenger.Default.Send(StaffChangedMessage.From(staffModel));
-
-                Cancel();
+                _logger.LogError("StaffManagementVM-SaveStaffAsync Error", ex);
+                throw;
             }
-
-            IsLoading = false;
         }
 
         /// <summary>
@@ -177,21 +208,29 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task DeleteItemAsync(StaffEditModel staff)
         {
-            var staffModel = new StaffModel
+            try
             {
-                Id = staff.Id,
-                Name = staff.Name,
-                PhoneNumber = staff.PhoneNumber,
-                Role = staff.Role,
-            };
+                var staffModel = new StaffModel
+                {
+                    Id = staff.Id,
+                    Name = staff.Name,
+                    PhoneNumber = staff.PhoneNumber,
+                    Role = staff.Role,
+                };
 
-            if (await _databaseService.StaffOperaiotns.DeleteStaffAsync(staffModel) > 0)
+                if (await _databaseService.StaffOperaiotns.DeleteStaffAsync(staffModel) > 0)
+                {
+                    await Shell.Current.DisplayAlert("Successful", $"{staff.Name} deleted successfully", "OK");
+
+                    await InitializeAsync();
+
+                    Cancel();
+                }
+            }
+            catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Successful", $"{staff.Name} deleted successfully", "OK");
-
-                await InitializeAsync();
-
-                Cancel();
+                _logger.LogError("StaffManagementVM-DeleteItemAsync Error", ex);
+                throw;
             }
         }
 

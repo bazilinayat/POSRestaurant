@@ -1,4 +1,4 @@
-﻿namespace SettingLibrary
+﻿namespace POSRestaurant.Service.SettingService
 {
     /// <summary>
     /// Class to keep the values taken from Settings.json file

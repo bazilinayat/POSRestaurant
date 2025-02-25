@@ -1,20 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Printing;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
-using SettingLibrary;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.SettingService;
 using System.Collections.ObjectModel;
-using Windows.Graphics.Printing;
-using Windows.UI.WebUI;
-using static CommunityToolkit.Mvvm.ComponentModel.__Internals.__TaskExtensions.TaskAwaitableWithoutEndValidation;
 
 namespace POSRestaurant.ViewModels
 {
@@ -27,6 +21,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// To check if ViewModel is already initialized
@@ -111,9 +110,10 @@ namespace POSRestaurant.ViewModels
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public BillViewModel(DatabaseService databaseService, OrdersViewModel ordersViewModel, 
+        public BillViewModel(DatabaseService databaseService, LogService logger, OrdersViewModel ordersViewModel, 
             SettingService settingService, ReceiptService receiptService)
         {
+            _logger = logger;
             _databaseService = databaseService;
             _settingService = settingService;
             _receiptService = receiptService;
@@ -153,18 +153,26 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            IsLoading = true;
+            try
+            {
+                IsLoading = true;
 
-            OrderKOTs.Clear();
-            OrderKOTItems.Clear();
-            OrderKOTIds = "";
-            ShowDiscountVariables = false;
+                OrderKOTs.Clear();
+                OrderKOTItems.Clear();
+                OrderKOTIds = "";
+                ShowDiscountVariables = false;
 
-            await GetOrderDetailsAsync();
+                await GetOrderDetailsAsync();
 
-            await LoadCashiers();
+                await LoadCashiers();
 
-            IsLoading = false;
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("BillVM-InitializeAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -173,9 +181,17 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a task object</returns>
         private async Task LoadCashiers()
         {
-            Cashiers = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Cashier))
-                            .Select(StaffModel.FromEntity)
-                            .ToArray();
+            try
+            {
+                Cashiers = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Cashier))
+                                    .Select(StaffModel.FromEntity)
+                                    .ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("BillVM-LoadCashiers Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -184,87 +200,95 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task Object</returns>
         private async Task GetOrderDetailsAsync()
         {
-            // Get Order for Basic Details
-            var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
-
-            OrderModel = new OrderModel
+            try
             {
-                Id = order.Id,
-                TableId = order.TableId,
-                OrderDate = order.OrderDate,
-                OrderType = order.OrderType,
-                TotalItemCount = order.TotalItemCount,
-                TotalAmount = order.TotalAmount,
-                PaymentMode = order.PaymentMode,
-                OrderStatus = order.OrderStatus,
+                // Get Order for Basic Details
+                var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
 
-                IsDiscountGiven = order.IsDiscountGiven,
-                IsFixedBased = order.IsFixedBased,
-                IsPercentageBased = order.IsPercentageBased,
-                DiscountFixed = order.DiscountFixed,
-                DiscountPercentage = order.DiscountPercentage,
-                TotalAmountAfterDiscount = order.TotalAmountAfterDiscount,
-
-                UsingGST = order.UsingGST,
-                CGST = order.CGST,
-                SGST = order.SGST,
-                CGSTAmount = order.CGSTAmount,
-                SGSTAmount = order.SGSTAmount,
-
-                RoundOff = order.RoundOff,
-                GrandTotal = order.GrandTotal,
-            };
-
-            // Get Order KOTs for More Details
-            OrderKOTs = (await _databaseService.GetOrderKotsAsync(OrderModel.Id))
-                            .Select(KOTModel.FromEntity)
-                            .ToList();
-
-            OrderKOTIds = string.Join(',', OrderKOTs.Select(o => o.Id).ToArray());
-
-            /*
-             * Get Order KOT Items
-             * Group them together
-             * Calculcate totals
-             */
-            var kotItems = new List<KOTItemModel>();
-
-            foreach (var kot in OrderKOTs)
-            {
-                var items = (await _databaseService.GetKotItemsAsync(kot.Id))
-                            .Select(KOTItemModel.FromEntity)
-                            .ToList();
-
-                kotItems.AddRange(items);
-            }
-
-            // Group items together
-            var dict = kotItems.GroupBy(o => o.ItemId).ToDictionary(g => g.Key, g => g.Select(o => o));
-
-            foreach(var groupedItems in dict)
-            {
-                OrderKOTItems.Add(new KOTItemBillModel
+                OrderModel = new OrderModel
                 {
-                    ItemId = groupedItems.Key,
-                    Name = groupedItems.Value.First().Name,
-                    Quantity = groupedItems.Value.Sum(o => o.Quantity),
-                    Price = groupedItems.Value.First().Price,
-                });
-            }
+                    Id = order.Id,
+                    TableId = order.TableId,
+                    OrderDate = order.OrderDate,
+                    OrderType = order.OrderType,
+                    TotalItemCount = order.TotalItemCount,
+                    TotalAmount = order.TotalAmount,
+                    PaymentMode = order.PaymentMode,
+                    OrderStatus = order.OrderStatus,
 
-            // Calculate totals
+                    IsDiscountGiven = order.IsDiscountGiven,
+                    IsFixedBased = order.IsFixedBased,
+                    IsPercentageBased = order.IsPercentageBased,
+                    DiscountFixed = order.DiscountFixed,
+                    DiscountPercentage = order.DiscountPercentage,
+                    TotalAmountAfterDiscount = order.TotalAmountAfterDiscount,
 
-            if (OrderModel.IsDiscountGiven)
-            {
-                ShowDiscountVariables = true;
-                if (OrderModel.IsFixedBased)
+                    UsingGST = order.UsingGST,
+                    CGST = order.CGST,
+                    SGST = order.SGST,
+                    CGSTAmount = order.CGSTAmount,
+                    SGSTAmount = order.SGSTAmount,
+
+                    RoundOff = order.RoundOff,
+                    GrandTotal = order.GrandTotal,
+                };
+
+                // Get Order KOTs for More Details
+                OrderKOTs = (await _databaseService.GetOrderKotsAsync(OrderModel.Id))
+                                .Select(KOTModel.FromEntity)
+                                .ToList();
+
+                OrderKOTIds = string.Join(',', OrderKOTs.Select(o => o.Id).ToArray());
+
+                /*
+                 * Get Order KOT Items
+                 * Group them together
+                 * Calculcate totals
+                 */
+                var kotItems = new List<KOTItemModel>();
+
+                foreach (var kot in OrderKOTs)
                 {
-                    DiscountAmount = OrderModel.DiscountFixed;
+                    var items = (await _databaseService.GetKotItemsAsync(kot.Id))
+                                .Select(KOTItemModel.FromEntity)
+                                .ToList();
+
+                    kotItems.AddRange(items);
                 }
-                else if (OrderModel.IsPercentageBased)
+
+                // Group items together
+                var dict = kotItems.GroupBy(o => o.ItemId).ToDictionary(g => g.Key, g => g.Select(o => o));
+
+                foreach (var groupedItems in dict)
                 {
-                    DiscountAmount = OrderModel.TotalAmount * OrderModel.DiscountPercentage / 100;
+                    OrderKOTItems.Add(new KOTItemBillModel
+                    {
+                        ItemId = groupedItems.Key,
+                        Name = groupedItems.Value.First().Name,
+                        Quantity = groupedItems.Value.Sum(o => o.Quantity),
+                        Price = groupedItems.Value.First().Price,
+                    });
                 }
+
+                // Calculate totals
+
+                if (OrderModel.IsDiscountGiven)
+                {
+                    ShowDiscountVariables = true;
+                    if (OrderModel.IsFixedBased)
+                    {
+                        DiscountAmount = OrderModel.DiscountFixed;
+                    }
+                    else if (OrderModel.IsPercentageBased)
+                    {
+                        DiscountAmount = OrderModel.TotalAmount * OrderModel.DiscountPercentage / 100;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("BillVM-GetOrderDetailsAsync Error", ex);
+                throw;
             }
         }
 
@@ -275,65 +299,71 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task PrintReceiptAsync()
         {
-            // TODO: Printing
-
-            if (SelectedCashier == null)
+            try
             {
-                await Shell.Current.DisplayAlert("Printing Error", "Assign a cashier to the order.", "Ok");
-                return;
+                if (SelectedCashier == null)
+                {
+                    await Shell.Current.DisplayAlert("Printing Error", "Assign a cashier to the order.", "Ok");
+                    return;
+                }
+
+                var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
+
+                var billModel = new BillModel
+                {
+                    RestrauntName = restaurantInfo.Name,
+                    Address = restaurantInfo.Address,
+                    GSTIn = restaurantInfo.GSTIN,
+                    CustomerName = "Customer Name",
+
+                    OrderType = OrderModel.OrderType,
+
+                    TimeStamp = OrderModel.OrderDate,
+                    TableNo = TableModel.TableNo,
+                    Cashier = SelectedCashier.Name,
+                    BillNo = OrderModel.Id.ToString(),
+                    TokenNos = OrderKOTIds,
+                    WaiterAssigned = TableModel.Waiter.Name,
+
+                    Items = OrderKOTItems.ToList(),
+
+                    TotalQty = OrderModel.TotalItemCount,
+                    SubTotal = OrderModel.TotalAmount,
+
+                    IsDiscountGiven = OrderModel.IsDiscountGiven,
+                    IsFixedBased = OrderModel.IsFixedBased,
+                    IsPercentageBased = OrderModel.IsPercentageBased,
+                    DiscountFixed = OrderModel.DiscountFixed,
+                    DiscountPercentage = OrderModel.DiscountPercentage,
+                    SubTotalAfterDiscount = OrderModel.TotalAmountAfterDiscount,
+
+                    UsginGST = OrderModel.UsingGST,
+                    CGST = OrderModel.CGST,
+                    SGST = OrderModel.SGST,
+                    CGSTAmount = OrderModel.CGSTAmount,
+                    SGSTAmount = OrderModel.SGSTAmount,
+                    RoundOff = OrderModel.RoundOff,
+                    GrandTotal = OrderModel.GrandTotal,
+
+                    FassaiNo = restaurantInfo.FSSAI,
+                    QRCode = "Data"
+                };
+
+                var pdfData = await _receiptService.GenerateReceipt(billModel);
+                await _receiptService.PrintReceipt(pdfData);
+
+                TableModel.Status = Data.TableOrderStatus.Printed;
+                TableModel.OrderTotal = OrderModel.GrandTotal;
+
+                WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
+
+                await Microsoft.Maui.Controls.Application.Current.MainPage.Navigation.PopAsync();
             }
-
-            await Shell.Current.DisplayAlert("Printing", "Printing Taking Place", "OK");
-
-            var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
-
-            var billModel = new BillModel
+            catch (Exception ex)
             {
-                RestrauntName = restaurantInfo.Name,
-                Address = restaurantInfo.Address,
-                GSTIn = restaurantInfo.GSTIN,
-                CustomerName = "Customer Name",
-
-                OrderType = OrderModel.OrderType,
-
-                TimeStamp = OrderModel.OrderDate,
-                TableNo = TableModel.TableNo,
-                Cashier = SelectedCashier.Name,
-                BillNo = OrderModel.Id.ToString(),
-                TokenNos = OrderKOTIds,
-                WaiterAssigned = TableModel.Waiter.Name,
-
-                Items = OrderKOTItems.ToList(),
-
-                TotalQty = OrderModel.TotalItemCount,
-                SubTotal = OrderModel.TotalAmount,
-
-                IsDiscountGiven = OrderModel.IsDiscountGiven,
-                IsFixedBased = OrderModel.IsFixedBased,
-                IsPercentageBased = OrderModel.IsPercentageBased,
-                DiscountFixed = OrderModel.DiscountFixed,
-                DiscountPercentage = OrderModel.DiscountPercentage,
-                SubTotalAfterDiscount = OrderModel.TotalAmountAfterDiscount,
-
-                UsginGST = OrderModel.UsingGST,
-                CGST = OrderModel.CGST,
-                SGST = OrderModel.SGST,
-                CGSTAmount = OrderModel.CGSTAmount,
-                SGSTAmount = OrderModel.SGSTAmount,
-                RoundOff = OrderModel.RoundOff,
-                GrandTotal = OrderModel.GrandTotal,
-
-                FassaiNo = restaurantInfo.FSSAI,
-                QRCode = "Data"
-            };
-
-            var pdfData = await _receiptService.GenerateReceipt(billModel);
-            await _receiptService.PrintReceipt(pdfData);
-
-            TableModel.Status = Data.TableOrderStatus.Printed;
-            TableModel.OrderTotal = OrderModel.GrandTotal;
-
-            WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
+                _logger.LogError("BillVM-PrintReceiptAsync Error", ex);
+                throw;
+            }
         }
     }
 }

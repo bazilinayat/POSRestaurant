@@ -1,6 +1,6 @@
 ﻿using POSRestaurant.Pages;
 using POSRestaurant.ViewModels;
-using SettingLibrary;
+using POSRestaurant.Service.SettingService;
 
 namespace POSRestaurant
 {

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PaymentService.Models.Paytm
+namespace POSRestaurant.PaymentService.Models.Paytm
 {
     /// <summary>
     /// To represent the head part of the api request and resposne

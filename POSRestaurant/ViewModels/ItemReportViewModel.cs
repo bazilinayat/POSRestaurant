@@ -4,13 +4,8 @@ using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
-using System;
-using System.Collections.Generic;
+using POSRestaurant.Service.LoggerService;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace POSRestaurant.ViewModels
 {
@@ -23,7 +18,12 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
-        
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
+
         /// <summary>
         /// DIed variable for MenuService
         /// </summary>
@@ -51,6 +51,9 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         public ObservableCollection<ItemReportModel> ItemReportData { get; set; } = new();
 
+        /// <summary>
+        /// Item data to display
+        /// </summary>
         [ObservableProperty]
         private Dictionary<string, List<KOTItem>> _itemData = new();
 
@@ -87,8 +90,9 @@ namespace POSRestaurant.ViewModels
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public ItemReportViewModel(DatabaseService databaseService, MenuService menuService)
+        public ItemReportViewModel(LogService logger, DatabaseService databaseService, MenuService menuService)
         {
+            _logger = logger;
             _databaseService = databaseService;
             _menuService = menuService;
 
@@ -104,39 +108,47 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            //Reset page
-            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
-            if (_isInitialized)
+            try
             {
-                if (Categories.Where(o => o.Key == 0) != null)
-                    SelectedCategory = defaultOrderType;
-
-                ItemReportData.Clear();
-                TotalItems = 0;
-                TotalQuantity = 0;
-                TotalAmount = 0;
-
-                return;
-            }
-
-            _isInitialized = true;
-            IsLoading = true;
-
-            var categories = await _menuService.GetMenuCategories();
-
-            Categories.Add(defaultOrderType);
-            foreach (var category in categories)
-            {
-                Categories.Add(new ValueForPicker
+                //Reset page
+                var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
+                if (_isInitialized)
                 {
-                    Key = category.Id,
-                    Value = category.Name
-                });
+                    if (Categories.Where(o => o.Key == 0) != null)
+                        SelectedCategory = defaultOrderType;
+
+                    ItemReportData.Clear();
+                    TotalItems = 0;
+                    TotalQuantity = 0;
+                    TotalAmount = 0;
+
+                    return;
+                }
+
+                _isInitialized = true;
+                IsLoading = true;
+
+                var categories = await _menuService.GetMenuCategories();
+
+                Categories.Add(defaultOrderType);
+                foreach (var category in categories)
+                {
+                    Categories.Add(new ValueForPicker
+                    {
+                        Key = category.Id,
+                        Value = category.Name
+                    });
+                }
+
+                await MakeItemReport();
+
+                IsLoading = false;
             }
-
-            await MakeItemReport();
-
-            IsLoading = false;
+            catch (Exception ex)
+            {
+                _logger.LogError("ItemReportVM-InitializeAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -145,51 +157,62 @@ namespace POSRestaurant.ViewModels
         /// <returns></returns>
         private async ValueTask MakeItemReport()
         {
-            ItemReportData.Clear();
-            var kotItems = await _databaseService.GetAllKotItemsAsync(SelectedDate);
-
-            var groupedItems = kotItems.GroupBy(o => o.ItemId).ToDictionary(group => group.Key, group => group.ToArray());
-
-            foreach (var kotItem in groupedItems)
+            try
             {
-                var category = await _databaseService.MenuOperations.GetCategoryOfMenuItem(kotItem.Key);
+                ItemReportData.Clear();
+                var kotItems = await _databaseService.GetAllKotItemsAsync(SelectedDate);
 
-                if (category.Id != SelectedCategory.Key)
-                    continue;
+                var groupedItems = kotItems.GroupBy(o => o.ItemId).ToDictionary(group => group.Key, group => group.ToArray());
 
-                var totalQuantity = kotItem.Value.Sum(o => o.Quantity);
-                var itemPrice = kotItem.Value.First().Price;
-
-                var kotItemsList = new List<KOTItem>
+                foreach (var kotItem in groupedItems)
                 {
-                    new KOTItem
+                    var category = await _databaseService.MenuOperations.GetCategoryOfMenuItem(kotItem.Key);
+
+                    if (SelectedCategory.Key != 0)
                     {
-                        ItemId = kotItem.Key,
-                        Name = kotItem.Value.First().Name,
-                        Price = itemPrice,
-                        Quantity = totalQuantity,
+                        if (category.Id != SelectedCategory.Key)
+                            continue;
                     }
-                };
 
-                var existingCategory = ItemReportData.FirstOrDefault(o => o.CategoryName == category.Name);
-                if (existingCategory != null)
-                {
-                    existingCategory.KOTItems.AddRange(kotItemsList);
-                }
-                else
-                {
-                    ItemReportData.Add(new ItemReportModel
+                    var totalQuantity = kotItem.Value.Sum(o => o.Quantity);
+                    var itemPrice = kotItem.Value.First().Price;
+
+                    var kotItemsList = new List<KOTItem>
                     {
-                        CategoryName = category.Name,
-                        KOTItems = kotItemsList
-                    });
-                }
-            }
+                        new KOTItem
+                        {
+                            ItemId = kotItem.Key,
+                            Name = kotItem.Value.First().Name,
+                            Price = itemPrice,
+                            Quantity = totalQuantity,
+                        }
+                    };
 
-            // Calculate totals
-            TotalItems = ItemReportData.Sum(category => category.KOTItems.Count);
-            TotalQuantity = ItemReportData.Sum(category => category.KOTItems.Sum(item => item.Quantity));
-            TotalAmount = ItemReportData.Sum(category => category.KOTItems.Sum(item => item.Amount));
+                    var existingCategory = ItemReportData.FirstOrDefault(o => o.CategoryName == category.Name);
+                    if (existingCategory != null)
+                    {
+                        existingCategory.KOTItems.AddRange(kotItemsList);
+                    }
+                    else
+                    {
+                        ItemReportData.Add(new ItemReportModel
+                        {
+                            CategoryName = category.Name,
+                            KOTItems = kotItemsList
+                        });
+                    }
+                }
+
+                // Calculate totals
+                TotalItems = ItemReportData.Sum(category => category.KOTItems.Count);
+                TotalQuantity = ItemReportData.Sum(category => category.KOTItems.Sum(item => item.Quantity));
+                TotalAmount = ItemReportData.Sum(category => category.KOTItems.Sum(item => item.Amount));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ItemReportVM-MakeItemReport Error", ex);
+                throw;
+            }
         }
 
         /// <summary>

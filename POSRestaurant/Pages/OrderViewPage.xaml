@@ -13,6 +13,13 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+            <Style TargetType="Entry" x:Key="txt">
+                <Setter Property="BackgroundColor" Value="Wheat" />
+                <Setter Property="PlaceholderColor" Value="Black" />
+            </Style>
+            <Style TargetType="Label" x:Key="lbl">
+                <Setter Property="FontSize" Value="16" />
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -70,8 +77,8 @@
                     <Label Text="Order Items"
                    FontSize="25"
                    FontAttributes="Bold"/>
-                    <Label Text="{Binding OrderModel.Id, StringFormat='Order Id - {0}'}" />
-                    <Label Text="{Binding OrderModel.OrderDate, StringFormat='DateTime - {0}'}" />
+                    <Label Text="{Binding OrderModelToDisplay.Id, StringFormat='Order Id - {0}'}" />
+                    <Label Text="{Binding OrderModelToDisplay.OrderDate, StringFormat='DateTime - {0}'}" />
                 </VerticalStackLayout>
                 <Grid Grid.Row="1"
               Padding="10"

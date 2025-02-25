@@ -1,12 +1,13 @@
 ﻿using CommunityToolkit.Maui;
-using LoggerService;
+using POSRestaurant.Service.LoggerService;
 using Microsoft.Extensions.Logging;
-using PaymentService.Online;
+using Microsoft.Maui.LifecycleEvents;
+using POSRestaurant.PaymentService.Online;
 using POSRestaurant.DBO;
 using POSRestaurant.Pages;
 using POSRestaurant.Service;
 using POSRestaurant.ViewModels;
-using SettingLibrary;
+using POSRestaurant.Service.SettingService;
 
 namespace POSRestaurant
 {
@@ -36,10 +37,11 @@ namespace POSRestaurant
 #if DEBUG
     		builder.Logging.AddDebug();
 
+            
+#endif
             string logFilePath = Path.Combine(AppContext.BaseDirectory, "logs");
 
             builder.Services.AddSingleton(new LogService(logFilePath));
-#endif
 
             builder.Services.AddSingleton<DatabaseService>()
                 .AddSingleton<SettingService>()
@@ -79,6 +81,20 @@ namespace POSRestaurant
                 .AddSingleton<SettingsViewModel>()
                 .AddSingleton<PickupViewModel>()
                 .AddSingleton<SalesReportViewModel>();
+
+            // Force initialize Windows App Runtime components
+            if (OperatingSystem.IsWindows())
+            {
+                builder.ConfigureLifecycleEvents(events =>
+                {
+                    events.AddWindows(windows => windows
+                        .OnWindowCreated(window =>
+                        {
+                            window.ExtendsContentIntoTitleBar = false;
+                        })
+                    );
+                });
+            }
 
             return builder.Build();
         }

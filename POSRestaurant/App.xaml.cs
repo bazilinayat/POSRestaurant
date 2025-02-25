@@ -1,6 +1,6 @@
 ﻿using POSRestaurant.DBO;
 using POSRestaurant.ViewModels;
-using SettingLibrary;
+using POSRestaurant.Service.SettingService;
 
 namespace POSRestaurant
 {
@@ -20,17 +20,25 @@ namespace POSRestaurant
         /// <param name="databaseService">DI for DatabaseService</param>
         public App(IServiceProvider serviceProvider, DatabaseService databaseService, SettingService settingService)
         {
-            InitializeComponent();
+            try
+            {
+                WinRT.ComWrappersSupport.InitializeComWrappers();
+                InitializeComponent();
 
-            // Set AppTheme permanently to light
-            Application.Current.UserAppTheme = AppTheme.Light;
+                // Set AppTheme permanently to light
+                Application.Current.UserAppTheme = AppTheme.Light;
 
-            var shellViewModel = serviceProvider.GetRequiredService<ShellViewModel>();
+                var shellViewModel = serviceProvider.GetRequiredService<ShellViewModel>();
 
-            MainPage = new AppShell(serviceProvider, shellViewModel, settingService);
+                MainPage = new AppShell(serviceProvider, shellViewModel, settingService);
 
-            // Initialize and Seed Database
-            Task.Run(async() => await databaseService.InitializeDatabaseAsync()).GetAwaiter().GetResult();            
+                // Initialize and Seed Database
+                Task.Run(async () => await databaseService.InitializeDatabaseAsync()).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         /// <summary>

@@ -6,11 +6,8 @@ using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Pages;
+using POSRestaurant.Service.LoggerService;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace POSRestaurant.ViewModels
 {
@@ -23,6 +20,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// ServiceProvider for the DIs
@@ -70,8 +72,9 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public InventoryViewModel(IServiceProvider serviceProvider, DatabaseService databaseService)
+        public InventoryViewModel(IServiceProvider serviceProvider, LogService logger, DatabaseService databaseService)
         {
+            _logger = logger;
             _serviceProvider = serviceProvider;
             _databaseService = databaseService;
 
@@ -87,53 +90,60 @@ namespace POSRestaurant.ViewModels
         public async ValueTask InitializeAsync()
         {
 
-            _isInitialized = true;
-            IsLoading = true;
-
-            ExpenseItems.Clear();
-            StaffMembers.Clear();
-            PaymentModes.Clear();
-
-            var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
-                                .Select(ExpenseTypeModel.FromEntity)
-                                .ToList();
-            ExpenseItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
-            foreach (var coowner in expenseItems)
+            try
             {
-                ExpenseItemTypes.Add(coowner);
-            }
+                _isInitialized = true;
+                IsLoading = true;
 
-            if (ExpenseItemTypes.Count() == 1)
+                ExpenseItems.Clear();
+                StaffMembers.Clear();
+                PaymentModes.Clear();
+
+                var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
+                                    .Select(ExpenseTypeModel.FromEntity)
+                                    .ToList();
+                foreach (var coowner in expenseItems)
+                {
+                    ExpenseItemTypes.Add(coowner);
+                }
+
+                if (ExpenseItemTypes.Count() == 1)
+                {
+                    await Shell.Current.DisplayAlert(
+                        "Error",
+                        $"Add Expense Types in Settings",
+                        "OK");
+                    var settingVM = _serviceProvider.GetRequiredService<SettingsViewModel>();
+                    await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage(settingVM));
+                }
+                else
+                {
+                    ExpenseItemTypes[0].IsSelected = true;
+                }
+
+                // Populate StaffMembers (mock data for now)
+                var coowners = await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.CoOwner);
+                foreach (var coowner in coowners)
+                {
+                    StaffMembers.Add(coowner);
+                }
+
+                // Populate ExpenseItemTypes
+                foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<ExpensePaymentModes>())
+                {
+                    PaymentModes.Add(desc);
+                }
+
+                Rows.Clear();
+                InitializeRows(10);
+
+                IsLoading = false;
+            }
+            catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert(
-                    "Error",
-                    $"Add Expense Types in Settings",
-                    "OK");
-                var settingVM = _serviceProvider.GetRequiredService<SettingsViewModel>();
-                await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage(settingVM));
+                _logger.LogError("InventoryVM-InitializeAsync Error", ex);
+                throw;
             }
-            else
-            {
-                ExpenseItemTypes[0].IsSelected = true;
-            }
-
-            // Populate StaffMembers (mock data for now)
-            var coowners = await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.CoOwner);
-            foreach (var coowner in coowners)
-            {
-                StaffMembers.Add(coowner);
-            }
-
-            // Populate ExpenseItemTypes
-            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<ExpensePaymentModes>())
-            {
-                PaymentModes.Add(desc);
-            }
-
-            Rows.Clear();
-            InitializeRows(10);
-
-            IsLoading = false;
         }
 
         /// <summary>
@@ -161,17 +171,25 @@ namespace POSRestaurant.ViewModels
         /// <param name="message">StaffChangedMessage</param>
         public async void Receive(StaffChangedMessage message)
         {
-            StaffMembers.Clear();
-            // Populate StaffMembers (mock data for now)
-            var coowners = await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.CoOwner);
-            foreach (var coowner in coowners)
+            try
             {
-                StaffMembers.Add(coowner);
-            }
+                StaffMembers.Clear();
+                // Populate StaffMembers (mock data for now)
+                var coowners = await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.CoOwner);
+                foreach (var coowner in coowners)
+                {
+                    StaffMembers.Add(coowner);
+                }
 
-            for (int i = 0; i < Rows.Count; i++)
+                for (int i = 0; i < Rows.Count; i++)
+                {
+                    Rows[i].StaffMembers = StaffMembers;
+                }
+            }
+            catch (Exception ex)
             {
-                Rows[i].StaffMembers = StaffMembers;
+                _logger.LogError("InventoryVM-Receive StaffChangedMessage Error", ex);
+                throw;
             }
         }
 
@@ -181,20 +199,27 @@ namespace POSRestaurant.ViewModels
         /// <param name="message">StaffChangedMessage</param>
         public async void Receive(ExpenseTypeChangedMessage message)
         {
-            ExpenseItemTypes.Clear();
-            var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
-                                .Select(ExpenseTypeModel.FromEntity)
-                                .ToList();
-            ExpenseItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
-            foreach (var coowner in expenseItems)
+            try
             {
-                ExpenseItemTypes.Add(coowner);
-            }
-            ExpenseItemTypes[0].IsSelected = true;
+                ExpenseItemTypes.Clear();
+                var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
+                                    .Select(ExpenseTypeModel.FromEntity)
+                                    .ToList();
+                foreach (var coowner in expenseItems)
+                {
+                    ExpenseItemTypes.Add(coowner);
+                }
+                ExpenseItemTypes[0].IsSelected = true;
 
-            for (int i = 0; i < Rows.Count; i++)
+                for (int i = 0; i < Rows.Count; i++)
+                {
+                    Rows[i].ExpenseItemTypes = ExpenseItemTypes;
+                }
+            }
+            catch (Exception ex)
             {
-                Rows[i].ExpenseItemTypes = ExpenseItemTypes;
+                _logger.LogError("InventoryVM-Receive ExpenseTypeChangedMessage Error", ex);
+                throw;
             }
         }
 
@@ -249,10 +274,8 @@ namespace POSRestaurant.ViewModels
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert(
-                    "Error",
-                    $"An error occurred while saving: {ex.Message}",
-                    "OK");
+                _logger.LogError("InventoryVM-SendAll Error", ex);
+                throw;
             }
         }
     }

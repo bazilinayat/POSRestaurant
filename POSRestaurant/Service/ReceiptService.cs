@@ -124,7 +124,7 @@ namespace POSRestaurant.Service
             height += data.Items.Count * 5; // Items space
             height += 50; // Totals space
             height += 5; // Footer space
-            return height;
+            return height+100;
         }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace POSRestaurant.Service
             BarcodeQRCode qrCode = new BarcodeQRCode(qrContent);
 
             // Create the QR code image
-            float qrSize = 80; // Size in points
+            float qrSize = 150; // Size in points
             iText.Layout.Element.Image qrCodeImage = new iText.Layout.Element.Image(qrCode.CreateFormXObject(DeviceRgb.BLACK, 4, document.GetPdfDocument()))
                 .SetWidth(qrSize)
                 .SetHeight(qrSize)

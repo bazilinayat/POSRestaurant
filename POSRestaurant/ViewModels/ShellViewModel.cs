@@ -1,13 +1,17 @@
 ﻿using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using POSRestaurant.ChangedMessages;
 using POSRestaurant.Controls;
+using POSRestaurant.DBO;
 using POSRestaurant.Pages;
-using SettingLibrary;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.SettingService;
 
 namespace POSRestaurant.ViewModels
 {
-    public partial class ShellViewModel : ObservableObject
+    public partial class ShellViewModel : ObservableObject, IRecipient<TaxChangedMessage>
     {
         /// <summary>
         /// ServiceProvider for the DIs
@@ -15,12 +19,80 @@ namespace POSRestaurant.ViewModels
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
+
+        /// <summary>
+        /// The name of the restaurant
+        /// </summary>
+        [ObservableProperty]
+        private string _restaurantName;
+
+        /// <summary>
         /// Constructor for the TablesViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public ShellViewModel(IServiceProvider serviceProvider)
+        public ShellViewModel(IServiceProvider serviceProvider, LogService logger)
         {
+            _logger = logger;
             _serviceProvider = serviceProvider;
+
+            WeakReferenceMessenger.Default.Register<TaxChangedMessage>(this);
+
+            GetRestaurantName();
+        }
+
+        /// <summary>
+        /// Just to reload the application name
+        /// </summary>
+        /// <param name="message">TaxChangedMessage</param>
+        public async void Receive(TaxChangedMessage message)
+        {
+            try
+            {
+                var databaseService = _serviceProvider.GetRequiredService<DatabaseService>();
+                var resInfo = await databaseService.SettingsOperation.GetRestaurantInfo();
+                if (resInfo != null)
+                {
+                    RestaurantName = resInfo.Name;
+                }
+                else
+                {
+                    RestaurantName = "Restaurant Name";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ShellVM-Receive TaxChangedMessage Error", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// To get the restaurant name
+        /// </summary>
+        /// <returns></returns>
+        private async Task GetRestaurantName()
+        {
+            try
+            {
+                var databaseService = _serviceProvider.GetRequiredService<DatabaseService>();
+                var resInfo = await databaseService.SettingsOperation.GetRestaurantInfo();
+                if (resInfo != null)
+                {
+                    RestaurantName = resInfo.Name;
+                }
+                else
+                {
+                    RestaurantName = "Restaurant Name";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ShellVM-GetRestaurantName Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -31,8 +103,16 @@ namespace POSRestaurant.ViewModels
         private async Task NavigateToOrdersPage()
         {
             // Navigate to ProfilePage
-            var tabv = _serviceProvider.GetRequiredService<OrdersViewModel>();
-            await Application.Current.MainPage.Navigation.PushAsync(new OrdersPage(tabv));
+            try
+            {
+                var tabv = _serviceProvider.GetRequiredService<OrdersViewModel>();
+                await Application.Current.MainPage.Navigation.PushAsync(new OrdersPage(tabv));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ShellVM-NavigateToOrdersPage Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -43,8 +123,16 @@ namespace POSRestaurant.ViewModels
         private async Task NavigateToSettings()
         {
             // Navigate to SettingsPage
-            var settingVM = _serviceProvider.GetRequiredService<SettingsViewModel>();
-            await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage(settingVM));
+            try
+            {
+                var settingVM = _serviceProvider.GetRequiredService<SettingsViewModel>();
+                await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage(settingVM));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ShellVM-NavigateToSettings Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -54,9 +142,17 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SupportCommand()
         {
-            var setting = _serviceProvider.GetRequiredService<SettingService>();
-            var helpPopup = new HelpPopup(setting);
-            await Shell.Current.ShowPopupAsync(helpPopup);
+            try
+            {
+                var setting = _serviceProvider.GetRequiredService<SettingService>();
+                var helpPopup = new HelpPopup(setting);
+                await Shell.Current.ShowPopupAsync(helpPopup);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ShellVM-SupportCommand Error", ex);
+                throw;
+            }
         }
     }
 }

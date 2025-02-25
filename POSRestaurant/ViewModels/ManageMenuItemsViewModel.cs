@@ -6,7 +6,8 @@ using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
-using SettingLibrary;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.SettingService;
 
 namespace POSRestaurant.ViewModels
 {
@@ -19,6 +20,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// DIed variable for MenuService
@@ -72,8 +78,9 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="databaseService">DIed DatabaseService</param>
         /// <param name="settingService">DIed SettingService</param>
-        public ManageMenuItemViewModel(DatabaseService databaseService, MenuService menuService, SettingService settingService)
+        public ManageMenuItemViewModel(LogService logger, DatabaseService databaseService, MenuService menuService, SettingService settingService)
         {
+            _logger = logger;
             _databaseService = databaseService;
             _menuService = menuService;
             _settingService = settingService;
@@ -97,27 +104,35 @@ namespace POSRestaurant.ViewModels
         /// <returns></returns>
         private async Task GetSetRequiredValues()
         {
-            IsLoading = true;
-
-            Categories = await _menuService.GetMenuCategories();
-
-            if (!_isInitialized)
+            try
             {
-                Categories[0].IsSelected = true;
-                SelectedCategory = Categories[0];
+                IsLoading = true;
+
+                Categories = await _menuService.GetMenuCategories();
+
+                if (!_isInitialized)
+                {
+                    Categories[0].IsSelected = true;
+                    SelectedCategory = Categories[0];
+                }
+                else
+                {
+                    var category = Categories.FirstOrDefault(o => o.Id == SelectedCategory.Id);
+                    category.IsSelected = true;
+                }
+
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+
+                AddNewItemMenuItem();
+
+                _isInitialized = true;
+                IsLoading = false;
             }
-            else
+            catch (Exception ex)
             {
-                var category = Categories.FirstOrDefault(o => o.Id == SelectedCategory.Id);
-                category.IsSelected = true;
+                _logger.LogError("ManageMenuItemsVM-GetSetRequiredValues Error", ex);
+                throw;
             }
-
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
-
-            AddNewItemMenuItem();
-
-            _isInitialized = true;
-            IsLoading = false;
         }
 
         /// <summary>
@@ -128,23 +143,31 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SelectCategoryAsync(int categoryId)
         {
-            if (SelectedCategory.Id == categoryId) return;
+            try
+            {
+                if (SelectedCategory.Id == categoryId) return;
 
-            IsLoading = true;
+                IsLoading = true;
 
-            var existingSelectedCategory = Categories.First(o => o.IsSelected);
-            existingSelectedCategory.IsSelected = false;
+                var existingSelectedCategory = Categories.First(o => o.IsSelected);
+                existingSelectedCategory.IsSelected = false;
 
-            var newSelectedCategory = Categories.First(o => o.Id == categoryId);
-            newSelectedCategory.IsSelected = true;
+                var newSelectedCategory = Categories.First(o => o.Id == categoryId);
+                newSelectedCategory.IsSelected = true;
 
-            SelectedCategory = newSelectedCategory;
+                SelectedCategory = newSelectedCategory;
 
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
 
-            AddNewItemMenuItem();
+                AddNewItemMenuItem();
 
-            IsLoading = false;
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ManageMenuItemsVM-SelectCategoryAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -155,33 +178,41 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task EditMenuItemAsync(ItemOnMenu itemOnMenu)
         {
-            var menuItemModel = new ItemOnMenuModel
+            try
             {
-                Description = itemOnMenu.Description,
-                Name = itemOnMenu.Name,
-                Price = itemOnMenu.Price,
-                Id = itemOnMenu.Id,
-                ShortCode = itemOnMenu.ShortCode
-            };
-
-            if (itemOnMenu.Id != 0)
-            {
-                var itemCategory = await _databaseService.MenuOperations.GetCategoryOfMenuItem(itemOnMenu.Id);
-
-                var categorOfItem = new MenuCategoryModel
+                var menuItemModel = new ItemOnMenuModel
                 {
-                    Icon = itemCategory.Icon,
-                    Name = itemCategory.Name,
-                    Id = itemCategory.Id,
+                    Description = itemOnMenu.Description,
+                    Name = itemOnMenu.Name,
+                    Price = itemOnMenu.Price,
+                    Id = itemOnMenu.Id,
+                    ShortCode = itemOnMenu.ShortCode
                 };
-                menuItemModel.Category = categorOfItem; 
-            }
-            else
-            {
-                menuItemModel.Category = SelectedCategory;
-            }
 
-            MenuItem = menuItemModel;
+                if (itemOnMenu.Id != 0)
+                {
+                    var itemCategory = await _databaseService.MenuOperations.GetCategoryOfMenuItem(itemOnMenu.Id);
+
+                    var categorOfItem = new MenuCategoryModel
+                    {
+                        Icon = itemCategory.Icon,
+                        Name = itemCategory.Name,
+                        Id = itemCategory.Id,
+                    };
+                    menuItemModel.Category = categorOfItem;
+                }
+                else
+                {
+                    menuItemModel.Category = SelectedCategory;
+                }
+
+                MenuItem = menuItemModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ManageMenuItemsVM-EditMenuItemAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -201,38 +232,46 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SaveItem(ItemOnMenuModel item)
         {
-            IsLoading = true;
-
-            var errorMessage = await _databaseService.MenuOperations.SaveMenuItemAsync(item);
-
-            if (errorMessage != null)
+            try
             {
-                await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
-                IsLoading = false;
-                return;
-            }
-            else
-            {
-                await Shell.Current.DisplayAlert("Successful", "Item save successfully", "OK");
+                IsLoading = true;
 
-                await GetSetRequiredValues();
+                var errorMessage = await _databaseService.MenuOperations.SaveMenuItemAsync(item);
 
-                /* Sending the new item, changed item to WeakReferenceMessager
-                 * This is the publishing part
-                 */
-                WeakReferenceMessenger.Default.Send(MenuItemChangedMessage.From(new ItemOnMenuChangeModel
+                if (errorMessage != null)
                 {
-                    IsDeleted = false,
-                    ItemModel = item
-                }));
+                    await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                    IsLoading = false;
+                    return;
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert("Successful", "Item save successfully", "OK");
 
-                Cancel();
+                    await GetSetRequiredValues();
+
+                    /* Sending the new item, changed item to WeakReferenceMessager
+                     * This is the publishing part
+                     */
+                    WeakReferenceMessenger.Default.Send(MenuItemChangedMessage.From(new ItemOnMenuChangeModel
+                    {
+                        IsDeleted = false,
+                        ItemModel = item
+                    }));
+
+                    Cancel();
+                }
+                await _menuService.LoadCategoryItems();
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+                AddNewItemMenuItem();
+
+                IsLoading = false;
             }
-            await _menuService.LoadCategoryItems();
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
-            AddNewItemMenuItem();
-
-            IsLoading = false;
+            catch (Exception ex)
+            {
+                _logger.LogError("ManageMenuItemsVM-SaveItem Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -243,33 +282,41 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task DeleteItem(ItemOnMenuModel item)
         {
-            var menuItem = new ItemOnMenu
+            try
             {
-                Id = item.Id,
-                Description = item.Description,
-                Name = item.Name,
-                Price = item.Price,
-                MenuCategoryId = item.Category.Id
-            };
-            if (await _databaseService.MenuOperations.DeleteMenuItemAsync(menuItem) > 0)
-            {
-                await Shell.Current.DisplayAlert("Successful", $"{item.Name} deleted successfully", "OK");
-
-                await GetSetRequiredValues();
-
-                /* Sending the new item, changed item to WeakReferenceMessager
-                 * This is the publishing part
-                 */
-                WeakReferenceMessenger.Default.Send(MenuItemChangedMessage.From(new ItemOnMenuChangeModel
+                var menuItem = new ItemOnMenu
                 {
-                    IsDeleted = true,
-                    ItemModel = item
-                }));
-                await _menuService.LoadCategoryItems();
-                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
-                AddNewItemMenuItem();
+                    Id = item.Id,
+                    Description = item.Description,
+                    Name = item.Name,
+                    Price = item.Price,
+                    MenuCategoryId = item.Category.Id
+                };
+                if (await _databaseService.MenuOperations.DeleteMenuItemAsync(menuItem) > 0)
+                {
+                    await Shell.Current.DisplayAlert("Successful", $"{item.Name} deleted successfully", "OK");
 
-                Cancel();
+                    await GetSetRequiredValues();
+
+                    /* Sending the new item, changed item to WeakReferenceMessager
+                     * This is the publishing part
+                     */
+                    WeakReferenceMessenger.Default.Send(MenuItemChangedMessage.From(new ItemOnMenuChangeModel
+                    {
+                        IsDeleted = true,
+                        ItemModel = item
+                    }));
+                    await _menuService.LoadCategoryItems();
+                    MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+                    AddNewItemMenuItem();
+
+                    Cancel();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ManageMenuItemsVM-DeleteItem Error", ex);
+                throw;
             }
         }
 
@@ -278,14 +325,22 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         private void AddNewItemMenuItem()
         {
-            var newItem = new ItemOnMenu
+            try
             {
-                Name = "Add New Item"
-            };
-            var newArray = new ItemOnMenu[MenuItems.Length + 1];
-            newArray[0] = newItem;
-            Array.Copy(MenuItems, 0, newArray, 1, MenuItems.Length);
-            MenuItems = newArray;
+                var newItem = new ItemOnMenu
+                {
+                    Name = "Add New Item"
+                };
+                var newArray = new ItemOnMenu[MenuItems.Length + 1];
+                newArray[0] = newItem;
+                Array.Copy(MenuItems, 0, newArray, 1, MenuItems.Length);
+                MenuItems = newArray;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ManageMenuItemsVM-AddNewItemMenuItem Error", ex);
+                throw;
+            }
         }
     }
 }

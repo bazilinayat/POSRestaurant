@@ -145,7 +145,7 @@ namespace POSRestaurant.DBO
 
             if (expenseType != 0)
             {
-                filteredData = filteredData.Where(o => o.Id == expenseType).ToArray();
+                filteredData = filteredData.Where(o => o.ExpenseTypeId == expenseType).ToArray();
             }
 
             if (paidByWho != 0)

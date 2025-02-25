@@ -1,21 +1,17 @@
-﻿using CommunityToolkit.Maui.Views;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using LoggerService;
-using Microsoft.Maui.Controls;
 using POSRestaurant.ChangedMessages;
-using POSRestaurant.Controls;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
-using SettingLibrary;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.SettingService;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Windows.Services.Maps;
 
 namespace POSRestaurant.ViewModels
 {
@@ -29,6 +25,9 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         private readonly DatabaseService _databaseService;
 
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
         private readonly LogService _logger;
 
         /// <summary>
@@ -232,30 +231,38 @@ namespace POSRestaurant.ViewModels
             {
                 if (_selectedDiscountType != value)
                 {
-                    _selectedDiscountType = value;
-                    if (_selectedDiscountType == null)
+                    try
                     {
-                        IsDiscountGiven = false;
-                        DiscountAmount = 0;
-                        EnableDiscount = false;
+                        _selectedDiscountType = value;
+                        if (_selectedDiscountType == null)
+                        {
+                            IsDiscountGiven = false;
+                            DiscountAmount = 0;
+                            EnableDiscount = false;
+                            OnPropertyChanged();
+                            return;
+                        }
+                        if (_selectedDiscountType.Key == 0)
+                        {
+                            IsDiscountGiven = false;
+                            DiscountAmount = 0;
+                            EnableDiscount = false;
+                        }
+                        else if (_selectedDiscountType.Key == 1 || _selectedDiscountType.Key == 2)
+                        {
+                            DiscountAmount = 0;
+                            EnableDiscount = true;
+                            IsDiscountGiven = true;
+                        }
                         OnPropertyChanged();
-                        return;
+                        if (_selectedDiscountType.Key != 0)
+                            ReCalculateAmount();
                     }
-                    if (_selectedDiscountType.Key == 0)
+                    catch (Exception ex)
                     {
-                        IsDiscountGiven = false;
-                        DiscountAmount = 0;
-                        EnableDiscount = false;
+                        _logger.LogError("PickupVM-SelectedDiscountType Set Error", ex);
+                        throw;
                     }
-                    else if (_selectedDiscountType.Key == 1 || _selectedDiscountType.Key == 2)
-                    {
-                        DiscountAmount = 0;
-                        EnableDiscount = true;
-                        IsDiscountGiven = true;
-                    }
-                    OnPropertyChanged();
-                    if (_selectedDiscountType.Key != 0)
-                        ReCalculateAmount();
                 }
             }
         }
@@ -384,63 +391,71 @@ namespace POSRestaurant.ViewModels
         public async ValueTask InitializeAsync()
         {
 
-            UsingGst = _taxService.IndianTaxService.UsingGST;
-            Cgst = _taxService.IndianTaxService.CGST;
-            Sgst = _taxService.IndianTaxService.SGST;
-            IsDiscountGiven = false;
-            DiscountAmount= 0;
-            CartItems.Clear();
-
-            SelectedPaymentMode = 1;
-
-            IsPartPayment = false;
-            IsNotPartPayment = true;
-            IsCashForPart = IsCardForPart = IsOnlineForPart = false;
-            PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
-
-            DiscountOptionsTS.Clear();
-            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<DiscountOptions>())
+            try
             {
-                DiscountOptionsTS.Add(desc);
-            }
-            var defaultItem = DiscountOptionsTS.FirstOrDefault(x => x.Key == 0);
-            if (defaultItem != null)
-            {
-                SelectedDiscountType = defaultItem;
-            }
-            _selectedDiscountType = DiscountOptionsTS.First();
+                UsingGst = _taxService.IndianTaxService.UsingGST;
+                Cgst = _taxService.IndianTaxService.CGST;
+                Sgst = _taxService.IndianTaxService.SGST;
+                IsDiscountGiven = false;
+                DiscountAmount = 0;
+                CartItems.Clear();
 
-            if (_isInitialized)
-            {
-                foreach (var category in Categories)
+                SelectedPaymentMode = 1;
+
+                IsPartPayment = false;
+                IsNotPartPayment = true;
+                IsCashForPart = IsCardForPart = IsOnlineForPart = false;
+                PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
+
+                DiscountOptionsTS.Clear();
+                foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<DiscountOptions>())
                 {
-                    category.IsSelected = false;
+                    DiscountOptionsTS.Add(desc);
                 }
+                var defaultItem = DiscountOptionsTS.FirstOrDefault(x => x.Key == 0);
+                if (defaultItem != null)
+                {
+                    SelectedDiscountType = defaultItem;
+                }
+                _selectedDiscountType = DiscountOptionsTS.First();
+
+                if (_isInitialized)
+                {
+                    foreach (var category in Categories)
+                    {
+                        category.IsSelected = false;
+                    }
+                    Categories[0].IsSelected = true;
+                    SelectedCategory = Categories[0];
+                    MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+
+                    return;
+                }
+
+                _isInitialized = true;
+
+                IsLoading = true;
+
+                Categories = await _menuService.GetMenuCategories();
+
                 Categories[0].IsSelected = true;
                 SelectedCategory = Categories[0];
+
                 MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
 
-                return;
+                PickupSources = EnumExtensions.GetAllDescriptions<PickupSources>().ToArray();
+
+                await LoadDeliveryPersons();
+
+                CartItems.Clear();
+
+                IsLoading = false;
             }
-
-            _isInitialized = true;
-
-            IsLoading = true;
-
-            Categories = await _menuService.GetMenuCategories();
-
-            Categories[0].IsSelected = true;
-            SelectedCategory = Categories[0];
-
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
-
-            PickupSources = EnumExtensions.GetAllDescriptions<PickupSources>().ToArray();
-
-            await LoadDeliveryPersons();
-
-            CartItems.Clear();
-
-            IsLoading = false;
+            catch (Exception ex)
+            {
+                _logger.LogError("PickupVM-InitializeAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -459,28 +474,36 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task DiscountClickAsync()
         {
-            var result = await Shell.Current.DisplayPromptAsync("Discount", "Enter the applicable discount in percentage / fixed amount.", placeholder: "10", initialValue: DiscountAmount.ToString());
-            if (!string.IsNullOrWhiteSpace(result))
+            try
             {
-
-                if (!Decimal.TryParse(result, out decimal enteredDiscount))
+                var result = await Shell.Current.DisplayPromptAsync("Discount", "Enter the applicable discount in percentage / fixed amount.", placeholder: "10", initialValue: DiscountAmount.ToString());
+                if (!string.IsNullOrWhiteSpace(result))
                 {
-                    await Shell.Current.DisplayAlert("Invalid Value", "Entered discount is invalid.", "Ok");
-                    return;
-                }
 
-                if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
-                {
-                    DiscountAmount = enteredDiscount;
-                    ReCalculateAmount();
-                }
-                else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
-                {
-                    DiscountAmount = (SubTotal * enteredDiscount) / 100;
-                    DiscountAmount = enteredDiscount;
-                    ReCalculateAmount();
+                    if (!Decimal.TryParse(result, out decimal enteredDiscount))
+                    {
+                        await Shell.Current.DisplayAlert("Invalid Value", "Entered discount is invalid.", "Ok");
+                        return;
+                    }
 
+                    if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
+                    {
+                        DiscountAmount = enteredDiscount;
+                        ReCalculateAmount();
+                    }
+                    else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
+                    {
+                        DiscountAmount = (SubTotal * enteredDiscount) / 100;
+                        DiscountAmount = enteredDiscount;
+                        ReCalculateAmount();
+
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PickupVM-DiscountClickAsync Error", ex);
+                throw;
             }
         }
 
@@ -490,9 +513,17 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a task object</returns>
         private async Task LoadDeliveryPersons()
         {
-            DeliveryPersons = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Delivery))
-                            .Select(StaffModel.FromEntity)
-                            .ToList();
+            try
+            {
+                DeliveryPersons = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Delivery))
+                                    .Select(StaffModel.FromEntity)
+                                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PickupVM-LoadDeliveryPersons Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -503,21 +534,29 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SelectCategoryAsync(int categoryId)
         {
-            if (SelectedCategory.Id == categoryId) return;
+            try
+            {
+                if (SelectedCategory.Id == categoryId) return;
 
-            IsLoading = true;
+                IsLoading = true;
 
-            var existingSelectedCategory = Categories.First(o => o.IsSelected);
-            existingSelectedCategory.IsSelected = false;
+                var existingSelectedCategory = Categories.First(o => o.IsSelected);
+                existingSelectedCategory.IsSelected = false;
 
-            var newSelectedCategory = Categories.First(o => o.Id == categoryId);
-            newSelectedCategory.IsSelected = true;
+                var newSelectedCategory = Categories.First(o => o.Id == categoryId);
+                newSelectedCategory.IsSelected = true;
 
-            SelectedCategory = newSelectedCategory;
+                SelectedCategory = newSelectedCategory;
 
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
 
-            IsLoading = false;
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PickupVM-SelectCategoryAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -587,43 +626,51 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         private void ReCalculateAmount()
         {
-            var totalItems = CartItems.Sum(o => o.Quantity);
-            var totalAmount = CartItems.Sum(o => o.Amount);
-            // Calculate totals
-            TotalItemCount = totalItems;
-            TotalAmount = totalAmount;
-            TotalAmountAfterDiscount = SubTotal;
-
-            if (IsDiscountGiven)
+            try
             {
-                if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
+                var totalItems = CartItems.Sum(o => o.Quantity);
+                var totalAmount = CartItems.Sum(o => o.Amount);
+                // Calculate totals
+                TotalItemCount = totalItems;
+                TotalAmount = totalAmount;
+                TotalAmountAfterDiscount = SubTotal;
+
+                if (IsDiscountGiven)
                 {
-                    DiscountAmount = DiscountAmount;
-                    TotalAmountAfterDiscount = TotalAmount - DiscountAmount;
+                    if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
+                    {
+                        DiscountAmount = DiscountAmount;
+                        TotalAmountAfterDiscount = TotalAmount - DiscountAmount;
+                    }
+                    else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
+                    {
+                        DiscountAmount = TotalAmount * DiscountAmount / 100;
+                        TotalAmountAfterDiscount = TotalAmount - DiscountAmount;
+                    }
                 }
-                else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
-                { 
-                    DiscountAmount = TotalAmount * DiscountAmount / 100;
-                    TotalAmountAfterDiscount = TotalAmount - DiscountAmount;
+                else
+                {
+                    TotalAmountAfterDiscount = TotalAmount;
                 }
-            }
-            else
-            {
-                TotalAmountAfterDiscount = TotalAmount;
-            }
 
-            if (UsingGst)
-            {
-                CgstAmount = _taxService.IndianTaxService.CalculateCGST(TotalAmountAfterDiscount);
-                SgstAmount = _taxService.IndianTaxService.CalculateSGST(TotalAmountAfterDiscount);
-                var total = TotalAmountAfterDiscount + CgstAmount + SgstAmount;
-                GrandTotal = Math.Floor(total);
-                RoundOff = GrandTotal - total;
+                if (UsingGst)
+                {
+                    CgstAmount = _taxService.IndianTaxService.CalculateCGST(TotalAmountAfterDiscount);
+                    SgstAmount = _taxService.IndianTaxService.CalculateSGST(TotalAmountAfterDiscount);
+                    var total = TotalAmountAfterDiscount + CgstAmount + SgstAmount;
+                    GrandTotal = Math.Floor(total);
+                    RoundOff = GrandTotal - total;
+                }
+                else
+                {
+                    GrandTotal = Math.Floor(TotalAmountAfterDiscount);
+                    RoundOff = GrandTotal - TotalAmountAfterDiscount;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                GrandTotal = Math.Floor(TotalAmountAfterDiscount);
-                RoundOff = GrandTotal - TotalAmountAfterDiscount;
+                _logger.LogError("PickupVM-ReCalculateAmount Error", ex);
+                throw;
             }
         }
 
@@ -659,171 +706,185 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task PlaceOrderAsync()
         {
-            IsLoading = true;
-
-            var kotItems = CartItems.Select(o => new KOTItem
+            try
             {
-                Icon = o.Icon,
-                ItemId = o.ItemId,
-                Name = o.Name,
-                Price = o.Price,
-                Quantity = o.Quantity
-            }).ToArray();
+                IsLoading = true;
 
-            var kotModel = new KOTModel
-            {
-                KOTDateTime = DateTime.Now,
-                TotalItemCount = CartItems.Sum(x => x.Quantity),
-                TotalPrice = CartItems.Sum(x => x.Amount),
-                Items = kotItems
-            };
+                var kotItems = CartItems.Select(o => new KOTItem
+                {
+                    Icon = o.Icon,
+                    ItemId = o.ItemId,
+                    Name = o.Name,
+                    Price = o.Price,
+                    Quantity = o.Quantity
+                }).ToArray();
 
-            List<KOTModel> kots = new List<KOTModel>();
-            kots.Add(kotModel);
+                var kotModel = new KOTModel
+                {
+                    KOTDateTime = DateTime.Now,
+                    TotalItemCount = CartItems.Sum(x => x.Quantity),
+                    TotalPrice = CartItems.Sum(x => x.Amount),
+                    Items = kotItems
+                };
 
-            string? errorMessage;
+                List<KOTModel> kots = new List<KOTModel>();
+                kots.Add(kotModel);
 
-            var lastOrderNumber = await _databaseService.GetLastestOrderNumberForToday();
+                string? errorMessage;
 
-            // new order, place order
-            var orderModel = new OrderModel
-            {
-                TableId = 0,
-                OrderDate = DateTime.Now,
-                TotalItemCount = kots.Sum(x => x.TotalItemCount),
-                TotalAmount = kots.Sum(x => x.TotalPrice),
-                KOTs = kots.ToArray(),
-                OrderStatus = TableOrderStatus.Paid,
-                OrderNumber = lastOrderNumber + 1,
-                OrderType = Data.OrderTypes.Pickup,
-                NumberOfPeople = 0,
-                WaiterId = 0,
+                var lastOrderNumber = await _databaseService.GetLastestOrderNumberForToday();
 
-                IsDiscountGiven = IsDiscountGiven,
-                IsFixedBased = SelectedDiscountType.Key == (int)DiscountOptions.Fixed ? true : false,
-                IsPercentageBased = SelectedDiscountType.Key == (int)DiscountOptions.Percentage ? true : false,
-                DiscountFixed = DiscountAmount,
-                DiscountPercentage = DiscountAmount,
-                TotalAmountAfterDiscount = TotalAmountAfterDiscount,
+                // new order, place order
+                var orderModel = new OrderModel
+                {
+                    TableId = 0,
+                    OrderDate = DateTime.Now,
+                    TotalItemCount = kots.Sum(x => x.TotalItemCount),
+                    TotalAmount = kots.Sum(x => x.TotalPrice),
+                    KOTs = kots.ToArray(),
+                    OrderStatus = TableOrderStatus.Paid,
+                    OrderNumber = lastOrderNumber + 1,
+                    OrderType = Data.OrderTypes.Pickup,
+                    NumberOfPeople = 0,
+                    WaiterId = 0,
 
-                UsingGST = UsingGst,
-                CGST = Cgst,
-                SGST = Sgst,
-                CGSTAmount = CgstAmount,
-                SGSTAmount = SgstAmount,
+                    IsDiscountGiven = IsDiscountGiven,
+                    IsFixedBased = SelectedDiscountType.Key == (int)DiscountOptions.Fixed ? true : false,
+                    IsPercentageBased = SelectedDiscountType.Key == (int)DiscountOptions.Percentage ? true : false,
+                    DiscountFixed = DiscountAmount,
+                    DiscountPercentage = DiscountAmount,
+                    TotalAmountAfterDiscount = TotalAmountAfterDiscount,
 
-                RoundOff = RoundOff,
-                GrandTotal = GrandTotal,
+                    UsingGST = UsingGst,
+                    CGST = Cgst,
+                    SGST = Sgst,
+                    CGSTAmount = CgstAmount,
+                    SGSTAmount = SgstAmount,
 
-                Source = SelectedSource.Key,
-                ReferenceNo = ReferenceNo,
-                DeliveryPersion = SelectedDeliveryPerson.Id
-            };
+                    RoundOff = RoundOff,
+                    GrandTotal = GrandTotal,
 
-            if (await _ordersViewModel.PlacePickupAsync(orderModel))
-            {
-                OrderId = orderModel.Id;
+                    Source = SelectedSource.Key,
+                    ReferenceNo = ReferenceNo,
+                    DeliveryPersion = SelectedDeliveryPerson.Id
+                };
+
+                if (await _ordersViewModel.PlacePickupAsync(orderModel))
+                {
+                    OrderId = orderModel.Id;
+                }
+
+                await SaveOrderPaymentAsync();
+
+                await PrintReceipt(orderModel);
+
+                CartItems.Clear();
+
+                IsLoading = false;
+
+                await Application.Current.MainPage.Navigation.PopAsync();
             }
-
-            await SaveOrderPaymentAsync();
-
-            await PrintReceipt(orderModel);
-
-            CartItems.Clear();
-
-            IsLoading = false;
-
-            await Application.Current.MainPage.Navigation.PopAsync();
+            catch (Exception ex)
+            {
+                _logger.LogError("PickupVM-PlaceOrderAsync Error", ex);
+                throw;
+            }
         }
 
         private async Task PrintReceipt(OrderModel orderModel)
         {
-            await Shell.Current.DisplayAlert("Printing", "Printing Taking Place", "OK");
-
-            OrderKOTs = (await _databaseService.GetOrderKotsAsync(orderModel.Id))
-                            .Select(KOTModel.FromEntity)
-                            .ToList();
-
-            OrderKOTIds = string.Join(',', OrderKOTs.Select(o => o.Id).ToArray());
-
-            /*
-             * Get Order KOT Items
-             * Group them together
-             * Calculcate totals
-             */
-            var kotItems = new List<KOTItemModel>();
-
-            foreach (var kot in OrderKOTs)
+            try
             {
-                var items = (await _databaseService.GetKotItemsAsync(kot.Id))
-                            .Select(KOTItemModel.FromEntity)
-                            .ToList();
+                OrderKOTs = (await _databaseService.GetOrderKotsAsync(orderModel.Id))
+                                    .Select(KOTModel.FromEntity)
+                                    .ToList();
 
-                kotItems.AddRange(items);
-            }
+                OrderKOTIds = string.Join(',', OrderKOTs.Select(o => o.Id).ToArray());
 
-            // Group items together
-            var dict = kotItems.GroupBy(o => o.ItemId).ToDictionary(g => g.Key, g => g.Select(o => o));
+                /*
+                 * Get Order KOT Items
+                 * Group them together
+                 * Calculcate totals
+                 */
+                var kotItems = new List<KOTItemModel>();
 
-            foreach (var groupedItems in dict)
-            {
-                OrderKOTItems.Add(new KOTItemBillModel
+                foreach (var kot in OrderKOTs)
                 {
-                    ItemId = groupedItems.Key,
-                    Name = groupedItems.Value.First().Name,
-                    Quantity = groupedItems.Value.Sum(o => o.Quantity),
-                    Price = groupedItems.Value.First().Price,
-                });
+                    var items = (await _databaseService.GetKotItemsAsync(kot.Id))
+                                .Select(KOTItemModel.FromEntity)
+                                .ToList();
+
+                    kotItems.AddRange(items);
+                }
+
+                // Group items together
+                var dict = kotItems.GroupBy(o => o.ItemId).ToDictionary(g => g.Key, g => g.Select(o => o));
+
+                foreach (var groupedItems in dict)
+                {
+                    OrderKOTItems.Add(new KOTItemBillModel
+                    {
+                        ItemId = groupedItems.Key,
+                        Name = groupedItems.Value.First().Name,
+                        Quantity = groupedItems.Value.Sum(o => o.Quantity),
+                        Price = groupedItems.Value.First().Price,
+                    });
+                }
+
+                var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
+
+                var billModel = new BillModel
+                {
+                    RestrauntName = restaurantInfo.Name,
+                    Address = restaurantInfo.Address,
+                    GSTIn = restaurantInfo.GSTIN,
+                    CustomerName = "Customer Name",
+
+                    OrderType = orderModel.OrderType,
+
+                    TimeStamp = orderModel.OrderDate,
+                    TableNo = orderModel.TableId,
+                    Cashier = "Cashier",
+                    BillNo = orderModel.Id.ToString(),
+                    TokenNos = OrderKOTIds,
+                    WaiterAssigned = "",
+
+                    Items = OrderKOTItems.ToList(),
+
+                    TotalQty = orderModel.TotalItemCount,
+                    SubTotal = orderModel.TotalAmount,
+
+                    IsDiscountGiven = orderModel.IsDiscountGiven,
+                    IsFixedBased = orderModel.IsFixedBased,
+                    IsPercentageBased = orderModel.IsPercentageBased,
+                    DiscountFixed = orderModel.DiscountFixed,
+                    DiscountPercentage = orderModel.DiscountPercentage,
+                    SubTotalAfterDiscount = orderModel.TotalAmountAfterDiscount,
+
+                    UsginGST = orderModel.UsingGST,
+                    CGST = orderModel.CGST,
+                    SGST = orderModel.SGST,
+                    CGSTAmount = orderModel.CGSTAmount,
+                    SGSTAmount = orderModel.SGSTAmount,
+                    RoundOff = orderModel.RoundOff,
+                    GrandTotal = orderModel.GrandTotal,
+
+                    FassaiNo = restaurantInfo.FSSAI,
+                    QRCode = "Data",
+
+                    Source = SelectedSource.Value,
+                    ReferenceNo = ReferenceNo,
+                    DeliveryPersonName = SelectedDeliveryPerson.Name
+                };
+
+                var pdfData = await _receiptService.GenerateReceipt(billModel);
+                await _receiptService.PrintReceipt(pdfData);
             }
-
-            var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
-
-            var billModel = new BillModel
+            catch (Exception ex)
             {
-                RestrauntName = restaurantInfo.Name,
-                Address = restaurantInfo.Address,
-                GSTIn = restaurantInfo.GSTIN,
-                CustomerName = "Customer Name",
-
-                OrderType = orderModel.OrderType,
-
-                TimeStamp = orderModel.OrderDate,
-                TableNo = orderModel.TableId,
-                Cashier = "Cashier",
-                BillNo = orderModel.Id.ToString(),
-                TokenNos = OrderKOTIds,
-                WaiterAssigned = "",
-
-                Items = OrderKOTItems.ToList(),
-
-                TotalQty = orderModel.TotalItemCount,
-                SubTotal = orderModel.TotalAmount,
-
-                IsDiscountGiven = orderModel.IsDiscountGiven,
-                IsFixedBased = orderModel.IsFixedBased,
-                IsPercentageBased = orderModel.IsPercentageBased,
-                DiscountFixed = orderModel.DiscountFixed,
-                DiscountPercentage = orderModel.DiscountPercentage,
-                SubTotalAfterDiscount = orderModel.TotalAmountAfterDiscount,
-
-                UsginGST = orderModel.UsingGST,
-                CGST = orderModel.CGST,
-                SGST = orderModel.SGST,
-                CGSTAmount = orderModel.CGSTAmount,
-                SGSTAmount = orderModel.SGSTAmount,
-                RoundOff = orderModel.RoundOff,
-                GrandTotal = orderModel.GrandTotal,
-
-                FassaiNo = restaurantInfo.FSSAI,
-                QRCode = "Data",
-
-                Source = SelectedSource.Value,
-                ReferenceNo = ReferenceNo,
-                DeliveryPersonName = SelectedDeliveryPerson.Name
-            };
-
-            var pdfData = await _receiptService.GenerateReceipt(billModel);
-            await _receiptService.PrintReceipt(pdfData);
+                _logger.LogError("PickupVM-PrintReceipt Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -833,18 +894,26 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private void SearchItems(string? textSearch)
         {
-            if (string.IsNullOrWhiteSpace(textSearch) || textSearch.Length < 3)
-                return;
-
-            Task.Run(async () =>
+            try
             {
-                var result = await _databaseService.GetMenuItemBySearch(textSearch);
+                if (string.IsNullOrWhiteSpace(textSearch) || textSearch.Length < 3)
+                    return;
 
-                MainThread.BeginInvokeOnMainThread(() =>
+                Task.Run(async () =>
                 {
-                    MenuItems = result;
+                    var result = await _databaseService.GetMenuItemBySearch(textSearch);
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        MenuItems = result;
+                    });
                 });
-            });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PickupVM-SearchItems Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -853,45 +922,53 @@ namespace POSRestaurant.ViewModels
         /// <param name="message">ItemOnMenuModel published from other parts of the application</param>
         public void Receive(MenuItemChangedMessage message)
         {
-            var changedItem = message.Value;
-            var menuItem = changedItem.ItemModel;
-            bool isDeleted = changedItem.IsDeleted;
-
-            if (menuItem != null)
+            try
             {
-                // This menu item is on the screen right now
+                var changedItem = message.Value;
+                var menuItem = changedItem.ItemModel;
+                bool isDeleted = changedItem.IsDeleted;
 
-                // check if this item still has a mapping to selected category
-                // can be used for delete part
-                if (SelectedCategory != null)
+                if (menuItem != null)
                 {
-                    if (isDeleted && menuItem.Category.Id == SelectedCategory.Id)
+                    // This menu item is on the screen right now
+
+                    // check if this item still has a mapping to selected category
+                    // can be used for delete part
+                    if (SelectedCategory != null)
                     {
-                        // this item is deleted, should not be displayed here anymore
-                        // remove this item from the current UI menu items list
-                        MenuItems = [.. MenuItems.Where(m => m.Id != menuItem.Id)];
+                        if (isDeleted && menuItem.Category.Id == SelectedCategory.Id)
+                        {
+                            // this item is deleted, should not be displayed here anymore
+                            // remove this item from the current UI menu items list
+                            MenuItems = [.. MenuItems.Where(m => m.Id != menuItem.Id)];
+                        }
                     }
-                }
 
-                // update details of existing item on the screen
-                menuItem.Price = menuItem.Price;
-                menuItem.Name = menuItem.Name;
-                menuItem.Description = menuItem.Description;
-                MenuItems = [.. MenuItems];
-            }
-            else
-            {
-                // model is newly added
-                // add this menu item to current UI menu items list
-                var item = new ItemOnMenu
+                    // update details of existing item on the screen
+                    menuItem.Price = menuItem.Price;
+                    menuItem.Name = menuItem.Name;
+                    menuItem.Description = menuItem.Description;
+                    MenuItems = [.. MenuItems];
+                }
+                else
                 {
-                    Id = menuItem.Id,
-                    Description = menuItem.Description,
-                    Name = menuItem.Name,
-                    Price = menuItem.Price,
-                    MenuCategoryId = menuItem.Category.Id
-                };
-                MenuItems = [.. MenuItems, item];
+                    // model is newly added
+                    // add this menu item to current UI menu items list
+                    var item = new ItemOnMenu
+                    {
+                        Id = menuItem.Id,
+                        Description = menuItem.Description,
+                        Name = menuItem.Name,
+                        Price = menuItem.Price,
+                        MenuCategoryId = menuItem.Category.Id
+                    };
+                    MenuItems = [.. MenuItems, item];
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PickupVM-Recieve MenuItemChangedMessage Error", ex);
+                throw;
             }
         }
 
@@ -964,23 +1041,31 @@ namespace POSRestaurant.ViewModels
             {
                 if (_selectedPaymentMode != value)
                 {
-                    _selectedPaymentMode = value;
-                    if (_selectedPaymentMode != 0)
-                        PaymentMode = (PaymentModes)_selectedPaymentMode;
-                    if (PaymentMode == PaymentModes.Part)
+                    try
                     {
-                        IsPartPayment = true;
-                        IsNotPartPayment = false;
-                        IsCashForPart = IsCardForPart = IsOnlineForPart = false;
-                        PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
+                        _selectedPaymentMode = value;
+                        if (_selectedPaymentMode != 0)
+                            PaymentMode = (PaymentModes)_selectedPaymentMode;
+                        if (PaymentMode == PaymentModes.Part)
+                        {
+                            IsPartPayment = true;
+                            IsNotPartPayment = false;
+                            IsCashForPart = IsCardForPart = IsOnlineForPart = false;
+                            PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
+                        }
+                        else if (PaymentMode == PaymentModes.Online || PaymentMode == PaymentModes.Card || PaymentMode == PaymentModes.Cash)
+                        {
+                            IsPartPayment = false;
+                            IsNotPartPayment = true;
+                        }
+                        CalculateReturn();
+                        OnPaymenModeChanged();
                     }
-                    else if (PaymentMode == PaymentModes.Online || PaymentMode == PaymentModes.Card || PaymentMode == PaymentModes.Cash)
+                    catch (Exception ex)
                     {
-                        IsPartPayment = false;
-                        IsNotPartPayment = true;
+                        _logger.LogError("PickupVM-SelectedPaymentMode Set Error", ex);
+                        throw;
                     }
-                    CalculateReturn();
-                    OnPaymenModeChanged();
                 }
             }
         }
@@ -1025,38 +1110,46 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SaveOrderPaymentAsync()
         {
-            var orderPayment = new OrderPayment
+            try
             {
-                OrderId = OrderId,
-                SettlementDate = DateTime.Now,
-                PaymentMode = PaymentMode,
-                OrderType = OrderTypes.Pickup,
-                Total = GrandTotal,
-                IsCardForPart = IsCardForPart,
-                IsCashForPart = IsCashForPart,
-                IsOnlineForPart = IsOnlineForPart,
-                PartPaidInCard = PaidByCustomerInCard,
-                PartPaidInCash = PaidByCustomerInCash,
-                PartPaidInOnline = PaidByCustomerInOnline,
-            };
+                var orderPayment = new OrderPayment
+                {
+                    OrderId = OrderId,
+                    SettlementDate = DateTime.Now,
+                    PaymentMode = PaymentMode,
+                    OrderType = OrderTypes.Pickup,
+                    Total = GrandTotal,
+                    IsCardForPart = IsCardForPart,
+                    IsCashForPart = IsCashForPart,
+                    IsOnlineForPart = IsOnlineForPart,
+                    PartPaidInCard = PaidByCustomerInCard,
+                    PartPaidInCash = PaidByCustomerInCash,
+                    PartPaidInOnline = PaidByCustomerInOnline,
+                };
 
-            var errorMessage = await _databaseService.OrderPaymentOperations.SaveOrderPaymentAsync(orderPayment);
+                var errorMessage = await _databaseService.OrderPaymentOperations.SaveOrderPaymentAsync(orderPayment);
 
-            if (errorMessage != null)
-            {
-                await Shell.Current.DisplayAlert("Order Payment Error", errorMessage, "Ok");
-                return;
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Order Payment Error", errorMessage, "Ok");
+                    return;
+                }
+
+                var order = await _databaseService.GetOrderById(OrderId);
+                if (order != null)
+                {
+                    order.OrderStatus = TableOrderStatus.Paid;
+                    order.PaymentMode = PaymentMode;
+                    await _databaseService.UpdateOrder(order);
+                }
+
+                WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(true));
             }
-
-            var order = await _databaseService.GetOrderById(OrderId);
-            if (order != null)
+            catch (Exception ex)
             {
-                order.OrderStatus = TableOrderStatus.Paid;
-                order.PaymentMode = PaymentMode;
-                await _databaseService.UpdateOrder(order);
+                _logger.LogError("PickupVM-SaveOrderPaymentAsync Error", ex);
+                throw;
             }
-
-            WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(true));
         }
     }
 }

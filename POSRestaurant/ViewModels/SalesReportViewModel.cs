@@ -1,15 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Controls.Primitives;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
-using System;
-using System.Collections.Generic;
+using POSRestaurant.Service.LoggerService;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace POSRestaurant.ViewModels
 {
@@ -22,6 +17,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// To indicate that the ViewModel data is loading
@@ -96,8 +96,9 @@ namespace POSRestaurant.ViewModels
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public SalesReportViewModel(DatabaseService databaseService)
+        public SalesReportViewModel(LogService logger, DatabaseService databaseService)
         {
+            _logger = logger;
             _databaseService = databaseService;
         }
 
@@ -108,31 +109,39 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            //Reset page
-            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
-            if (_isInitialized)
+            try
             {
-                SelectedDate = DateTime.Now;
+                //Reset page
+                var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
+                if (_isInitialized)
+                {
+                    SelectedDate = DateTime.Now;
 
-                SalesReportData.Clear();
+                    SalesReportData.Clear();
+
+                    SelectedType = OrderTypes[0];
+                    return;
+                }
+
+                _isInitialized = true;
+                IsLoading = true;
+
+                foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<OrderTypes>())
+                {
+                    OrderTypes.Add(desc);
+                }
 
                 SelectedType = OrderTypes[0];
-                return;
+
+                await MakeSalesReport();
+
+                IsLoading = false;
             }
-
-            _isInitialized = true;
-            IsLoading = true;
-
-            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<OrderTypes>())
+            catch (Exception ex)
             {
-                OrderTypes.Add(desc);
+                _logger.LogError("SalesReportVM-InitializeAsync Error", ex);
+                throw;
             }
-
-            SelectedType = OrderTypes[0];
-
-            await MakeSalesReport();
-
-            IsLoading = false;
         }
 
         /// <summary>
@@ -141,42 +150,56 @@ namespace POSRestaurant.ViewModels
         /// <returns></returns>
         private async ValueTask MakeSalesReport()
         {
-            SalesReportData.Clear();
-            TotalSpent = TotalCash = TotalOnline = TotalBank = TotalDine = TotalPickup = 0;
-            var orderEntries = await _databaseService.OrderPaymentOperations.GetFilteredOrderPaymentsAsync(SelectedDate, SelectedType.Key);
-
-            if (orderEntries.Length > 0)
+            try
             {
-                var orderItem = orderEntries.ToList();
+                SalesReportData.Clear();
+                TotalSpent = TotalCash = TotalOnline = TotalBank = 0;
+                if (SelectedType.Key == 0)
+                    TotalPickup = TotalDine = 0;
 
-                foreach (var order in orderItem)
+                var orderEntries = await _databaseService.OrderPaymentOperations.GetFilteredOrderPaymentsAsync(SelectedDate, SelectedType.Key);
+
+                if (orderEntries.Length > 0)
                 {
-                    TotalSpent += order.Total;
+                    var orderItem = orderEntries.ToList();
 
-                    if (order.OrderType == Data.OrderTypes.Pickup)
-                        TotalPickup += 1;
-                    else
-                        TotalDine += 1;
-
-                    switch (order.PaymentMode)
+                    foreach (var order in orderItem)
                     {
-                        case PaymentModes.Cash:
-                            TotalCash += order.Total;
-                            break;
-                        case PaymentModes.Online:
-                            TotalOnline += order.Total;
-                            break;
-                        case PaymentModes.Card:
-                            TotalBank += order.Total;
-                            break;
-                        case PaymentModes.Part:
-                            TotalBank += order.PartPaidInCard;
-                            TotalCash += order.PartPaidInCash;
-                            TotalOnline += order.PartPaidInOnline;
-                            break;
+                        TotalSpent += order.Total;
+
+                        if (SelectedType.Key == 0)
+                        {
+                            if (order.OrderType == Data.OrderTypes.Pickup)
+                                TotalPickup += 1;
+                            else
+                                TotalDine += 1; 
+                        }
+
+                        switch (order.PaymentMode)
+                        {
+                            case PaymentModes.Cash:
+                                TotalCash += order.Total;
+                                break;
+                            case PaymentModes.Online:
+                                TotalOnline += order.Total;
+                                break;
+                            case PaymentModes.Card:
+                                TotalBank += order.Total;
+                                break;
+                            case PaymentModes.Part:
+                                TotalBank += order.PartPaidInCard;
+                                TotalCash += order.PartPaidInCash;
+                                TotalOnline += order.PartPaidInOnline;
+                                break;
+                        }
+                        SalesReportData.Add(order);
                     }
-                    SalesReportData.Add(order);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SalesReportVM-Search Error", ex);
+                throw;
             }
         }
 

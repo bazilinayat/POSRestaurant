@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace SettingLibrary
+namespace POSRestaurant.Service.SettingService
 {
     /// <summary>
     /// To Keep track of the settings, taken from some config

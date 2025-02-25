@@ -1,6 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using POSRestaurant.PaymentService.Models.Paytm;
+using System.Text.Json.Serialization;
 
-namespace PaymentService.Models.Paytm.TansactionStatus
+namespace POSRestaurant.PaymentService.Models.Paytm.TansactionStatus
 {
     /// <summary>
     /// To store the response body we get from transaction status api

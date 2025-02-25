@@ -13,6 +13,13 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+            <Style TargetType="Entry" x:Key="txt">
+                <Setter Property="BackgroundColor" Value="Wheat" />
+                <Setter Property="PlaceholderColor" Value="Black" />
+            </Style>
+            <Style TargetType="Label" x:Key="lbl">
+                <Setter Property="FontSize" Value="16" />
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -46,7 +53,7 @@
                         StrokeShape="RoundRectangle 10"
                         IsEnabled="{Binding OrderTypeEnable}"
                         BackgroundColor="{StaticResource AllBackground}">
-                    <Grid ColumnDefinitions="0.50*, 0.50*">
+                    <Grid ColumnDefinitions="0.50*, 0.50*" Margin="10">
                         <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
                             <Label Text="Number of People" FontSize="16" VerticalOptions="Center"/>
                             <ImageButton 
@@ -199,63 +206,56 @@
                         Padding="10"
                         StrokeShape="RoundRectangle 10"
                         StrokeThickness="0">
-                    <Border.Shadow>
-                        <Shadow Brush="red"/>
-                    </Border.Shadow>
-                    <Grid RowDefinitions="Auto, Auto, Auto"
+                        <Border.Shadow>
+                            <Shadow Brush="red"/>
+                        </Border.Shadow>
+                        <Grid RowDefinitions="Auto, Auto, Auto"
                           ColumnDefinitions="2*, 3*"
                           RowSpacing="8">
-                        <!--<Label Grid.Row="0"
-                               Grid.Column="0"
-                               Text="SubTotal"
-                               Style="{StaticResource lbl}"/>
-                        <Label Grid.Row="0"
-                               Grid.Column="1"
-                               HorizontalOptions="Center"
-                               Text="{Binding SubTotal, StringFormat='{0:C}'}" />-->
-                        <Label Grid.Row="0"
-                               Grid.Column="0"
-                               FontAttributes="Bold"
-                               Text="Total"
-                               Style="{StaticResource lbl}"/>
                             <Label Grid.Row="0"
-                               Grid.Column="1"
-                               FontAttributes="Bold"
-                               HorizontalOptions="Center"
-                               Text="{Binding Total, StringFormat='{0:C}'}" />
+                                   Grid.Column="0"
+                                   FontAttributes="Bold"
+                                   Text="Total"
+                                   Style="{StaticResource lbl}"/>
+                            <Label Grid.Row="0"
+                                   Grid.Column="1"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center"
+                                   Text="{Binding Total, StringFormat='{0:C}'}" />
                             <Grid Grid.Row="1"
-                              Grid.ColumnSpan="2"
-                              ColumnDefinitions="Auto, *, Auto, Auto"
-                              ColumnSpacing="10">
-                            <Button Grid.Column="0"
-                                    Text="Clear"
-                                    HorizontalOptions="Start"
-                                    VerticalOptions="Center"
-                                    CornerRadius="5"
-                                    MinimumHeightRequest="25"
-                                    MinimumWidthRequest="25"
-                                    BackgroundColor="Red"
-                                    Command="{Binding ClearCartCommand}"/>
-                            <Button Grid.Column="2"
-                                    Text="Save"
-                                    HorizontalOptions="End"
-                                    VerticalOptions="Center"
-                                    CornerRadius="5"
-                                    MinimumHeightRequest="25"
-                                    MinimumWidthRequest="25"
-                                    BackgroundColor="MediumSeaGreen"
-                                    Clicked="PlaceOrder_Clicked">
-                            </Button>
+                                  Grid.ColumnSpan="2"
+                                  ColumnDefinitions="Auto, *, Auto, Auto"
+                                  ColumnSpacing="10">
+                                <Button Grid.Column="0"
+                                        Text="Clear"
+                                        HorizontalOptions="Start"
+                                        VerticalOptions="Center"
+                                        CornerRadius="5"
+                                        MinimumHeightRequest="25"
+                                        MinimumWidthRequest="25"
+                                        BackgroundColor="Red"
+                                        Command="{Binding ClearCartCommand}"/>
+                                <Button Grid.Column="2"
+                                        Text="Save"
+                                        HorizontalOptions="End"
+                                        VerticalOptions="Center"
+                                        CornerRadius="5"
+                                        MinimumHeightRequest="25"
+                                        MinimumWidthRequest="25"
+                                        BackgroundColor="MediumSeaGreen"
+                                        Clicked="PlaceOrder_Clicked">
+                                </Button>
 
+                            </Grid>
+                            <Button Grid.Row="2"
+                                    Grid.ColumnSpan="2"
+                                    Text="Cancel"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    CornerRadius="5"
+                                    BackgroundColor="Red"
+                                    Clicked="CancelButton_Clicked" />
                         </Grid>
-                        <Button Grid.Row="2"
-                                Text="Cancel"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center"
-                                CornerRadius="5"
-                                BackgroundColor="Red"
-                                Clicked="CancelButton_Clicked" />
-                    </Grid>
                 </Border>
             </VerticalStackLayout>
         </Grid>

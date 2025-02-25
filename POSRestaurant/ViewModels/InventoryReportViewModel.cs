@@ -1,13 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Ghostscript.NET;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.Service.LoggerService;
 using System.Collections.ObjectModel;
-using Windows.ApplicationModel.Email.DataProvider;
 
 namespace POSRestaurant.ViewModels
 {
@@ -20,6 +19,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// To indicate that the ViewModel data is loading
@@ -41,8 +45,7 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// To add expense types in picker
         /// </summary>
-        [ObservableProperty]
-        private ObservableCollection<ExpenseTypeModel> _itemTypes;
+        public ObservableCollection<ExpenseTypeModel> ItemTypes { get; set; } = new();
 
         /// <summary>
         /// To add payers in picker
@@ -100,8 +103,9 @@ namespace POSRestaurant.ViewModels
         /// Constructor for the OrdersViewModel
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public InventoryReportViewModel(DatabaseService databaseService)
+        public InventoryReportViewModel(LogService logger, DatabaseService databaseService)
         {
+            _logger = logger;
             _databaseService = databaseService;
 
             var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
@@ -119,47 +123,55 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            //Reset page
-            var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
-            if (_isInitialized)
+            try
             {
-                SelectedDate= DateTime.Now;
-
-                if (Payers.Where(o => o.Key == 0) != null)
-                    SelectedPayer = defaultOrderType;
-
-                InventoryReportData.Clear();
-
-                return;
-            }
-
-            _isInitialized = true;
-            IsLoading = true;
-
-            var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
-                                .Select(ExpenseTypeModel.FromEntity)
-                                .ToList();
-            ItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
-            foreach (var coowner in expenseItems)
-            {
-                ItemTypes.Add(coowner);
-            }
-            ItemTypes[0].IsSelected = true;
-
-            Payers.Add(defaultOrderType);
-            var payers = await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.CoOwner);
-            foreach (var payer in payers)
-            {
-                Payers.Add(new ValueForPicker
+                //Reset page
+                var defaultOrderType = new ValueForPicker { Key = 0, Value = "All" };
+                if (_isInitialized)
                 {
-                    Key = payer.Id,
-                    Value = payer.Name,
-                });
+                    SelectedDate = DateTime.Now;
+
+                    if (Payers.Where(o => o.Key == 0) != null)
+                        SelectedPayer = defaultOrderType;
+
+                    InventoryReportData.Clear();
+
+                    return;
+                }
+
+                _isInitialized = true;
+                IsLoading = true;
+
+                var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
+                                    .Select(ExpenseTypeModel.FromEntity)
+                                    .ToList();
+                ItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
+                foreach (var coowner in expenseItems)
+                {
+                    ItemTypes.Add(coowner);
+                }
+                ItemTypes[0].IsSelected = true;
+
+                Payers.Add(defaultOrderType);
+                var payers = await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.CoOwner);
+                foreach (var payer in payers)
+                {
+                    Payers.Add(new ValueForPicker
+                    {
+                        Key = payer.Id,
+                        Value = payer.Name,
+                    });
+                }
+
+                await MakeInventoryReport();
+
+                IsLoading = false;
             }
-
-            await MakeInventoryReport();
-
-            IsLoading = false;
+            catch (Exception ex)
+            {
+                _logger.LogError("InventoryReportVM-InitializeAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -168,32 +180,40 @@ namespace POSRestaurant.ViewModels
         /// <returns></returns>
         private async ValueTask MakeInventoryReport()
         {
-            InventoryReportData.Clear();
-            TotalSpent = TotalCash = TotalOnline = TotalBank = 0;
-            var inventoryEntries = await _databaseService.InventoryOperations.GetInventoryItemsAsync(SelectedDate, SelectedItem == null ? 0 : SelectedItem.Id, SelectedPayer.Key);
-
-            if (inventoryEntries.Length > 0)
+            try
             {
-                var inventoryItems = inventoryEntries.Select(InventoryReportModel.FromEntity)
-                                    .ToList();
+                InventoryReportData.Clear();
+                TotalSpent = TotalCash = TotalOnline = TotalBank = 0;
+                var inventoryEntries = await _databaseService.InventoryOperations.GetInventoryItemsAsync(SelectedDate, SelectedItem == null ? 0 : SelectedItem.Id, SelectedPayer.Key);
 
-                foreach (var inventory in inventoryItems)
+                if (inventoryEntries.Length > 0)
                 {
-                    TotalSpent += inventory.TotalPrice;
-                    switch (inventory.PaymentMode)
+                    var inventoryItems = inventoryEntries.Select(InventoryReportModel.FromEntity)
+                                        .ToList();
+
+                    foreach (var inventory in inventoryItems)
                     {
-                        case ExpensePaymentModes.Cash:
-                            TotalCash += inventory.TotalPrice;
+                        TotalSpent += inventory.TotalPrice;
+                        switch (inventory.PaymentMode)
+                        {
+                            case ExpensePaymentModes.Cash:
+                                TotalCash += inventory.TotalPrice;
                                 break;
-                        case ExpensePaymentModes.Online:
-                            TotalOnline += inventory.TotalPrice;
-                            break;
-                        case ExpensePaymentModes.Bank:
-                            TotalBank += inventory.TotalPrice;
-                            break;
+                            case ExpensePaymentModes.Online:
+                                TotalOnline += inventory.TotalPrice;
+                                break;
+                            case ExpensePaymentModes.Bank:
+                                TotalBank += inventory.TotalPrice;
+                                break;
+                        }
+                        InventoryReportData.Add(inventory);
                     }
-                    InventoryReportData.Add(inventory);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("InventoryReportVM-MakeInventoryReport Error", ex);
+                throw;
             }
             
             //TotalItems = KOTItems.Count;
@@ -222,16 +242,24 @@ namespace POSRestaurant.ViewModels
         /// <param name="message">StaffChangedMessage</param>
         public async void Receive(ExpenseTypeChangedMessage message)
         {
-            ItemTypes.Clear();
-            var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
-                                .Select(ExpenseTypeModel.FromEntity)
-                                .ToList();
-            ItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
-            foreach (var coowner in expenseItems)
+            try
             {
-                ItemTypes.Add(coowner);
+                ItemTypes.Clear();
+                var expenseItems = (await _databaseService.SettingsOperation.GetExpenseTypes()).ToList()
+                                    .Select(ExpenseTypeModel.FromEntity)
+                                    .ToList();
+                ItemTypes.Add(new ExpenseTypeModel { Id = 0, Name = "All", IsSelected = false });
+                foreach (var coowner in expenseItems)
+                {
+                    ItemTypes.Add(coowner);
+                }
+                ItemTypes[0].IsSelected = true;
             }
-            ItemTypes[0].IsSelected = true;
+            catch (Exception ex)
+            {
+                _logger.LogError("InventoryReportVM-Receive ExpenseTypeChangedMessage Error", ex);
+                throw;
+            }
         }
     }
 }

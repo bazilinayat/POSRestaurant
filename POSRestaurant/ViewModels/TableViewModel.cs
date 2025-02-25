@@ -2,14 +2,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using LoggerService;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Controls;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Pages;
-using SettingLibrary;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.SettingService;
 
 namespace POSRestaurant.ViewModels
 {
@@ -103,25 +103,32 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-
-            var info = await _databaseService.SettingsOperation.GetRestaurantInfo();
-            if (info == null)
+            try
             {
-                var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
-                var setInfo = new InitialPopup(settingsViewModel);
-                await Shell.Current.ShowPopupAsync(setInfo);
+                var info = await _databaseService.SettingsOperation.GetRestaurantInfo();
+                if (info == null)
+                {
+                    var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
+                    var setInfo = new InitialPopup(settingsViewModel);
+                    await Shell.Current.ShowPopupAsync(setInfo);
+                }
+
+                if (_isInitialized)
+                    return;
+
+                _isInitialized = true;
+
+                IsLoading = true;
+
+                await GetTablesAsync();
+
+                IsLoading = false;
             }
-
-            if (_isInitialized)
-                return;
-
-            _isInitialized = true;
-
-            IsLoading = true;
-
-            await GetTablesAsync();
-
-            IsLoading = false;
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-InitializeAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -130,11 +137,19 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task Object</returns>
         public async ValueTask GetTablesAsync()
         {
-            var tables = (await _databaseService.TableOperations.GetTablesAsync())
-                            .Select(TableModel.FromEntity)
-                            .ToArray();
+            try
+            {
+                var tables = (await _databaseService.TableOperations.GetTablesAsync())
+                                    .Select(TableModel.FromEntity)
+                                    .ToArray();
 
-            TransformTables(tables);
+                TransformTables(tables);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-GetTablesAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -144,42 +159,50 @@ namespace POSRestaurant.ViewModels
         /// <param name="tables">List of TableModel</param>
         private void TransformTables(TableModel[] tables)
         {
-            IsLoading = true;
-
-            foreach(var table in tables)
+            try
             {
-                switch(table.Status)
+                IsLoading = true;
+
+                foreach (var table in tables)
                 {
-                    case TableOrderStatus.NoOrder:
-                        // Used to reset everything
-                        table.BorderColour = Colors.Brown;
-                        table.ActionButtonImageIcon = "check_circle_regular_24.png";
-                        table.ActionButtonEnabled = false;
-                        break;
-                    case TableOrderStatus.Running:
-                        table.BorderColour = Colors.Yellow;
-                        table.ActionButtonImageIcon = "eye.png";
-                        table.ActionButtonEnabled = true;
-                        break;
-                    case TableOrderStatus.Confirmed:
-                        table.BorderColour = Colors.Orange;
-                        table.ActionButtonImageIcon = "invoice.png";
-                        table.ActionButtonEnabled = true;
-                        break;
-                    case TableOrderStatus.Printed:
-                        table.BorderColour = Colors.Green;
-                        table.ActionButtonImageIcon = "diskette.png";
-                        table.ActionButtonEnabled = true;
-                        break;
-                    case TableOrderStatus.Paid:
-                        table.BorderColour = Colors.Green;
-                        break;
+                    switch (table.Status)
+                    {
+                        case TableOrderStatus.NoOrder:
+                            // Used to reset everything
+                            table.BorderColour = Colors.Brown;
+                            table.ActionButtonImageIcon = "check_circle_regular_24.png";
+                            table.ActionButtonEnabled = false;
+                            break;
+                        case TableOrderStatus.Running:
+                            table.BorderColour = Colors.Yellow;
+                            table.ActionButtonImageIcon = "eye.png";
+                            table.ActionButtonEnabled = true;
+                            break;
+                        case TableOrderStatus.Confirmed:
+                            table.BorderColour = Colors.Orange;
+                            table.ActionButtonImageIcon = "invoice.png";
+                            table.ActionButtonEnabled = true;
+                            break;
+                        case TableOrderStatus.Printed:
+                            table.BorderColour = Colors.Green;
+                            table.ActionButtonImageIcon = "diskette.png";
+                            table.ActionButtonEnabled = true;
+                            break;
+                        case TableOrderStatus.Paid:
+                            table.BorderColour = Colors.Green;
+                            break;
+                    }
                 }
+
+                Tables = [.. tables];
+
+                IsLoading = false;
             }
-
-            Tables = [.. tables];
-
-            IsLoading = false;
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-TransformTables Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -190,10 +213,18 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task TableSelected(TableModel tableModel)
         {
-            if (tableModel.Status == TableOrderStatus.Confirmed || tableModel.Status == TableOrderStatus.Printed)
-                return;
+            try
+            {
+                if (tableModel.Status == TableOrderStatus.Confirmed || tableModel.Status == TableOrderStatus.Printed)
+                    return;
 
-            await Application.Current.MainPage.Navigation.PushAsync(new MainPage(_homeViewModel, tableModel));
+                await Application.Current.MainPage.Navigation.PushAsync(new MainPage(_homeViewModel, tableModel));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-TableSelected Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -203,7 +234,15 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task MakePickupOrder()
         {
-            await Application.Current.MainPage.Navigation.PushAsync(new PickupPage(_pickupViewModel));
+            try
+            {
+                await Application.Current.MainPage.Navigation.PushAsync(new PickupPage(_pickupViewModel));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-MakePickupOrder Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -213,17 +252,25 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task AddNewTable()
         {
-            if (await Shell.Current.DisplayAlert("Add Table", $"Do you really want to add a new table?", "Yes", "No"))
+            try
             {
-                var errorMessage = await _databaseService.TableOperations.AddNewTableAsync();
-
-                if (errorMessage != null)
+                if (await Shell.Current.DisplayAlert("Add Table", $"Do you really want to add a new table?", "Yes", "No"))
                 {
-                    await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
-                    return;
-                }
+                    var errorMessage = await _databaseService.TableOperations.AddNewTableAsync();
 
-                await GetTablesAsync();
+                    if (errorMessage != null)
+                    {
+                        await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                        return;
+                    }
+
+                    await GetTablesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-AddNewTable Error", ex);
+                throw;
             }
         }
 
@@ -254,21 +301,29 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task TableActionButton(TableModel tableModel)
         {
-            switch (tableModel.Status)
+            try
             {
-                case TableOrderStatus.Running: // To view the whole order, with KOTs
-                    var vovm = _serviceProvider.GetRequiredService<OrderViewViewModel>();
-                    await Application.Current.MainPage.Navigation.PushAsync(new OrderViewPage(vovm, _ordersViewModel, tableModel));
-                    break;
-                case TableOrderStatus.Confirmed:
-                    var billvm = _serviceProvider.GetRequiredService<BillViewModel>();
-                    await Application.Current.MainPage.Navigation.PushAsync(new BillPage(billvm, tableModel));
-                    break;
-                case TableOrderStatus.Printed: // To show popup, for marking as paid
-                    var orderCompleteVM = _serviceProvider.GetRequiredService<OrderCompleteViewModel>();
-                    var completeOrderPopup = new OrderCompletePopup(orderCompleteVM, tableModel);
-                    await Shell.Current.ShowPopupAsync(completeOrderPopup);
-                    break;
+                switch (tableModel.Status)
+                {
+                    case TableOrderStatus.Running: // To view the whole order, with KOTs
+                        var vovm = _serviceProvider.GetRequiredService<OrderViewViewModel>();
+                        await Application.Current.MainPage.Navigation.PushAsync(new OrderViewPage(vovm, _ordersViewModel, tableModel));
+                        break;
+                    case TableOrderStatus.Confirmed:
+                        var billvm = _serviceProvider.GetRequiredService<BillViewModel>();
+                        await Application.Current.MainPage.Navigation.PushAsync(new BillPage(billvm, tableModel));
+                        break;
+                    case TableOrderStatus.Printed: // To show popup, for marking as paid
+                        var orderCompleteVM = _serviceProvider.GetRequiredService<OrderCompleteViewModel>();
+                        var completeOrderPopup = new OrderCompletePopup(orderCompleteVM, tableModel);
+                        await Shell.Current.ShowPopupAsync(completeOrderPopup);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-TableActionButton Error", ex);
+                throw;
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace SettingLibrary
+﻿namespace POSRestaurant.Service.SettingService
 {
     /// <summary>
     /// To store the paytm information

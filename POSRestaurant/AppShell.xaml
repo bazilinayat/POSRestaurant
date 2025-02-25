@@ -15,10 +15,10 @@
     <Shell.TitleView>
         <Grid HeightRequest="45" BackgroundColor="{StaticResource AllBackground}" ColumnDefinitions="Auto,*,Auto" Padding="10" VerticalOptions="Center">
             <!-- Left: Application Logo -->
-            <Image Source="logo.png" HeightRequest="40" WidthRequest="40" Grid.Column="0" />
+            <Image Source="g2.png" HeightRequest="40" WidthRequest="40" Grid.Column="0" />
 
             <!-- Center: Welcome Text -->
-            <Label Text="Welcome to application_name" 
+            <Label Text="{Binding RestaurantName, StringFormat='Welcome to {0}'}" 
                    FontSize="20" 
                    VerticalOptions="Center" 
                    HorizontalOptions="Center" 

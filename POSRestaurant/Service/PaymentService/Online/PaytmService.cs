@@ -1,13 +1,13 @@
-﻿using LoggerService;
-using PaymentService.Models.Paytm;
-using PaymentService.Models.Paytm.CreateQR;
-using PaymentService.Models.Paytm.TansactionStatus;
-using Paytm;
-using SettingLibrary;
+﻿using Paytm;
+using POSRestaurant.PaymentService.Models.Paytm;
+using POSRestaurant.PaymentService.Models.Paytm.CreateQR;
+using POSRestaurant.PaymentService.Models.Paytm.TansactionStatus;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.SettingService;
 using System.Net;
 using System.Text.Json;
 
-namespace PaymentService.Online
+namespace POSRestaurant.PaymentService.Online
 {
     /// <summary>
     /// Service class to handle all the paytm related payment transactions
@@ -46,7 +46,7 @@ namespace PaymentService.Online
         {
             try
             {
-                return Paytm.Checksum.generateSignature(body, merchantKey);
+                return Checksum.generateSignature(body, merchantKey);
             }
             catch (Exception ex)
             {

@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using POSRestaurant.PaymentService.Models.Paytm;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
-namespace PaymentService.Models.Paytm.CreateQR
+namespace POSRestaurant.PaymentService.Models.Paytm.TansactionStatus
 {
     /// <summary>
-    /// To store the request we make for create qr api
+    /// To store the request we make for transaction status api
     /// </summary>
-    internal class CreateRequest
+    public class TSRequest
     {
         /// <summary>
         /// head of the request
@@ -21,6 +17,6 @@ namespace PaymentService.Models.Paytm.CreateQR
         /// body of the request
         /// </summary>
         [JsonPropertyName("body")]
-        public CreateRequestBody Body { get; set; }
+        public TSRequestBody Body { get; set; }
     }
 }

@@ -1,0 +1,51 @@
+We are making the certificate for installation, below is the command for creating the certificate
+
+Run the below command to create certificate in your machine
+
+$certificateSubjectName = "CN=AmanAndTeam"
+New-SelfSignedCertificate -Type Custom -Subject $certificateSubjectName  -KeyUsage DigitalSignature -FriendlyName "Aman Team Self Sign" -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
+
+-- You can verify the certificate in - Manage User Certificate
+Open Manage User Certificates 
+Under Personal - Cerfiicates, you will be able to see your certificate.
+
+Here, double-click on your certificate.
+Go to Details tab
+Click on Copy To File
+Click Next
+Check 'No, do not export the private key'
+Click Next
+Select 'DER encoded binary X.509 (CER)'
+Click Next
+Browse and give your file a name
+Click Next
+Click Finish
+Click 'Ok' on the popup, saying - Exported successfully or something
+
+Now...
+Open Manage Computer Certificates
+Navigate to Trusted Root Certification Authorities -> Certificates
+
+On the left Pane
+Right-click on Certificates
+Go to All Tasks > Import
+Click Next
+Select the .CER file you exported before
+Click Next
+Select 'Place all certificates in the following store'
+And Certificate store should be - "Trusted Root Certification Authorities"
+Click Next
+Click Finish
+
+Now the certiifcate will be trusted by the machine to deploy and use your applications
+
+--------------------------------------------------------------------------------------
+Run the following commands together to create a msix package for your application -
+
+$certificateSubjectName = "CN=AmanAndTeam"
+$cert = (Get-ChildItem cert:\CurrentUser\My   | where-object { $_.Subject -like "$certificateSubjectName" }  | Select-Object -First 1).Thumbprint
+
+$env:Path += ";C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin" 
+$env:Path += ";C:\Program Files (x86)\Windows Kits\10\App Certification Kit"
+
+msbuild /restore /t:Publish /p:TargetFramework=net8.0-windows10.0.19041.0 /p:RuntimeIdentifierOverride=win10-x64  /p:configuration=release /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=$cert

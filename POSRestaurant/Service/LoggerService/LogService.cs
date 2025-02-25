@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace LoggerService
+namespace POSRestaurant.Service.LoggerService
 {
     public class LogService
     {

@@ -1,14 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Maui.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
-using SettingLibrary;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.SettingService;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -25,6 +24,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// DIed variable for MenuService
@@ -155,7 +159,8 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// To store the order details
         /// </summary>
-        public OrderModel OrderModel { get; set; }
+        [ObservableProperty]
+        public OrderModel _orderModelToDisplay;
 
         /// <summary>
         /// To be set True, if discount is given
@@ -201,32 +206,40 @@ namespace POSRestaurant.ViewModels
             {
                 if (_selectedDiscountType != value)
                 {
-                    _selectedDiscountType = value;
-
-                    if (_selectedDiscountType == null)
+                    try
                     {
-                        IsDiscountGiven = false;
-                        DiscountAmount = 0;
-                        EnableDiscount = false;
+                        _selectedDiscountType = value;
+
+                        if (_selectedDiscountType == null)
+                        {
+                            IsDiscountGiven = false;
+                            DiscountAmount = 0;
+                            EnableDiscount = false;
+                            OnPropertyChanged();
+                            return;
+                        }
+
+                        if (_selectedDiscountType.Key == 0)
+                        {
+                            IsDiscountGiven = false;
+                            DiscountAmount = 0;
+                            EnableDiscount = false;
+                        }
+                        else if (_selectedDiscountType.Key == 1 || _selectedDiscountType.Key == 2)
+                        {
+                            DiscountAmount = 0;
+                            EnableDiscount = true;
+                            IsDiscountGiven = true;
+                        }
                         OnPropertyChanged();
-                        return;
+                        if (_selectedDiscountType.Key != 0)
+                            CalculateTotal();
                     }
-
-                    if (_selectedDiscountType.Key == 0)
+                    catch (Exception ex)
                     {
-                        IsDiscountGiven = false;
-                        DiscountAmount = 0;
-                        EnableDiscount = false;
+                        _logger.LogError("OrderViewVM-SelectedDiscountType Set Error", ex);
+                        throw;
                     }
-                    else if (_selectedDiscountType.Key == 1 || _selectedDiscountType.Key == 2)
-                    {
-                        DiscountAmount = 0;
-                        EnableDiscount = true;
-                        IsDiscountGiven = true;
-                    }
-                    OnPropertyChanged();
-                    if (_selectedDiscountType.Key != 0)
-                        CalculateTotal();
                 }
             }
         }
@@ -251,10 +264,11 @@ namespace POSRestaurant.ViewModels
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public OrderViewViewModel(DatabaseService databaseService, MenuService menuService, 
+        public OrderViewViewModel(LogService logger, DatabaseService databaseService, MenuService menuService, 
             OrdersViewModel ordersViewModel, SettingService settingService,
             TaxService taxService)
         {
+            _logger = logger;
             _databaseService = databaseService;
             _ordersViewModel = ordersViewModel;
             _settingService = settingService;
@@ -272,35 +286,43 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task object</returns>
         public async ValueTask InitializeAsync()
         {
-            IsLoading = true;
-
-            TableNumber = TableModel.TableNo;
-
-            OrderItems.Clear();
-
-            Categories = await _menuService.GetMenuCategories();
-
-            Categories[0].IsSelected = true;
-            SelectedCategory = Categories[0];
-
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
-
-            DiscountOptionsTS.Clear();
-            foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<DiscountOptions>())
+            try
             {
-                DiscountOptionsTS.Add(desc);
+                IsLoading = true;
+
+                TableNumber = TableModel.TableNo;
+
+                OrderItems.Clear();
+
+                Categories = await _menuService.GetMenuCategories();
+
+                Categories[0].IsSelected = true;
+                SelectedCategory = Categories[0];
+
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+
+                DiscountOptionsTS.Clear();
+                foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<DiscountOptions>())
+                {
+                    DiscountOptionsTS.Add(desc);
+                }
+                var defaultItem = DiscountOptionsTS.FirstOrDefault(x => x.Key == 0);
+                if (defaultItem != null)
+                {
+                    SelectedDiscountType = defaultItem;
+                }
+                _selectedDiscountType = DiscountOptionsTS.First();
+
+                await GetOrderDetailsAsync();
+                await GetOrderKOTsAsync();
+
+                IsLoading = false;
             }
-            var defaultItem = DiscountOptionsTS.FirstOrDefault(x => x.Key == 0);
-            if (defaultItem != null)
+            catch (Exception ex)
             {
-                SelectedDiscountType = defaultItem;
+                _logger.LogError("OrderViewVM-InitializeAsync Error", ex);
+                throw;
             }
-            _selectedDiscountType = DiscountOptionsTS.First();
-
-            await GetOrderDetailsAsync();
-            await GetOrderKOTsAsync();
-
-            IsLoading = false;
         }
 
         /// <summary>
@@ -309,18 +331,26 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task Object</returns>
         private async Task GetOrderDetailsAsync()
         {
-            var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
-
-            OrderModel = new OrderModel
+            try
             {
-                Id = order.Id,
-                TableId = order.TableId,
-                OrderDate = order.OrderDate,
-                TotalItemCount = order.TotalItemCount,
-                TotalAmount = order.TotalAmount,
-                PaymentMode = order.PaymentMode,
-                OrderStatus = order.OrderStatus,
-            };
+                var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
+
+                OrderModelToDisplay = new OrderModel
+                {
+                    Id = order.Id,
+                    TableId = order.TableId,
+                    OrderDate = order.OrderDate,
+                    TotalItemCount = order.TotalItemCount,
+                    TotalAmount = order.TotalAmount,
+                    PaymentMode = order.PaymentMode,
+                    OrderStatus = order.OrderStatus,
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderViewVM-GetOrderDetailsAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -329,23 +359,31 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns Task Object</returns>
         private async Task GetOrderKOTsAsync()
         {
-            IsLoading = true;
-
-            OrderKOTs = (await _databaseService.GetOrderKotsAsync(OrderModel.Id))
-                            .Select(KOTModel.FromEntity)
-                            .ToArray();
-
-            foreach (var kot in OrderKOTs)
+            try
             {
-                var items = (await _databaseService.GetKotItemsAsync(kot.Id))
-                            .Select(KOTItemModel.FromEntity)
-                            .ToList();
+                IsLoading = true;
 
-                foreach (var item in items)
-                    OrderItems.Add(item);
+                OrderKOTs = (await _databaseService.GetOrderKotsAsync(OrderModelToDisplay.Id))
+                                .Select(KOTModel.FromEntity)
+                                .ToArray();
+
+                foreach (var kot in OrderKOTs)
+                {
+                    var items = (await _databaseService.GetKotItemsAsync(kot.Id))
+                                .Select(KOTItemModel.FromEntity)
+                                .ToList();
+
+                    foreach (var item in items)
+                        OrderItems.Add(item);
+                }
+
+                IsLoading = false;
             }
-
-            IsLoading = false;
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderViewVM-GetOrderKOTsAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -356,21 +394,29 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SelectCategoryAsync(int categoryId)
         {
-            if (SelectedCategory.Id == categoryId) return;
+            try
+            {
+                if (SelectedCategory.Id == categoryId) return;
 
-            IsLoading = true;
+                IsLoading = true;
 
-            var existingSelectedCategory = Categories.First(o => o.IsSelected);
-            existingSelectedCategory.IsSelected = false;
+                var existingSelectedCategory = Categories.First(o => o.IsSelected);
+                existingSelectedCategory.IsSelected = false;
 
-            var newSelectedCategory = Categories.First(o => o.Id == categoryId);
-            newSelectedCategory.IsSelected = true;
+                var newSelectedCategory = Categories.First(o => o.Id == categoryId);
+                newSelectedCategory.IsSelected = true;
 
-            SelectedCategory = newSelectedCategory;
+                SelectedCategory = newSelectedCategory;
 
-            MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
+                MenuItems = await _menuService.GetCategoryItems(SelectedCategory.Id);
 
-            IsLoading = false;
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderViewVM-SelectCategoryAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -478,29 +524,37 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task DiscountClickAsync()
         {
-            var result = await Shell.Current.DisplayPromptAsync("Discount", "Enter the applicable discount in percentage / fixed amount.", placeholder: "10", initialValue: DiscountAmount.ToString());
-            if (!string.IsNullOrWhiteSpace(result))
+            try
             {
+                var result = await Shell.Current.DisplayPromptAsync("Discount", "Enter the applicable discount in percentage / fixed amount.", placeholder: "10", initialValue: DiscountAmount.ToString());
+                if (!string.IsNullOrWhiteSpace(result))
+                {
 
-                if (!Decimal.TryParse(result, out decimal enteredDiscount))
-                {
-                    await Shell.Current.DisplayAlert("Invalid Value", "Entered discount is invalid.", "Ok");
-                    return;
-                }
+                    if (!Decimal.TryParse(result, out decimal enteredDiscount))
+                    {
+                        await Shell.Current.DisplayAlert("Invalid Value", "Entered discount is invalid.", "Ok");
+                        return;
+                    }
 
-                if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
-                {
-                    DiscountAmount = enteredDiscount;
-                    Total = SubTotal - DiscountAmount;
+                    if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
+                    {
+                        DiscountAmount = enteredDiscount;
+                        Total = SubTotal - DiscountAmount;
+                    }
+                    else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
+                    {
+                        DiscountAmount = (SubTotal * enteredDiscount) / 100;
+                        DiscountAmount = enteredDiscount;
+                        Total = SubTotal - DiscountPercentageAmount;
+                    }
                 }
-                else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
-                {
-                    DiscountAmount = (SubTotal * enteredDiscount) / 100;
-                    DiscountAmount = enteredDiscount;
-                    Total = SubTotal - DiscountPercentageAmount;
-                }
+                IsUpdated = true;
             }
-            IsUpdated = true;
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderViewVM-DiscountClickAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -510,18 +564,26 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private void SearchItems(string? textSearch)
         {
-            if (string.IsNullOrWhiteSpace(textSearch) || textSearch.Length < 3)
-                return;
-
-            Task.Run(async () =>
+            try
             {
-                var result = await _databaseService.GetMenuItemBySearch(textSearch);
+                if (string.IsNullOrWhiteSpace(textSearch) || textSearch.Length < 3)
+                    return;
 
-                MainThread.BeginInvokeOnMainThread(() =>
+                Task.Run(async () =>
                 {
-                    MenuItems = result;
+                    var result = await _databaseService.GetMenuItemBySearch(textSearch);
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        MenuItems = result;
+                    });
                 });
-            });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderViewVM-SearchItems Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -541,77 +603,85 @@ namespace POSRestaurant.ViewModels
              * After all the oprerations, print the receipt
              */
 
-            // Remove the KOTItems from DB and recalculate total
-            var toDelete = _removedItems.GroupBy(o => o.KOTId).ToDictionary(group => group.Key, group => group.Select(KOTItem.FromEntity).ToArray());
-
-            if (toDelete.Count > 0)
+            try
             {
-                var errorMessage = await _databaseService.DeleteKOTItemsAndUpdateKOT(toDelete, TableModel.RunningOrderId);
+                // Remove the KOTItems from DB and recalculate total
+                var toDelete = _removedItems.GroupBy(o => o.KOTId).ToDictionary(group => group.Key, group => group.Select(KOTItem.FromEntity).ToArray());
 
-                if (errorMessage != null)
-                    await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
-            }
-
-            // Update OrderItems => KOTItemModel, where KOTItemId != 0
-            var toUpdate = OrderItems.Where(o => o.Id != 0 && _updatedKOTItemIds.Contains(o.Id)).GroupBy(o => o.KOTId).ToDictionary(group => group.Key, group => group.Select(KOTItem.FromEntity).ToArray());
-
-            if (toUpdate.Count > 0)
-            {
-                var errorMessage = await _databaseService.UpdateKOTItemsAndKOT(toUpdate, TableModel.RunningOrderId);
-
-                if (errorMessage != null)
-                    await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
-            }
-
-            // Add new KOT items if needed
-            KOTItem[] toAdd = OrderItems.Where(o => o.Id == 0).Select(KOTItem.FromEntity).ToArray();
-
-            if (toAdd.Length > 0)
-            {
-                var lastKOTNumber = await _databaseService.GetLastKOTNumberForOrderId(TableModel.RunningOrderId);
-
-                var kotModel = new KOTModel
+                if (toDelete.Count > 0)
                 {
-                    KOTNumber = lastKOTNumber + 1,
-                    KOTDateTime = DateTime.Now,
-                    TotalItemCount = toAdd.Length,
-                    TotalPrice = toAdd.Sum(x => x.Price),
-                    Items = toAdd
-                };
-                List<KOTModel> kots = new List<KOTModel>();
-                kots.Add(kotModel);
+                    var errorMessage = await _databaseService.DeleteKOTItemsAndUpdateKOT(toDelete, TableModel.RunningOrderId);
 
-                var errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), TableModel.RunningOrderId);
+                    if (errorMessage != null)
+                        await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
+                }
 
-                if (errorMessage != null)
-                    await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
-            }
+                // Update OrderItems => KOTItemModel, where KOTItemId != 0
+                var toUpdate = OrderItems.Where(o => o.Id != 0 && _updatedKOTItemIds.Contains(o.Id)).GroupBy(o => o.KOTId).ToDictionary(group => group.Key, group => group.Select(KOTItem.FromEntity).ToArray());
 
-            // Add Discounts to Order if any
-            if (IsDiscountGiven)
-            {
-                Discount discount = new Discount
+                if (toUpdate.Count > 0)
                 {
-                    OrderId = TableModel.RunningOrderId,
-                    IsFixedBased = EnableFixedDiscount,
-                    IsPercentageBased = EnableDiscount,
-                    DiscountFixed = DiscountAmount,
-                    DiscountPercentage = DiscountAmount,
-                };
-                await _databaseService.DiscountOperations.SaveDiscountAsync(discount);
-            }
+                    var errorMessage = await _databaseService.UpdateKOTItemsAndKOT(toUpdate, TableModel.RunningOrderId);
 
-            if (await UpdateOrder() <= 0)
+                    if (errorMessage != null)
+                        await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
+                }
+
+                // Add new KOT items if needed
+                KOTItem[] toAdd = OrderItems.Where(o => o.Id == 0).Select(KOTItem.FromEntity).ToArray();
+
+                if (toAdd.Length > 0)
+                {
+                    var lastKOTNumber = await _databaseService.GetLastKOTNumberForOrderId(TableModel.RunningOrderId);
+
+                    var kotModel = new KOTModel
+                    {
+                        KOTNumber = lastKOTNumber + 1,
+                        KOTDateTime = DateTime.Now,
+                        TotalItemCount = toAdd.Length,
+                        TotalPrice = toAdd.Sum(x => x.Price),
+                        Items = toAdd
+                    };
+                    List<KOTModel> kots = new List<KOTModel>();
+                    kots.Add(kotModel);
+
+                    var errorMessage = await _databaseService.InsertOrderKOTAsync(kots.ToArray(), TableModel.RunningOrderId);
+
+                    if (errorMessage != null)
+                        await Shell.Current.DisplayAlert("Saving Error", errorMessage, "OK");
+                }
+
+                // Add Discounts to Order if any
+                if (IsDiscountGiven)
+                {
+                    Discount discount = new Discount
+                    {
+                        OrderId = TableModel.RunningOrderId,
+                        IsFixedBased = EnableFixedDiscount,
+                        IsPercentageBased = EnableDiscount,
+                        DiscountFixed = DiscountAmount,
+                        DiscountPercentage = DiscountAmount,
+                    };
+                    await _databaseService.DiscountOperations.SaveDiscountAsync(discount);
+                }
+
+                if (await UpdateOrder() <= 0)
+                {
+                    await Shell.Current.DisplayAlert("Saving Error", "Couldn't Update Order", "OK");
+                    return;
+                }
+
+                TableModel.Status = TableOrderStatus.Confirmed;
+                // Push for change in table info
+                WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
+
+                await Application.Current.MainPage.Navigation.PopAsync();
+            }
+            catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Saving Error", "Couldn't Update Order", "OK");
-                return;
+                _logger.LogError("OrderViewVM-SaveAndPrint Error", ex);
+                throw;
             }
-
-            TableModel.Status = TableOrderStatus.Confirmed;
-            // Push for change in table info
-            WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
-
-            await Application.Current.MainPage.Navigation.PopAsync();
         }
 
         /// <summary>
@@ -620,50 +690,58 @@ namespace POSRestaurant.ViewModels
         /// <returns>Return the number of rows affected by the operation</returns>
         private async Task<int> UpdateOrder()
         {
-            var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
-
-            order.IsDiscountGiven = IsDiscountGiven;
-            order.IsFixedBased = SelectedDiscountType.Key == (int)DiscountOptions.Fixed ? true : false;
-            order.IsPercentageBased = SelectedDiscountType.Key == (int)DiscountOptions.Percentage ? true : false; ;
-            order.DiscountFixed = DiscountAmount;
-            order.DiscountPercentage = DiscountAmount;
-            if (IsDiscountGiven)
+            try
             {
-                if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
+                var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
+
+                order.IsDiscountGiven = IsDiscountGiven;
+                order.IsFixedBased = SelectedDiscountType.Key == (int)DiscountOptions.Fixed ? true : false;
+                order.IsPercentageBased = SelectedDiscountType.Key == (int)DiscountOptions.Percentage ? true : false; ;
+                order.DiscountFixed = DiscountAmount;
+                order.DiscountPercentage = DiscountAmount;
+                if (IsDiscountGiven)
                 {
-                    order.TotalAmountAfterDiscount = order.TotalAmount - DiscountAmount;
+                    if (SelectedDiscountType.Key == (int)DiscountOptions.Fixed)
+                    {
+                        order.TotalAmountAfterDiscount = order.TotalAmount - DiscountAmount;
+                    }
+                    else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
+                    {
+                        var amount = order.TotalAmount * DiscountAmount / 100;
+                        order.TotalAmountAfterDiscount = order.TotalAmount - amount;
+                    }
                 }
-                else if (SelectedDiscountType.Key == (int)DiscountOptions.Percentage)
+                else
                 {
-                    var amount = order.TotalAmount * DiscountAmount / 100;
-                    order.TotalAmountAfterDiscount = order.TotalAmount - amount;
+                    order.TotalAmountAfterDiscount = order.TotalAmount;
                 }
+
+
+                order.UsingGST = _taxService.IndianTaxService.UsingGST;
+                order.CGST = _taxService.IndianTaxService.CGST;
+                order.SGST = _taxService.IndianTaxService.SGST;
+                order.CGSTAmount = _taxService.IndianTaxService.CalculateCGST(order.TotalAmount);
+                order.SGSTAmount = _taxService.IndianTaxService.CalculateSGST(order.TotalAmount);
+
+                if (order.UsingGST)
+                {
+                    var total = order.TotalAmountAfterDiscount + order.CGSTAmount + order.SGSTAmount;
+                    order.GrandTotal = Math.Floor(total);
+                    order.RoundOff = order.GrandTotal - total;
+                }
+                else
+                {
+                    order.GrandTotal = Math.Floor(order.TotalAmountAfterDiscount);
+                    order.RoundOff = order.GrandTotal - order.TotalAmountAfterDiscount;
+                }
+
+                return await _databaseService.UpdateOrder(order);
             }
-            else
+            catch (Exception ex)
             {
-                order.TotalAmountAfterDiscount = order.TotalAmount;
+                _logger.LogError("OrderViewVM-UpdateOrder Error", ex);
+                throw;
             }
-
-
-            order.UsingGST = _taxService.IndianTaxService.UsingGST;
-            order.CGST = _taxService.IndianTaxService.CGST;
-            order.SGST = _taxService.IndianTaxService.SGST;
-            order.CGSTAmount = _taxService.IndianTaxService.CalculateCGST(order.TotalAmount);
-            order.SGSTAmount = _taxService.IndianTaxService.CalculateSGST(order.TotalAmount);
-
-            if (order.UsingGST)
-            {
-                var total = order.TotalAmountAfterDiscount + order.CGSTAmount + order.SGSTAmount;
-                order.GrandTotal = Math.Floor(total);
-                order.RoundOff = order.GrandTotal - total;
-            }
-            else
-            {
-                order.GrandTotal = Math.Floor(order.TotalAmountAfterDiscount);
-                order.RoundOff = order.GrandTotal - order.TotalAmountAfterDiscount;
-            }
-
-            return await _databaseService.UpdateOrder(order);
         }
 
         /// <summary>

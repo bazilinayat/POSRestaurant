@@ -1,12 +1,11 @@
-﻿using CommunityToolkit.Maui.Converters;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Maui.Controls;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.Service.LoggerService;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -18,6 +17,11 @@ namespace POSRestaurant.ViewModels
         /// To handle the calls to database for the order
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// To add details to the UI
@@ -91,25 +95,33 @@ namespace POSRestaurant.ViewModels
             get => _selectedPaymentMode;
             set
             {
-                if (_selectedPaymentMode != value)
+                try
                 {
-                    _selectedPaymentMode = value;
-                    if (_selectedPaymentMode != 0)
-                        PaymentMode = (PaymentModes)_selectedPaymentMode;
-                    if (PaymentMode == PaymentModes.Part)
+                    if (_selectedPaymentMode != value)
                     {
-                        IsPartPayment = true;
-                        IsNotPartPayment = false;
-                        IsCashForPart = IsCardForPart = IsOnlineForPart = false;
-                        PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
+                        _selectedPaymentMode = value;
+                        if (_selectedPaymentMode != 0)
+                            PaymentMode = (PaymentModes)_selectedPaymentMode;
+                        if (PaymentMode == PaymentModes.Part)
+                        {
+                            IsPartPayment = true;
+                            IsNotPartPayment = false;
+                            IsCashForPart = IsCardForPart = IsOnlineForPart = false;
+                            PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
+                        }
+                        else if (PaymentMode == PaymentModes.Online || PaymentMode == PaymentModes.Card || PaymentMode == PaymentModes.Cash)
+                        {
+                            IsPartPayment = false;
+                            IsNotPartPayment = true;
+                        }
+                        CalculateReturn();
+                        OnPaymenModeChanged();
                     }
-                    else if (PaymentMode == PaymentModes.Online || PaymentMode == PaymentModes.Card || PaymentMode == PaymentModes.Cash)
-                    {
-                        IsPartPayment = false;
-                        IsNotPartPayment = true;
-                    }
-                    CalculateReturn();
-                    OnPaymenModeChanged();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("OrderCompleteVM-SelectedPaymentMode Set Error", ex);
+                    throw;
                 }
             }
         }
@@ -118,8 +130,9 @@ namespace POSRestaurant.ViewModels
         /// Contructor for the view model
         /// </summary>
         /// <param name="databaseService">DIed DatabaseService</param>
-        public OrderCompleteViewModel(DatabaseService databaseService)
+        public OrderCompleteViewModel(LogService logger, DatabaseService databaseService)
         {
+            _logger = logger;
             _databaseService = databaseService;
         }
 
@@ -177,45 +190,53 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SaveOrderPaymentAsync()
         {
-            var orderPayment = new OrderPayment
+            try
             {
-                OrderId = TableModel.RunningOrderId,
-                SettlementDate = DateTime.Now,
-                PaymentMode = PaymentMode,
-                OrderType = OrderTypes.DineIn,
-                Total = TableModel.OrderTotal,
-                IsCardForPart = IsCardForPart,
-                IsCashForPart = IsCashForPart,
-                IsOnlineForPart = IsOnlineForPart,
-                PartPaidInCard = PaidByCustomerInCard,
-                PartPaidInCash = PaidByCustomerInCash,
-                PartPaidInOnline = PaidByCustomerInOnline,
-            };
+                var orderPayment = new OrderPayment
+                {
+                    OrderId = TableModel.RunningOrderId,
+                    SettlementDate = DateTime.Now,
+                    PaymentMode = PaymentMode,
+                    OrderType = OrderTypes.DineIn,
+                    Total = TableModel.OrderTotal,
+                    IsCardForPart = IsCardForPart,
+                    IsCashForPart = IsCashForPart,
+                    IsOnlineForPart = IsOnlineForPart,
+                    PartPaidInCard = PaidByCustomerInCard,
+                    PartPaidInCash = PaidByCustomerInCash,
+                    PartPaidInOnline = PaidByCustomerInOnline,
+                };
 
-            var errorMessage = await _databaseService.OrderPaymentOperations.SaveOrderPaymentAsync(orderPayment);
+                var errorMessage = await _databaseService.OrderPaymentOperations.SaveOrderPaymentAsync(orderPayment);
 
-            if (errorMessage != null)
-            {
-                await Shell.Current.DisplayAlert("Order Payment Error", errorMessage, "Ok");
-                return;
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Order Payment Error", errorMessage, "Ok");
+                    return;
+                }
+
+                var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
+                if (order != null)
+                {
+                    order.OrderStatus = TableOrderStatus.Paid;
+                    order.PaymentMode = PaymentMode;
+                    await _databaseService.UpdateOrder(order);
+                }
+
+                TableModel.Status = TableOrderStatus.NoOrder;
+                TableModel.Waiter = null;
+                TableModel.OrderTotal = 0;
+                TableModel.RunningOrderId = 0;
+                TableModel.NumberOfPeople = 0;
+
+                WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
+                WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(true));
             }
-
-            var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
-            if (order != null)
+            catch (Exception ex)
             {
-                order.OrderStatus = TableOrderStatus.Paid;
-                order.PaymentMode = PaymentMode;
-                await _databaseService.UpdateOrder(order);
+                _logger.LogError("OrderCompleteVM-SaveOrderPaymentAsync Error", ex);
+                throw;
             }
-
-            TableModel.Status = TableOrderStatus.NoOrder;
-            TableModel.Waiter = null;
-            TableModel.OrderTotal = 0;
-            TableModel.RunningOrderId = 0;
-            TableModel.NumberOfPeople = 0;
-
-            WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
-            WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(true));
         }
     }
 }

@@ -1,13 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Controls.Internals;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
-using System.Collections.ObjectModel;
+using POSRestaurant.Service.LoggerService;
 
 namespace POSRestaurant.ViewModels
 {
@@ -20,6 +18,11 @@ namespace POSRestaurant.ViewModels
         /// DIed variable for DatabaseService
         /// </summary>
         private readonly DatabaseService _databaseService;
+
+        /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
 
         /// <summary>
         /// To indicate that the ViewModel data is loading
@@ -114,8 +117,9 @@ namespace POSRestaurant.ViewModels
         /// Constructor for the view model
         /// </summary>
         /// <param name="databaseService">DIed Database Service</param>
-        public SettingsViewModel(DatabaseService databaseService)
+        public SettingsViewModel(LogService logger, DatabaseService databaseService)
         {
+            _logger = logger;
             _databaseService = databaseService;
         }
 
@@ -125,33 +129,41 @@ namespace POSRestaurant.ViewModels
         /// <returns></returns>
         public async ValueTask InitializeAsync()
         {
-            Settings = EnumExtensions.GetAllDescriptions<ApplicationSettings>()
-                        .Select(ValueForPickerSelection.FromEntity)
-                        .ToArray();
-            Settings[0].IsSelected = true;
-            SelectedSetting = Settings[0];
-            ShowInfo = true;
-            ShowExpenseTypes = false;
-
-            var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
-
-            if (restaurantInfo == null)
+            try
             {
-                UsingGST = false;
-                GstIn = Fassai = Address = Phone = "";
-                Cgst = Sgst = 0;
+                Settings = EnumExtensions.GetAllDescriptions<ApplicationSettings>()
+                                .Select(ValueForPickerSelection.FromEntity)
+                                .ToArray();
+                Settings[0].IsSelected = true;
+                SelectedSetting = Settings[0];
+                ShowInfo = true;
+                ShowExpenseTypes = false;
+
+                var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
+
+                if (restaurantInfo == null)
+                {
+                    UsingGST = false;
+                    GstIn = Fassai = Address = Phone = "";
+                    Cgst = Sgst = 0;
+                }
+                else
+                {
+                    Fassai = restaurantInfo.FSSAI;
+                    Name = restaurantInfo.Name;
+                    Address = restaurantInfo.Address;
+                    Phone = restaurantInfo.PhoneNumber;
+
+                    UsingGST = restaurantInfo.UsingGST;
+                    GstIn = restaurantInfo.GSTIN;
+                    Cgst = restaurantInfo.CGST;
+                    Sgst = restaurantInfo.SGST;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Fassai = restaurantInfo.FSSAI;
-                Name = restaurantInfo.Name;
-                Address = restaurantInfo.Address;
-                Phone = restaurantInfo.PhoneNumber;
-
-                UsingGST = restaurantInfo.UsingGST;
-                GstIn = restaurantInfo.GSTIN;
-                Cgst = restaurantInfo.CGST;
-                Sgst = restaurantInfo.SGST;
+                _logger.LogError("SettingsVM-InitializeAsync Error", ex);
+                throw;
             }
         }
 
@@ -162,19 +174,27 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task AddExpenseType()
         {
-            var result = await Shell.Current.DisplayPromptAsync("ExpenseType", "Enter the Expense Type name.", placeholder: "Enter Expense Type Name");
-            if (!string.IsNullOrWhiteSpace(result))
+            try
             {
-                var errorMessage = await _databaseService.SettingsOperation.SaveExpenseType(result);
-                if (errorMessage == null)
+                var result = await Shell.Current.DisplayPromptAsync("ExpenseType", "Enter the Expense Type name.", placeholder: "Enter Expense Type Name");
+                if (!string.IsNullOrWhiteSpace(result))
                 {
-                    await Shell.Current.DisplayAlert("Success", $"{result} Added Successfully", "OK");
-                    await LoadExpenseTypes();
-                    WeakReferenceMessenger.Default.Send(ExpenseTypeChangedMessage.From(true));
+                    var errorMessage = await _databaseService.SettingsOperation.SaveExpenseType(result);
+                    if (errorMessage == null)
+                    {
+                        await Shell.Current.DisplayAlert("Success", $"{result} Added Successfully", "OK");
+                        await LoadExpenseTypes();
+                        WeakReferenceMessenger.Default.Send(ExpenseTypeChangedMessage.From(true));
+                        return;
+                    }
+                    await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
                     return;
                 }
-                await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
-                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SettingsVM-AddExpenseType Error", ex);
+                throw;
             }
         }
 
@@ -186,32 +206,40 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SelectSettingAsync(int settingId)
         {
-            if (SelectedSetting.Key == settingId) return;
-
-            IsLoading = true;
-
-            var existingSelectedCategory = Settings.First(o => o.IsSelected);
-            existingSelectedCategory.IsSelected = false;
-
-            var newSelectedCategory = Settings.First(o => o.Key == settingId);
-            newSelectedCategory.IsSelected = true;
-
-            SelectedSetting = newSelectedCategory;
-
-            switch (SelectedSetting.Key)
+            try
             {
-                case (int)ApplicationSettings.RestaurantInfo:
-                    ShowInfo = true;
-                    ShowExpenseTypes = false;
-                    break;
-                case (int)ApplicationSettings.ExpenseItems:
-                    await LoadExpenseTypes();
-                    ShowInfo = false;
-                    ShowExpenseTypes = true;
-                    break;
-            }
+                if (SelectedSetting.Key == settingId) return;
 
-            IsLoading = false;
+                IsLoading = true;
+
+                var existingSelectedCategory = Settings.First(o => o.IsSelected);
+                existingSelectedCategory.IsSelected = false;
+
+                var newSelectedCategory = Settings.First(o => o.Key == settingId);
+                newSelectedCategory.IsSelected = true;
+
+                SelectedSetting = newSelectedCategory;
+
+                switch (SelectedSetting.Key)
+                {
+                    case (int)ApplicationSettings.RestaurantInfo:
+                        ShowInfo = true;
+                        ShowExpenseTypes = false;
+                        break;
+                    case (int)ApplicationSettings.ExpenseItems:
+                        await LoadExpenseTypes();
+                        ShowInfo = false;
+                        ShowExpenseTypes = true;
+                        break;
+                }
+
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SettingsVM-SelectSettingAsync Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -220,11 +248,19 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a task</returns>
         private async Task LoadExpenseTypes()
         {
-            IsLoading = true;
+            try
+            {
+                IsLoading = true;
 
-            ExpenseTypesToDisplay = await _databaseService.SettingsOperation.GetExpenseTypes();
+                ExpenseTypesToDisplay = await _databaseService.SettingsOperation.GetExpenseTypes();
 
-            IsLoading = false;
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SettingsVM-LoadExpenseTypes Error", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -235,16 +271,24 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task DeleteExpenseTypeAsync(ExpenseTypes expenseType)
         {
-            if (await Shell.Current.DisplayAlert("Delete?", $"Do you really want to delete this type?", "Yes", "No"))
+            try
             {
-                var errorMessage = await _databaseService.SettingsOperation.DeleteExpenseType(expenseType);
-
-                if (errorMessage != null)
+                if (await Shell.Current.DisplayAlert("Delete?", $"Do you really want to delete this type?", "Yes", "No"))
                 {
-                    await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
-                    return;
+                    var errorMessage = await _databaseService.SettingsOperation.DeleteExpenseType(expenseType);
+
+                    if (errorMessage != null)
+                    {
+                        await Shell.Current.DisplayAlert("Error", errorMessage, "OK");
+                        return;
+                    }
+                    await LoadExpenseTypes();
                 }
-                await LoadExpenseTypes();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SettingsVM-DeleteExpenseTypeAsync Error", ex);
+                throw;
             }
         }
 
@@ -254,59 +298,67 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task SaveRestaurantInfoAsync()
         {
-            if (string.IsNullOrWhiteSpace(Name))
+            try
             {
-                await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant name", "Ok");
-                return;
+                if (string.IsNullOrWhiteSpace(Name))
+                {
+                    await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant name", "Ok");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(Address))
+                {
+                    await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant address", "Ok");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(Phone))
+                {
+                    await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant contact number", "Ok");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(Fassai))
+                {
+                    await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant FASSAI number", "Ok");
+                    return;
+                }
+
+                var info = new RestaurantInfo
+                {
+                    FSSAI = Fassai,
+                    Name = Name,
+                    Address = Address,
+                    PhoneNumber = Phone,
+
+                    UsingGST = UsingGST,
+                    GSTIN = GstIn,
+                    CGST = Cgst,
+                    SGST = Sgst
+                };
+
+                IsLoading = true;
+
+                var errorMessage = await _databaseService.SettingsOperation.SaveRestaurantInfo(info);
+
+                if (errorMessage != null)
+                {
+                    await Shell.Current.DisplayAlert("Save Error", "Error Saving Restaurant Info", "Ok");
+                    return;
+                }
+
+                await Shell.Current.DisplayAlert("Successful", "Restaurant Info Save Successfully", "Ok");
+                WeakReferenceMessenger.Default.Send(TaxChangedMessage.From(true));
+
+                InfoInitialized = true;
+
+                IsLoading = false;
             }
-
-            if (string.IsNullOrWhiteSpace(Address))
+            catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant address", "Ok");
-                return;
+                _logger.LogError("SettingsVM-SaveRestaurantInfoAsync Error", ex);
+                throw;
             }
-
-            if (string.IsNullOrWhiteSpace(Phone))
-            {
-                await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant contact number", "Ok");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(Fassai))
-            {
-                await Shell.Current.DisplayAlert("Invalid Input", "Please enter restaurant FASSAI number", "Ok");
-                return;
-            }
-
-            var info = new RestaurantInfo
-            {
-                FSSAI = Fassai,
-                Name = Name,
-                Address = Address,
-                PhoneNumber = Phone,
-
-                UsingGST = UsingGST,
-                GSTIN = GstIn,
-                CGST = Cgst,
-                SGST = Sgst
-            };
-            
-            IsLoading = true;
-
-            var errorMessage = await _databaseService.SettingsOperation.SaveRestaurantInfo(info);
-
-            if (errorMessage != null)
-            {
-                await Shell.Current.DisplayAlert("Save Error", "Error Saving Restaurant Info", "Ok");
-                return;
-            }
-
-            await Shell.Current.DisplayAlert("Successful", "Restaurant Info Save Successfully", "Ok");
-            WeakReferenceMessenger.Default.Send(TaxChangedMessage.From(true));
-
-            InfoInitialized = true;
-
-            IsLoading = false;
         }
     }
 }

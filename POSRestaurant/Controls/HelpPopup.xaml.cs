@@ -1,5 +1,5 @@
 using CommunityToolkit.Maui.Views;
-using SettingLibrary;
+using POSRestaurant.Service.SettingService;
 
 namespace POSRestaurant.Controls;
 
