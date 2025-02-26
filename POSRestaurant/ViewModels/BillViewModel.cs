@@ -363,13 +363,16 @@ namespace POSRestaurant.ViewModels
                 WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
 
                 IsLoading = false;
-                await Application.Current.MainPage.Navigation.PopAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError("BillVM-PrintReceiptAsync Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "Error in Printing the Bill", "OK");
                 IsLoading = false;
+            }
+            finally
+            {
+                await Application.Current.MainPage.Navigation.PopAsync();
             }
         }
     }

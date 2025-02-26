@@ -159,13 +159,15 @@
         </VerticalStackLayout>
 
         <BoxView IsVisible="{Binding IsLoading}"
-         HorizontalOptions="Fill"
-         VerticalOptions="Fill"
-         Color="{StaticResource LightWheat}"
-         Opacity="0.3"/>
+                 HorizontalOptions="Fill"
+                 VerticalOptions="Fill"
+                 Color="{StaticResource LightWheat}"
+                 Opacity="0.3"
+                 AbsoluteLayout.LayoutBounds="0,0,1,1"
+                 AbsoluteLayout.LayoutFlags="All"/>
         <ActivityIndicator IsRunning="{Binding IsLoading}" 
-                   HeightRequest="25" 
-                   WidthRequest="25" 
+                   HeightRequest="50" 
+                   WidthRequest="50" 
                    HorizontalOptions="Center" 
                    VerticalOptions="Center"
                    Color="LightBlue"/>
