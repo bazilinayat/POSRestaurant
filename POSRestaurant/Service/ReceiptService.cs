@@ -387,7 +387,7 @@ namespace POSRestaurant.Service
         {
             try
             {
-                document.Add(new Paragraph("Thank you for your business!")
+                document.Add(new Paragraph("Thank you for visiting Gokul Pav Bhaji! Your cravings made our day. See you again soon!")
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
                         .SetFontSize(8));
             }
@@ -427,7 +427,6 @@ namespace POSRestaurant.Service
 
                 // Ghostscript conversion command
                 string tempImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "receipt.bmp");
-                string tempImageFile1 = "E:\\ResumeBuilding\\receipt.bmp";
 
 
 
@@ -441,20 +440,6 @@ namespace POSRestaurant.Service
                 };
 
                 using (var process = Process.Start(processInfo))
-                {
-                    process.WaitForExit(5000);
-                }
-
-                var processInfo1 = new ProcessStartInfo
-                {
-                    FileName = "gswin64c.exe", // Ghostscript executable
-                    Arguments = $"-dQUIET -dNOPAUSE -dBATCH -sDEVICE=bmpmono -r{dpi} -sOutputFile=\"{tempImageFile1}\" \"{tempPdfFile}\"",
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                };
-
-                using (var process = Process.Start(processInfo1))
                 {
                     process.WaitForExit(5000);
                 }

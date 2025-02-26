@@ -176,7 +176,7 @@
                         </Border>
                         <CollectionView Grid.Row="1" ItemsSource="{Binding OrderKOTItems}">
                             <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="models:KOTItemModel">
+                                <DataTemplate x:DataType="models:KOTItemBillModel">
                                     <Grid ColumnDefinitions="*, *, *, *" RowDefinitions="Auto, *">
                                         <Label Grid.Column="0"
                                                  Text="{Binding Name}"
