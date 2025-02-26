@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using POSRestaurant.Service.LoggerService;
+using System.Text.Json;
 
 namespace POSRestaurant.Service.SettingService
 {
@@ -21,7 +22,7 @@ namespace POSRestaurant.Service.SettingService
         /// <summary>
         /// Constructor to set settings object
         /// </summary>
-        public SettingService()
+        public SettingService(LogService logger)
         {
             if (_isInitialized) return;
 
@@ -38,6 +39,7 @@ namespace POSRestaurant.Service.SettingService
             }
             catch (Exception ex)
             {
+                logger.LogError("SettingService-Error in Loading Settings ", ex);
                 Settings = null;
             }
         }

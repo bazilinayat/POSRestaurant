@@ -127,6 +127,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("TableVM-InitializeAsync Error", ex);
+                await Shell.Current.DisplayAlert("Fault", "There was an error loading the screen", "OK");
                 throw;
             }
         }
@@ -223,7 +224,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("TableVM-TableSelected Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Menu", "OK");
             }
         }
 
@@ -241,7 +242,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("TableVM-MakePickupOrder Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Pickup Menu", "OK");
             }
         }
 
@@ -270,7 +271,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("TableVM-AddNewTable Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Adding new Table", "OK");
             }
         }
 
@@ -323,7 +324,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("TableVM-TableActionButton Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Actions", "OK");
             }
         }
     }

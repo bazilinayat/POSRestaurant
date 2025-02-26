@@ -83,7 +83,7 @@
                     </Border>
                     <CollectionView Grid.Row="1" ItemsSource="{Binding OrderKOTItems}">
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:KOTItemModel">
+                            <DataTemplate x:DataType="models:KOTItemBillModel">
                                 <Grid ColumnDefinitions="*, *, *, *"
                                       RowDefinitions="*, Auto">
                                     <Label Grid.Column="0"
@@ -157,5 +157,17 @@
             </VerticalStackLayout>
             <Button Text="Print Bill" Command="{Binding PrintReceiptCommand}" />
         </VerticalStackLayout>
+
+        <BoxView IsVisible="{Binding IsLoading}"
+         HorizontalOptions="Fill"
+         VerticalOptions="Fill"
+         Color="{StaticResource LightWheat}"
+         Opacity="0.3"/>
+        <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                   HeightRequest="25" 
+                   WidthRequest="25" 
+                   HorizontalOptions="Center" 
+                   VerticalOptions="Center"
+                   Color="LightBlue"/>
     </Grid>
 </ContentPage>

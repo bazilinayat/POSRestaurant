@@ -140,7 +140,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("SalesReportVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Sales Report", "OK");
             }
         }
 
@@ -199,7 +199,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("SalesReportVM-Search Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Generating Sales Report", "OK");
             }
         }
 

@@ -107,7 +107,7 @@ namespace POSRestaurant.ViewModels
                     ExpenseItemTypes.Add(coowner);
                 }
 
-                if (ExpenseItemTypes.Count() == 1)
+                if (ExpenseItemTypes.Count() == 0)
                 {
                     await Shell.Current.DisplayAlert(
                         "Error",
@@ -142,7 +142,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("InventoryVM-InitializeAsync Error", ex);
-                throw;
             }
         }
 
@@ -189,7 +188,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("InventoryVM-Receive StaffChangedMessage Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error while Changing Staff Details", "OK");
             }
         }
 
@@ -219,7 +218,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("InventoryVM-Receive ExpenseTypeChangedMessage Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Adding new Rows", "OK");
             }
         }
 
@@ -275,7 +274,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("InventoryVM-SendAll Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Saving Inventory Data", "OK");
             }
         }
     }

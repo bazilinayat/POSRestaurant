@@ -339,7 +339,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrdersVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Orders Screen", "OK");
             }
         }
 
@@ -406,7 +406,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrdersVM-GetOrdersAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Getting Order Details", "OK");
             }
         }
 
@@ -457,7 +457,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrdersVM-NextPage Error", ex);
-                throw;
             }
         }
 
@@ -605,7 +604,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrdersVM-SelectOrderAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Selected Order", "OK");
             }
         }
         
@@ -719,7 +718,8 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrdersVM-PlaceKOTAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Placing Order KOT", "OK");
+                return false;
             }
         }
 
@@ -746,7 +746,8 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrdersVM-PlacePickupAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Placing Pickup Order", "OK");
+                return false;
             }
         }
 

@@ -171,7 +171,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("BillVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Bill Screen", "OK");
             }
         }
 
@@ -190,7 +190,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("BillVM-LoadCashiers Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Cashiers", "OK");
             }
         }
 
@@ -200,6 +200,7 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task Object</returns>
         private async Task GetOrderDetailsAsync()
         {
+            IsLoading = true;
             try
             {
                 // Get Order for Basic Details
@@ -288,8 +289,9 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("BillVM-GetOrderDetailsAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Bill Details", "OK");
             }
+            IsLoading = false;
         }
 
         /// <summary>
@@ -299,11 +301,14 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task PrintReceiptAsync()
         {
+            IsLoading = true;
+            await Task.Delay(10); // Give UI time to update
             try
             {
                 if (SelectedCashier == null)
                 {
                     await Shell.Current.DisplayAlert("Printing Error", "Assign a cashier to the order.", "Ok");
+                    IsLoading = false;
                     return;
                 }
 
@@ -357,12 +362,14 @@ namespace POSRestaurant.ViewModels
 
                 WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
 
-                await Microsoft.Maui.Controls.Application.Current.MainPage.Navigation.PopAsync();
+                IsLoading = false;
+                await Application.Current.MainPage.Navigation.PopAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError("BillVM-PrintReceiptAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Printing the Bill", "OK");
+                IsLoading = false;
             }
         }
     }

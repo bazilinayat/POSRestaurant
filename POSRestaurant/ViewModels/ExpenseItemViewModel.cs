@@ -46,9 +46,15 @@ namespace POSRestaurant.ViewModels
         [ObservableProperty]
         private ExpenseItemEditModel _expenseItem = new();
 
+        /// <summary>
+        /// To know if the expense item is weighted
+        /// </summary>
         [ObservableProperty]
         private bool isWeighted;
 
+        /// <summary>
+        /// To know if the expense item is counted
+        /// </summary>
         [ObservableProperty]
         private bool isQuantity = true;
 
@@ -109,7 +115,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ExpenseItemViewModel-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Expense Item Screen", "OK");
             }
         }
 
@@ -157,7 +163,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ExpenseItemViewModel-SelectExpenseItemAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Selected Expense Item", "OK");
             }
         }
 
@@ -204,7 +210,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ExpenseItemViewModel-SaveExpenseItemAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Saving Expense Item", "OK");
             }
         }
 
@@ -238,7 +244,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ExpenseItemViewModel-DeleteItemAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Deleting Expense Item", "OK");
             }
         }
 

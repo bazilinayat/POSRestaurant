@@ -454,7 +454,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Pickup Menu", "OK");
             }
         }
 
@@ -503,7 +503,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-DiscountClickAsync Error", ex);
-                throw;
             }
         }
 
@@ -522,7 +521,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-LoadDeliveryPersons Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Delivery Persons", "OK");
             }
         }
 
@@ -555,7 +554,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-SelectCategoryAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Selected Category", "OK");
             }
         }
 
@@ -670,7 +669,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-ReCalculateAmount Error", ex);
-                throw;
             }
         }
 
@@ -787,7 +785,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-PlaceOrderAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Placing Pickup Order", "OK");
             }
         }
 
@@ -883,7 +881,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-PrintReceipt Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Printing Receipt", "OK");
             }
         }
 
@@ -912,7 +910,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-SearchItems Error", ex);
-                throw;
             }
         }
 
@@ -968,7 +965,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-Recieve MenuItemChangedMessage Error", ex);
-                throw;
+                Shell.Current.DisplayAlert("Fault", "Error while Changing Menu Item", "OK");
             }
         }
 
@@ -1064,7 +1061,6 @@ namespace POSRestaurant.ViewModels
                     catch (Exception ex)
                     {
                         _logger.LogError("PickupVM-SelectedPaymentMode Set Error", ex);
-                        throw;
                     }
                 }
             }
@@ -1148,7 +1144,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("PickupVM-SaveOrderPaymentAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Saving Payment Details", "OK");
             }
         }
     }

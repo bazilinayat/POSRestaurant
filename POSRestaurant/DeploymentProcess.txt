@@ -48,4 +48,6 @@ $cert = (Get-ChildItem cert:\CurrentUser\My   | where-object { $_.Subject -like 
 $env:Path += ";C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin" 
 $env:Path += ";C:\Program Files (x86)\Windows Kits\10\App Certification Kit"
 
-msbuild /restore /t:Publish /p:TargetFramework=net8.0-windows10.0.19041.0 /p:RuntimeIdentifierOverride=win10-x64  /p:configuration=release /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=$cert
+msbuild /restore /t:Publish /p:TargetFramework=net8.0-windows10.0.19041.0 /p:RuntimeIdentifierOverride=win10-x64 /p:configuration=release /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=$cert 
+
+/p:Version=1.0.34.0 /p:ApplicationVersion=1.0.34.0 /p:PackageVersion=1.0.34.0

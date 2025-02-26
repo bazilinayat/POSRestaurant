@@ -121,7 +121,6 @@ namespace POSRestaurant.ViewModels
                 catch (Exception ex)
                 {
                     _logger.LogError("OrderCompleteVM-SelectedPaymentMode Set Error", ex);
-                    throw;
                 }
             }
         }
@@ -235,7 +234,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderCompleteVM-SaveOrderPaymentAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Saving Payment Details", "OK");
             }
         }
     }

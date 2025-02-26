@@ -248,7 +248,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("HomeVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Menu", "OK");
             }
         }
 
@@ -281,7 +281,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("HomeVM-SelectCategoryAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Selected Category", "OK");
             }
         }
 
@@ -317,7 +317,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("HomeVM-AddToCart Error", ex);
-                throw;
+                Shell.Current.DisplayAlert("Fault", "Error in Adding Item to Cart", "OK");
             }
         }
 
@@ -442,7 +442,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("HomeVM-PlaceOrderAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Placing Order", "OK");
             }
         }
 
@@ -471,7 +471,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("HomeVM-SearchItems Error", ex);
-                throw;
+                Shell.Current.DisplayAlert("Fault", "Error in Searching Items", "OK");
             }
         }
 
@@ -527,7 +527,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("HomeVM-Receive MenuItemChangedMessage Error", ex);
-                throw;
+                Shell.Current.DisplayAlert("Fault", "Error while Changing MenuItem", "OK");
             }
         }
 
@@ -576,7 +576,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("HomeVM-LoadWaiters Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Waiters", "OK");
             }
         }
     }

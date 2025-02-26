@@ -131,7 +131,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ManageMenuItemsVM-GetSetRequiredValues Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Manage Menu Screen", "OK");
             }
         }
 
@@ -166,7 +166,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ManageMenuItemsVM-SelectCategoryAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Selected Category", "OK");
             }
         }
 
@@ -211,7 +211,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ManageMenuItemsVM-EditMenuItemAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Selected Item", "OK");
             }
         }
 
@@ -270,7 +270,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ManageMenuItemsVM-SaveItem Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Saving Menu Item", "OK");
             }
         }
 
@@ -316,7 +316,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ManageMenuItemsVM-DeleteItem Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Deleting Menu Item", "OK");
             }
         }
 
@@ -339,7 +339,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ManageMenuItemsVM-AddNewItemMenuItem Error", ex);
-                throw;
             }
         }
     }

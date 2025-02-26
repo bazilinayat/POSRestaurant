@@ -170,7 +170,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("InventoryReportVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Inventory Report Screen", "OK");
             }
         }
 
@@ -213,7 +213,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("InventoryReportVM-MakeInventoryReport Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Generating Inventory Report", "OK");
             }
             
             //TotalItems = KOTItems.Count;
@@ -258,7 +258,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("InventoryReportVM-Receive ExpenseTypeChangedMessage Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error while Changing Expense Types", "OK");
             }
         }
     }

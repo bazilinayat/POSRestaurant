@@ -238,7 +238,6 @@ namespace POSRestaurant.ViewModels
                     catch (Exception ex)
                     {
                         _logger.LogError("OrderViewVM-SelectedDiscountType Set Error", ex);
-                        throw;
                     }
                 }
             }
@@ -321,7 +320,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderViewVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Order View Screen", "OK");
             }
         }
 
@@ -349,7 +348,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderViewVM-GetOrderDetailsAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Order Details", "OK");
             }
         }
 
@@ -382,7 +381,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderViewVM-GetOrderKOTsAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Getting Order KOTs", "OK");
             }
         }
 
@@ -415,7 +414,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderViewVM-SelectCategoryAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading the Selected Category", "OK");
             }
         }
 
@@ -553,7 +552,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderViewVM-DiscountClickAsync Error", ex);
-                throw;
             }
         }
 
@@ -582,7 +580,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderViewVM-SearchItems Error", ex);
-                throw;
             }
         }
 
@@ -680,7 +677,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderViewVM-SaveAndPrint Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Saving Updated Order", "OK");
             }
         }
 
@@ -740,7 +737,8 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("OrderViewVM-UpdateOrder Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Updating Order", "OK");
+                return 0;
             }
         }
 

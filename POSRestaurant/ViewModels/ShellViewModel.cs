@@ -65,7 +65,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ShellVM-Receive TaxChangedMessage Error", ex);
-                throw;
             }
         }
 
@@ -91,7 +90,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ShellVM-GetRestaurantName Error", ex);
-                throw;
             }
         }
 
@@ -111,7 +109,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ShellVM-NavigateToOrdersPage Error", ex);
-                throw;
             }
         }
 
@@ -131,7 +128,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ShellVM-NavigateToSettings Error", ex);
-                throw;
             }
         }
 
@@ -151,7 +147,6 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ShellVM-SupportCommand Error", ex);
-                throw;
             }
         }
     }

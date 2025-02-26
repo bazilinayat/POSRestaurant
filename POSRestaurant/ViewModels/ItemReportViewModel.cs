@@ -147,7 +147,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ItemReportVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Item Report", "OK");
             }
         }
 
@@ -211,7 +211,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("ItemReportVM-MakeItemReport Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Generating Item Report", "OK");
             }
         }
 

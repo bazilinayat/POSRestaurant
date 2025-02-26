@@ -17,12 +17,12 @@
         <CollectionView.ItemTemplate>
             <DataTemplate x:DataType="models:MenuCategoryModel">
                 <Border Padding="20"
-                    StrokeThickness="0">
+                    StrokeThickness="0.5">
                     <HorizontalStackLayout>
-                        <Image Source="{Binding Icon}" 
+                        <!--<Image Source="{Binding Icon}" 
                            HeightRequest="20" 
                            WidthRequest="20" 
-                           VerticalOptions="Center" />
+                           VerticalOptions="Center" />-->
                         <Label Text="{Binding Name}" 
                            VerticalOptions="Center" 
                            Padding="10">

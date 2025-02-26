@@ -27,7 +27,6 @@
 
             <!-- Right: Navigation Icons -->
             <HorizontalStackLayout Spacing="15" Grid.Column="2" HorizontalOptions="End">
-                <ImageButton Source="grid_alt_solid_24.png" Command="{Binding NavigateToOrdersPageCommand}" />
                 <ImageButton Source="setting.png" Command="{Binding NavigateToSettingsCommand}" />
                 <ImageButton Source="phone_solid_24.png" Command="{Binding SupportCommandCommand}"/>
             </HorizontalStackLayout>
@@ -38,22 +37,22 @@
         <ShellContent
     Title="TablesPage Page"
     ContentTemplate="{DataTemplate pages:TablePage}"
-    Icon="grid_alt_solid_24.png"
+    Icon="table.png"
     Route="TablePage" />
         <ShellContent
     Title="Orders"
     ContentTemplate="{DataTemplate pages:OrdersPage}"
-    Icon="list_ul_regular_24.png"
+    Icon="list.png"
     Route="OrdersPage" />
         <ShellContent
     Title="Manage Menu"
     ContentTemplate="{DataTemplate pages:ManageMenuItemPage}"
-    Icon="grid_alt_solid_24.png"
+    Icon="edit.png"
     Route="ManageMenuItemPage" />
         <ShellContent
     Title="Manage Staff"
     ContentTemplate="{DataTemplate pages:StaffManagementPage}"
-    Icon="grid_alt_solid_24.png"
+    Icon="user_regular_24.png"
     Route="StaffManagementPage" />
         <!--<ShellContent
     Title="Manage Expense Item"
@@ -63,23 +62,23 @@
         <ShellContent
     Title="Item Report"
     ContentTemplate="{DataTemplate pages:ItemReportPage}"
-    Icon="grid_alt_solid_24.png"
+    Icon="item_report.png"
     Route="ItemReportPage" />
         <ShellContent
     Title="Manage Inventory"
     ContentTemplate="{DataTemplate pages:InventoryPage}"
-    Icon="grid_alt_solid_24.png"
+    Icon="inventory.png"
     Route="InventoryPage" />
         <ShellContent
     Title="Inventory Report"
     ContentTemplate="{DataTemplate pages:InventoryReport}"
-    Icon="grid_alt_solid_24.png"
+    Icon="inventory_report.png"
     Route="InventoryReport" />
         <ShellContent
-Title="Sales Report"
-ContentTemplate="{DataTemplate pages:SalesReportPage}"
-Icon="grid_alt_solid_24.png"
-Route="SalesReportPage" />
+    Title="Sales Report"
+    ContentTemplate="{DataTemplate pages:SalesReportPage}"
+    Icon="sales_report.png"
+    Route="SalesReportPage" />
     </TabBar>
     
 

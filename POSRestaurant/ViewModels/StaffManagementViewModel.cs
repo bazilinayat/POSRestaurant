@@ -104,7 +104,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("StaffManagementVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Manage Staff Screen", "OK");
             }
         }
 
@@ -149,7 +149,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("StaffManagementVM-SelectStaffAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Selected Staff", "OK");
             }
         }
 
@@ -196,7 +196,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("StaffManagementVM-SaveStaffAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Saving Staff", "OK");
             }
         }
 
@@ -230,7 +230,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("StaffManagementVM-DeleteItemAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Deleting Staff", "OK");
             }
         }
 

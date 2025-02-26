@@ -163,7 +163,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("SettingsVM-InitializeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Settings Screen", "OK");
             }
         }
 
@@ -194,7 +194,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("SettingsVM-AddExpenseType Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Adding Expense Type", "OK");
             }
         }
 
@@ -238,7 +238,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("SettingsVM-SelectSettingAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Selected Menu", "OK");
             }
         }
 
@@ -259,7 +259,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("SettingsVM-LoadExpenseTypes Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Expense Types", "OK");
             }
         }
 
@@ -288,7 +288,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("SettingsVM-DeleteExpenseTypeAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Deleting Expense Type", "OK");
             }
         }
 
@@ -357,7 +357,7 @@ namespace POSRestaurant.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError("SettingsVM-SaveRestaurantInfoAsync Error", ex);
-                throw;
+                await Shell.Current.DisplayAlert("Fault", "Error in Saving Restaurant Info", "OK");
             }
         }
     }
