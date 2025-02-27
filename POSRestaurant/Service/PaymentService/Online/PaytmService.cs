@@ -22,7 +22,7 @@ namespace POSRestaurant.PaymentService.Online
         /// <summary>
         /// DI SettingService
         /// </summary>
-        private readonly SettingService _settingService;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// To initialize the paytm service
@@ -30,7 +30,7 @@ namespace POSRestaurant.PaymentService.Online
         /// </summary>
         /// <param name="logService">DIed LogService</param>
         /// <param name="settingService">DIed SettingsService</param>
-        public PaytmService(LogService logService, SettingService settingService)
+        public PaytmService(LogService logService, Setting settingService)
         {
             _logService = logService;
             _settingService = settingService;

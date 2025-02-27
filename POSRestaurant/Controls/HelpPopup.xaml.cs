@@ -11,13 +11,13 @@ public partial class HelpPopup : Popup
     /// <summary>
     /// DI SettingService
     /// </summary>
-    private readonly SettingService _settingService;
+    private readonly Setting _settingService;
 
     /// <summary>
     /// Constructor for the help popup
     /// </summary>
     /// <param name="settingService">DIed SettingsService</param>
-    public HelpPopup(SettingService settingService)
+    public HelpPopup(Setting settingService)
 	{
 		InitializeComponent();
         _settingService = settingService;

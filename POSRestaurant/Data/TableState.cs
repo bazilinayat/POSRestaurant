@@ -1,17 +1,21 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using POSRestaurant.Data;
+﻿using POSRestaurant.Models;
+using SQLite;
 
-namespace POSRestaurant.Models
+namespace POSRestaurant.Data
 {
-    public partial class TableModel : ObservableObject
+    /// <summary>
+    /// Table to store the table state of the application
+    /// This will be used if in case application is closed abruptly
+    /// </summary>
+    public class TableState
     {
         /// <summary>
-        /// Table Id
-        /// Primary key, autoincrement
+        /// Table id 
         /// </summary>
+        [PrimaryKey]
         public int Id { get; set; }
         /// <summary>
-        /// Table number, Id could be different, we can't say
+        /// Table number
         /// </summary>
         public int TableNo { get; set; }
         /// <summary>
@@ -22,10 +26,6 @@ namespace POSRestaurant.Models
         /// To represent status of the table
         /// </summary>
         public TableOrderStatus Status { get; set; } = TableOrderStatus.NoOrder;
-        /// <summary>
-        /// To set the colour of the table border as per the TableOrderStatus
-        /// </summary>
-        public Color BorderColour { get; set; }
         /// <summary>
         /// As per the Status, the action to be taken will change
         /// Should display different images for each action
@@ -42,7 +42,7 @@ namespace POSRestaurant.Models
         /// <summary>
         /// Will keep track for how long the table was running
         /// </summary>
-        public TimeOnly RunningTime { get; set; }
+        public DateTime RunningTime { get; set; }
         /// <summary>
         /// To represent the type of order this is
         /// </summary>
@@ -54,38 +54,30 @@ namespace POSRestaurant.Models
         /// <summary>
         /// Id of the staff waiter who handled the order and table
         /// </summary>
-        public StaffModel Waiter { get; set; }
-        /// <summary>
-        /// Watier id
-        /// </summary>
         public int WaiterId { get; set; }
-        /// <summary>
-        /// Id of the staff cashier who handled the order 
-        /// </summary>
-        public StaffModel Cashier { get; set; }
-        /// <summary>
-        /// Cashier id
-        /// </summary>
-        public int CashierId { get; set; }
         /// <summary>
         /// Order total, to be displayed on UI
         /// </summary>
         public decimal OrderTotal { get; set; }
         /// <summary>
-        /// To track the selected order
-        /// </summary>
-        [ObservableProperty]
-        private bool _isSelected;
-        /// <summary>
         /// To make object of TableModel
         /// </summary>
-        /// <param name="entity">Table Object</param>
+        /// <param name="entity">TableState Object</param>
         /// <returns>Returns a TableModel object</returns>
-        public static TableModel FromEntity(Table entity) =>
+        public static TableModel FromEntity(TableState entity) =>
             new()
             {
                 Id = entity.Id,
                 TableNo = entity.TableNo,
+                RunningOrderId = entity.RunningOrderId,
+                Status = entity.Status,
+                ActionButtonImageIcon = entity.ActionButtonImageIcon,
+                ActionButtonEnabled = entity.ActionButtonEnabled,
+                ActionButtonToolTipText = entity.ActionButtonToolTipText,
+                OrderType = entity.OrderType,
+                NumberOfPeople = entity.NumberOfPeople,
+                WaiterId = entity.WaiterId,
+                OrderTotal = entity.OrderTotal
             };
     }
 }

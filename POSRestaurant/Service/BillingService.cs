@@ -1,21 +1,16 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using POSRestaurant.ChangedMessages;
-using POSRestaurant.Data;
+﻿using CommunityToolkit.Mvvm.Input;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
-using POSRestaurant.Service;
 using POSRestaurant.Service.LoggerService;
 using POSRestaurant.Service.SettingService;
-using System.Collections.ObjectModel;
+using POSRestaurant.ViewModels;
 
-namespace POSRestaurant.ViewModels
+namespace POSRestaurant.Service
 {
     /// <summary>
-    /// ViewModel for Bill Page
+    /// The billing service to make the model and start printing
     /// </summary>
-    public partial class BillViewModel : ObservableObject
+    public class BillingService
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -28,41 +23,14 @@ namespace POSRestaurant.ViewModels
         private readonly LogService _logger;
 
         /// <summary>
-        /// To check if ViewModel is already initialized
-        /// </summary>
-        private bool _isInitialized;
-
-        /// <summary>
-        /// To indicate that the ViewModel data is loading
-        /// </summary>
-        [ObservableProperty]
-        private bool _isLoading;
-
-        /// <summary>
-        /// DIed SettingService
-        /// </summary>
-        private readonly Setting _settingService;
-
-        /// <summary>
         /// DIed ReceiptService
         /// </summary>
         private readonly ReceiptService _receiptService;
 
         /// <summary>
-        /// DIed SettingService
+        /// DIed Setting
         /// </summary>
-        private readonly TaxService _taxService;
-
-        /// <summary>
-        /// To use for order details
-        /// </summary>
-        public TableModel TableModel { get; set; }
-
-        /// <summary>
-        /// To store the order details
-        /// </summary>
-        [ObservableProperty]
-        private OrderModel _orderModel;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// To store the order items of selected order
@@ -70,47 +38,44 @@ namespace POSRestaurant.ViewModels
         public List<KOTModel> OrderKOTs { get; set; } = new();
 
         /// <summary>
-        /// Comma separated order kot ids for this order
+        /// To store the order details
         /// </summary>
-        [ObservableProperty]
-        private string _orderKOTIds;
+        public OrderModel OrderModel { get; set; }
+
+        /// <summary>
+        /// To use for order details
+        /// </summary>
+        public TableModel TableModel { get; set; }
 
         /// <summary>
         /// To store the order items of selected order
         /// </summary>
-        public ObservableCollection<KOTItemBillModel> OrderKOTItems { get; set; } = new();
+        public List<KOTItemBillModel> OrderKOTItems { get; set; } = new();
 
         /// <summary>
-        /// To display the discount amount on UI
+        /// Comma separated order kot ids for this order
         /// </summary>
-        [ObservableProperty]
-        private decimal _discountAmount;
+        private string OrderKOTIds;
 
         /// <summary>
         /// To decide to show or not the discount variables
         /// </summary>
-        [ObservableProperty]
-        private bool _showDiscountVariables;
+        private bool ShowDiscountVariables;
 
         /// <summary>
-        /// List of waiters to be assigned to the order
+        /// To know the discount amount
         /// </summary>
-        [ObservableProperty]
-        public StaffModel[] _cashiers;
+        private decimal DiscountAmount;
 
         /// <summary>
-        /// To manage the selected waiter for the order
-        /// </summary>
-        [ObservableProperty]
-        private StaffModel _selectedCashier;
-
-        /// <summary>
-        /// Constructor for the HomeViewModel
+        /// Constructor for the BillingService
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
+        /// <param name="logger">DI for LogService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public BillViewModel(DatabaseService databaseService, LogService logger, OrdersViewModel ordersViewModel, 
+        /// <param name="receiptService">DI for ReceiptService</param>
+        public BillingService(DatabaseService databaseService, LogService logger, OrdersViewModel ordersViewModel,
             Setting settingService, ReceiptService receiptService)
         {
             _logger = logger;
@@ -119,79 +84,22 @@ namespace POSRestaurant.ViewModels
             _receiptService = receiptService;
         }
 
-        /*
-        * Take RunningOrderId from TableModel
-        * Get Order Details
-        * Get KOT Details
-        * Get KOTItems
-        * From these above, we will get -
-        *   Order Number
-        *   Order DateTime
-        *   Order Type
-        *   Token No - {KOT Ids}
-        *   Items
-        * 
-        * Available in TableModel -
-        *   Number Of People
-        *   Waiter Details
-        *   
-        * Tax Details -
-        *   To be taken from Tax Service
-        *   
-        * To Calculate -
-        *   Total Quantity - Total Number of Items
-        *   Total Price - Sum of Amount of all KOTs
-        *   Round-Off
-        *   Grand Total
-        *   
-        */
-
         /// <summary>
-        /// Initialize the ViewModel
-        /// Fetch data and assign
+        /// To gather information from different sources 
+        /// Print the final bill for the customer
         /// </summary>
-        /// <returns>Returns a Task object</returns>
-        public async ValueTask InitializeAsync()
+        /// <param name="tableModel"></param>
+        /// <returns></returns>
+        public async Task PrintBill(TableModel tableModel)
         {
-            try
-            {
-                IsLoading = true;
+            OrderKOTs.Clear();
+            OrderKOTItems.Clear();
+            OrderKOTIds = "";
+            ShowDiscountVariables = false;
 
-                OrderKOTs.Clear();
-                OrderKOTItems.Clear();
-                OrderKOTIds = "";
-                ShowDiscountVariables = false;
+            TableModel = tableModel;
 
-                await GetOrderDetailsAsync();
-
-                await LoadCashiers();
-
-                IsLoading = false;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("BillVM-InitializeAsync Error", ex);
-                await Shell.Current.DisplayAlert("Fault", "Error in Loading Bill Screen", "OK");
-            }
-        }
-
-        /// <summary>
-        /// To call the database and load the list of waiters
-        /// </summary>
-        /// <returns>Returns a task object</returns>
-        private async Task LoadCashiers()
-        {
-            try
-            {
-                Cashiers = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Cashier))
-                                    .Select(StaffModel.FromEntity)
-                                    .ToArray();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("BillVM-LoadCashiers Error", ex);
-                await Shell.Current.DisplayAlert("Fault", "Error in Loading Cashiers", "OK");
-            }
+            await GetOrderDetailsAsync();
         }
 
         /// <summary>
@@ -200,7 +108,6 @@ namespace POSRestaurant.ViewModels
         /// <returns>Returns a Task Object</returns>
         private async Task GetOrderDetailsAsync()
         {
-            IsLoading = true;
             try
             {
                 // Get Order for Basic Details
@@ -285,33 +192,25 @@ namespace POSRestaurant.ViewModels
                         DiscountAmount = OrderModel.TotalAmount * OrderModel.DiscountPercentage / 100;
                     }
                 }
+
+                await PrintReceiptAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError("BillVM-GetOrderDetailsAsync Error", ex);
+                _logger.LogError("BillingService-GetOrderDetailsAsync Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "Error in Loading Bill Details", "OK");
             }
-            IsLoading = false;
         }
 
         /// <summary>
         /// Command to call when we want to print the receipt
         /// </summary>
         /// <returns>Returns a Task Object</returns>
-        [RelayCommand]
         private async Task PrintReceiptAsync()
         {
-            IsLoading = true;
             await Task.Delay(10); // Give UI time to update
             try
             {
-                if (SelectedCashier == null)
-                {
-                    await Shell.Current.DisplayAlert("Printing Error", "Assign a cashier to the order.", "Ok");
-                    IsLoading = false;
-                    return;
-                }
-
                 var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
 
                 var billModel = new BillModel
@@ -325,7 +224,7 @@ namespace POSRestaurant.ViewModels
 
                     TimeStamp = OrderModel.OrderDate,
                     TableNo = TableModel.TableNo,
-                    Cashier = SelectedCashier.Name,
+                    Cashier = TableModel.Cashier.Name,
                     BillNo = OrderModel.Id.ToString(),
                     TokenNos = OrderKOTIds,
                     WaiterAssigned = TableModel.Waiter.Name,
@@ -356,23 +255,11 @@ namespace POSRestaurant.ViewModels
 
                 var pdfData = await _receiptService.GenerateReceipt(billModel);
                 await _receiptService.PrintReceipt(pdfData);
-
-                TableModel.Status = Data.TableOrderStatus.Printed;
-                TableModel.OrderTotal = OrderModel.GrandTotal;
-
-                WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
-
-                IsLoading = false;
             }
             catch (Exception ex)
             {
                 _logger.LogError("BillVM-PrintReceiptAsync Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "Error in Printing the Bill", "OK");
-                IsLoading = false;
-            }
-            finally
-            {
-                await Application.Current.MainPage.Navigation.PopAsync();
             }
         }
     }

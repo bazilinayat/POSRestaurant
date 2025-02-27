@@ -18,7 +18,7 @@ namespace POSRestaurant
         /// Constructor for the class, just starting the application
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public App(IServiceProvider serviceProvider, DatabaseService databaseService, SettingService settingService)
+        public App(IServiceProvider serviceProvider, DatabaseService databaseService, Setting settingService)
         {
             try
             {

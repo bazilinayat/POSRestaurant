@@ -108,7 +108,7 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// DIed SettingService
         /// </summary>
-        private readonly SettingService _settingService;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// ObservableProperty for the SearchBox, to search for items
@@ -337,6 +337,11 @@ namespace POSRestaurant.ViewModels
         public long OrderId { get; set; }
 
         /// <summary>
+        /// The cashier who handled the order
+        /// </summary>
+        public StaffModel Cashier { get; set; }
+
+        /// <summary>
         /// To store the order items of selected order
         /// </summary>
         public ObservableCollection<KOTItemBillModel> OrderKOTItems { get; set; } = new();
@@ -363,7 +368,7 @@ namespace POSRestaurant.ViewModels
         /// <param name="settingService">DI for SettingService</param>
         public PickupViewModel(LogService logger, DatabaseService databaseService, 
             MenuService menuService, OrdersViewModel ordersViewModel, 
-            SettingService settingService, TaxService taxService,
+            Setting settingService, TaxService taxService,
             ReceiptService receiptService)
         {
             _logger = logger;
@@ -842,7 +847,7 @@ namespace POSRestaurant.ViewModels
 
                     TimeStamp = orderModel.OrderDate,
                     TableNo = orderModel.TableId,
-                    Cashier = "Cashier",
+                    Cashier = Cashier.Name,
                     BillNo = orderModel.Id.ToString(),
                     TokenNos = OrderKOTIds,
                     WaiterAssigned = "",

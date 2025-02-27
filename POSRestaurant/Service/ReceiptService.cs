@@ -418,7 +418,7 @@ namespace POSRestaurant.Service
         {
             // Temporary PDF file path
             string tempPdfFile = System.IO.Path.GetTempFileName();
-            //tempPdfFile = "E:\\ResumeBuilding\\bills.pdf";
+            tempPdfFile = "E:\\ResumeBuilding\\bills.pdf";
 
             try
             {
@@ -427,7 +427,7 @@ namespace POSRestaurant.Service
 
                 // Ghostscript conversion command
                 string tempImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "receipt.bmp");
-
+                tempImageFile = "E:\\ResumeBuilding\\receipt.bmp";
 
 
                 var processInfo = new ProcessStartInfo

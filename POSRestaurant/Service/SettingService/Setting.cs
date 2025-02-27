@@ -6,7 +6,7 @@ namespace POSRestaurant.Service.SettingService
     /// <summary>
     /// To Keep track of the settings, taken from some config
     /// </summary>
-    public class SettingService
+    public class Setting
     {
         /// <summary>
         /// To see if settings is initialized
@@ -22,7 +22,7 @@ namespace POSRestaurant.Service.SettingService
         /// <summary>
         /// Constructor to set settings object
         /// </summary>
-        public SettingService(LogService logger)
+        public Setting(LogService logger)
         {
             if (_isInitialized) return;
 

@@ -18,7 +18,7 @@ namespace POSRestaurant.DBO
         /// <summary>
         /// DIed SettingService
         /// </summary>
-        private readonly SettingService _settingService;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// Variable for getting initial data
@@ -65,7 +65,7 @@ namespace POSRestaurant.DBO
         /// Class constructor, to generate database and connection
         /// </summary>
         /// <param name="settingService">DI for SettingService</param>
-        public DatabaseService(SettingService settingService)
+        public DatabaseService(Setting settingService)
         {
             _settingService = settingService;
             _seedData = new SeedData(_settingService);
@@ -111,6 +111,8 @@ namespace POSRestaurant.DBO
             await _connection.CreateTableAsync<OrderPayment>();
             await _connection.CreateTableAsync<RestaurantInfo>();
             await _connection.CreateTableAsync<ExpenseTypes>();
+
+            await _connection.CreateTableAsync<TableState>();
 
             await SeedDataAsync();
         }

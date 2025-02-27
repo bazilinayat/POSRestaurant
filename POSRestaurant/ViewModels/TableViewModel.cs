@@ -8,6 +8,7 @@ using POSRestaurant.Data;
 using POSRestaurant.DBO;
 using POSRestaurant.Models;
 using POSRestaurant.Pages;
+using POSRestaurant.Service;
 using POSRestaurant.Service.LoggerService;
 using POSRestaurant.Service.SettingService;
 
@@ -16,7 +17,7 @@ namespace POSRestaurant.ViewModels
     /// <summary>
     /// ViewModel For Table Page
     /// </summary>
-    public partial class TableViewModel : ObservableObject, IRecipient<TableChangedMessage>
+    public partial class TableViewModel : ObservableObject, IRecipient<TableChangedMessage>, IRecipient<StaffChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -64,12 +65,29 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// DIed SettingService
         /// </summary>
-        private readonly SettingService _settingService;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// DIed PickupViewModel
         /// </summary>
         private readonly PickupViewModel _pickupViewModel;
+
+        /// <summary>
+        /// DIed BillingService
+        /// </summary>
+        private readonly BillingService _billingService;
+
+        /// <summary>
+        /// List of waiters to be assigned to the order
+        /// </summary>
+        [ObservableProperty]
+        public StaffModel[] _cashiers;
+
+        /// <summary>
+        /// To manage the selected waiter for the order
+        /// </summary>
+        [ObservableProperty]
+        private StaffModel _selectedCashier;
 
         /// <summary>
         /// Constructor for the TablesViewModel
@@ -81,8 +99,8 @@ namespace POSRestaurant.ViewModels
         /// <param name="settingService">DI for SettingService</param>
         public TableViewModel(IServiceProvider serviceProvider, LogService logger, 
             DatabaseService databaseService, HomeViewModel homeViewModel, 
-            OrdersViewModel ordersViewModel, SettingService settingService,
-            PickupViewModel pickupViewModel)
+            OrdersViewModel ordersViewModel, Setting settingService,
+            PickupViewModel pickupViewModel, BillingService billingService)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -91,9 +109,11 @@ namespace POSRestaurant.ViewModels
             _homeViewModel = homeViewModel;
             _settingService = settingService;
             _pickupViewModel = pickupViewModel;
+            _billingService = billingService;
 
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<TableChangedMessage>(this);
+            WeakReferenceMessenger.Default.Register<StaffChangedMessage>(this);
         }
 
         /// <summary>
@@ -122,6 +142,8 @@ namespace POSRestaurant.ViewModels
 
                 await GetTablesAsync();
 
+                await LoadCashiers();
+
                 IsLoading = false;
             }
             catch (Exception ex)
@@ -129,6 +151,25 @@ namespace POSRestaurant.ViewModels
                 _logger.LogError("TableVM-InitializeAsync Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "There was an error loading the screen", "OK");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// To call the database and load the list of waiters
+        /// </summary>
+        /// <returns>Returns a task object</returns>
+        private async Task LoadCashiers()
+        {
+            try
+            {
+                Cashiers = (await _databaseService.StaffOperaiotns.GetStaffBasedOnRole(StaffRole.Cashier))
+                                    .Select(StaffModel.FromEntity)
+                                    .ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-LoadCashiers Error", ex);
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Cashiers", "OK");
             }
         }
 
@@ -237,7 +278,13 @@ namespace POSRestaurant.ViewModels
         {
             try
             {
-                await Application.Current.MainPage.Navigation.PushAsync(new PickupPage(_pickupViewModel));
+                if (SelectedCashier == null)
+                {
+                    await Shell.Current.DisplayAlert("Error", "Select Cashier before Proceeding", "OK");
+                    return;
+                }
+
+                await Application.Current.MainPage.Navigation.PushAsync(new PickupPage(_pickupViewModel, SelectedCashier));
             }
             catch (Exception ex)
             {
@@ -294,6 +341,15 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
+        /// Refresh staff details when received
+        /// </summary>
+        /// <param name="message">StaffChangedMessage</param>
+        public async void Receive(StaffChangedMessage message)
+        {
+            await LoadCashiers();
+        }
+
+        /// <summary>
         /// When the action button for a table is clicked
         /// Action will depend on RunningOrderId and Status
         /// </summary>
@@ -311,8 +367,7 @@ namespace POSRestaurant.ViewModels
                         await Application.Current.MainPage.Navigation.PushAsync(new OrderViewPage(vovm, _ordersViewModel, tableModel));
                         break;
                     case TableOrderStatus.Confirmed:
-                        var billvm = _serviceProvider.GetRequiredService<BillViewModel>();
-                        await Application.Current.MainPage.Navigation.PushAsync(new BillPage(billvm, tableModel));
+                        await PrintFinalBill(tableModel);
                         break;
                     case TableOrderStatus.Printed: // To show popup, for marking as paid
                         var orderCompleteVM = _serviceProvider.GetRequiredService<OrderCompleteViewModel>();
@@ -325,6 +380,44 @@ namespace POSRestaurant.ViewModels
             {
                 _logger.LogError("TableVM-TableActionButton Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "Error in Loading Actions", "OK");
+            }
+        }
+
+        /// <summary>
+        /// To print the final bill of the selected table
+        /// </summary>
+        /// <param name="tableModel">TableModel for selected table</param>
+        /// <returns>Returns Task</returns>
+        private async Task PrintFinalBill(TableModel tableModel)
+        {
+            IsLoading = true;
+            await Task.Delay(10);
+            try
+            {
+                if (SelectedCashier == null)
+                {
+                    await Shell.Current.DisplayAlert("Printing Error", "Assign a cashier to the order.", "Ok");
+                    IsLoading = false;
+                    return;
+                }
+
+                tableModel.Cashier = SelectedCashier;
+                tableModel.CashierId = SelectedCashier.Id;
+
+                await _billingService.PrintBill(tableModel);
+
+                tableModel.Status = Data.TableOrderStatus.Printed;
+                tableModel.OrderTotal = _billingService.OrderModel.GrandTotal;
+
+                Receive(new TableChangedMessage(tableModel));
+
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-PrintFinalBill Error", ex);
+                await Shell.Current.DisplayAlert("Fault", "Error in Printing the Bill", "OK");
+                IsLoading = false;
             }
         }
     }

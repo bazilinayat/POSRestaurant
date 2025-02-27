@@ -140,7 +140,7 @@ namespace POSRestaurant.ViewModels
         {
             try
             {
-                var setting = _serviceProvider.GetRequiredService<SettingService>();
+                var setting = _serviceProvider.GetRequiredService<Setting>();
                 var helpPopup = new HelpPopup(setting);
                 await Shell.Current.ShowPopupAsync(helpPopup);
             }

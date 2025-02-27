@@ -45,7 +45,7 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// DIed SettingService
         /// </summary>
-        private readonly SettingService _settingService;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// To get and display all the categories
@@ -78,7 +78,7 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         /// <param name="databaseService">DIed DatabaseService</param>
         /// <param name="settingService">DIed SettingService</param>
-        public ManageMenuItemViewModel(LogService logger, DatabaseService databaseService, MenuService menuService, SettingService settingService)
+        public ManageMenuItemViewModel(LogService logger, DatabaseService databaseService, MenuService menuService, Setting settingService)
         {
             _logger = logger;
             _databaseService = databaseService;

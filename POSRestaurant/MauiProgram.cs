@@ -44,11 +44,12 @@ namespace POSRestaurant
             builder.Services.AddSingleton(new LogService(logFilePath));
 
             builder.Services.AddSingleton<DatabaseService>()
-                .AddSingleton<SettingService>()
+                .AddSingleton<Setting>()
                 .AddSingleton<TaxService>()
                 .AddSingleton<MenuService>()
                 .AddSingleton<PaytmService>()
                 .AddSingleton<ReceiptService>()
+                .AddSingleton<BillingService>()
 
                 .AddSingleton<MainPage>()
                 .AddSingleton<OrdersPage>()

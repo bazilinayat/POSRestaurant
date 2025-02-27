@@ -12,7 +12,7 @@ namespace POSRestaurant
         /// <summary>
         /// DI SettingService
         /// </summary>
-        private readonly SettingService _settingService;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// DI ServiceProvider to get objects
@@ -30,7 +30,7 @@ namespace POSRestaurant
         /// <param name="serviceProvider">DIed IServiceProvider</param>
         /// <param name="shellViewModel">DIed ShellViewModel</param>
         /// <param name="settingService">DIed SettingsService</param>
-        public AppShell(IServiceProvider serviceProvider, ShellViewModel shellViewModel, SettingService settingService)
+        public AppShell(IServiceProvider serviceProvider, ShellViewModel shellViewModel, Setting settingService)
         {
             InitializeComponent();
 

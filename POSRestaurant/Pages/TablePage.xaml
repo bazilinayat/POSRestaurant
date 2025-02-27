@@ -10,40 +10,53 @@
              Title="Table View"
              x:DataType="vm:TableViewModel">
 
-    <Grid RowDefinitions="Auto, Auto, *">
-        <Label Grid.Row="0" Text="Welcome my friend, Welcome!!" />
-        <Border Grid.Row="0" HorizontalOptions="End" WidthRequest="100" Stroke="Gray" StrokeShape="RoundRectangle 10" Margin="5">
-            <Label Text="+ Add Table" TextColor="Gray" HorizontalOptions="Center" VerticalOptions="Center"/>
-            <Border.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=AddNewTableCommand}"
-          CommandParameter="{Binding .}" />
-            </Border.GestureRecognizers>
-        </Border>
-        <Border Grid.Row="1" HorizontalOptions="Start" WidthRequest="100" Stroke="Orange" StrokeShape="RoundRectangle 10" Margin="5">
-            <Label Text="Pickup" TextColor="Orange" HorizontalOptions="Center" VerticalOptions="Center"/>
-            <Border.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=MakePickupOrderCommand}"
-                  CommandParameter="{Binding .}" />
-            </Border.GestureRecognizers>
-        </Border>
-        <HorizontalStackLayout Grid.Row="1" Spacing="20" HorizontalOptions="End" Margin="20">
-            <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Free Table to Put Order">
-                <Rectangle Fill="Maroon" HeightRequest="20" WidthRequest="20" />
-                <Label Text="Free" FontSize="12" VerticalOptions="Center" />
+    <Grid RowDefinitions="Auto, Auto, *" Margin="10">
+        <FlexLayout Grid.Row="0" JustifyContent="SpaceBetween" Margin="10">
+            <HorizontalStackLayout Spacing="10">
+                <Label Text="Cashier" FontSize="16" VerticalOptions="Center"/>
+                <Picker ItemsSource="{Binding Cashiers}" SelectedItem="{Binding SelectedCashier, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding Name}"
+                        BackgroundColor="LightYellow"
+                        WidthRequest="150"/>
             </HorizontalStackLayout>
-            <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Can Add New Items">
-                <Rectangle Fill="Yellow" HeightRequest="20" WidthRequest="20" />
-                <Label Text="Running" FontSize="12" VerticalOptions="Center" />
+            <Border WidthRequest="100" Stroke="Gray" StrokeShape="RoundRectangle 10">
+                <Label Text="+ Add Table" TextColor="Gray" HorizontalOptions="Center" VerticalOptions="Center"/>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=AddNewTableCommand}"
+                                          CommandParameter="{Binding .}" />
+                </Border.GestureRecognizers>
+            </Border>
+        </FlexLayout>
+
+        <FlexLayout Grid.Row="1" JustifyContent="SpaceBetween" Margin="10">
+            <Border WidthRequest="100" Stroke="Orange" StrokeShape="RoundRectangle 10" HeightRequest="50">
+                <Label Text="Pickup" TextColor="Orange" HorizontalOptions="Center" VerticalOptions="Center"/>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=MakePickupOrderCommand}"
+                                          CommandParameter="{Binding .}" />
+                </Border.GestureRecognizers>
+            </Border>
+
+            <HorizontalStackLayout Spacing="20">
+                <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Free Table to Put Order">
+                    <Rectangle Fill="Maroon" HeightRequest="20" WidthRequest="20" />
+                    <Label Text="Free" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Can Add New Items">
+                    <Rectangle Fill="Yellow" HeightRequest="20" WidthRequest="20" />
+                    <Label Text="Running" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Order Confirmed, Ready for Printing">
+                    <Rectangle Fill="Orange" HeightRequest="20" WidthRequest="20" />
+                    <Label Text="Confirmed" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Printed, Ready for Saving">
+                    <Rectangle Fill="Green" HeightRequest="20" WidthRequest="20" />
+                    <Label Text="Printed" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
             </HorizontalStackLayout>
-            <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Order Confirmed, Ready for Printing">
-                <Rectangle Fill="Orange" HeightRequest="20" WidthRequest="20" />
-                <Label Text="Confirmed" FontSize="12" VerticalOptions="Center" />
-            </HorizontalStackLayout>
-            <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Printed, Ready for Saving">
-                <Rectangle Fill="Green" HeightRequest="20" WidthRequest="20" />
-                <Label Text="Printed" FontSize="12" VerticalOptions="Center" />
-            </HorizontalStackLayout>
-        </HorizontalStackLayout>
+        </FlexLayout>
+        
         <CollectionView Grid.Row="2" ItemsSource="{Binding Tables}">
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="5"
@@ -87,5 +100,19 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
+        <BoxView IsVisible="{Binding IsLoading}"
+         HorizontalOptions="Fill"
+         VerticalOptions="Fill"
+         Color="{StaticResource LightWheat}"
+         Opacity="0.3"
+         AbsoluteLayout.LayoutBounds="0,0,1,1"
+         AbsoluteLayout.LayoutFlags="All"/>
+        <ActivityIndicator IsRunning="{Binding IsLoading}" 
+           HeightRequest="50" 
+           WidthRequest="50" 
+           HorizontalOptions="Center" 
+           VerticalOptions="Center"
+           Color="LightBlue"/>
     </Grid>
 </ContentPage>

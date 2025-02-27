@@ -20,10 +20,13 @@ public partial class PickupPage : ContentPage
     /// Initialize MainPage
     /// </summary>
     /// <param name="homeViewModel">HomeViewModel for the content page and handle actions</param>
-    public PickupPage(PickupViewModel pickupViewModel)
+    public PickupPage(PickupViewModel pickupViewModel, StaffModel cashier)
     {
         InitializeComponent();
+
         _pickupViewModel = pickupViewModel;
+        _pickupViewModel.Cashier = cashier;
+
         BindingContext = _pickupViewModel;
 
         Initialize();

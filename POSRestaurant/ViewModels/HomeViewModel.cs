@@ -110,7 +110,7 @@ namespace POSRestaurant.ViewModels
         /// <summary>
         /// DIed SettingService
         /// </summary>
-        private readonly SettingService _settingService;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// ObservableProperty for the SearchBox, to search for items
@@ -174,7 +174,7 @@ namespace POSRestaurant.ViewModels
         /// <param name="databaseService">DI for DatabaseService</param>
         /// <param name="ordersViewModel">DI for OrdersViewModel</param>
         /// <param name="settingService">DI for SettingService</param>
-        public HomeViewModel(LogService logger, DatabaseService databaseService, MenuService menuService, OrdersViewModel ordersViewModel, SettingService settingService)
+        public HomeViewModel(LogService logger, DatabaseService databaseService, MenuService menuService, OrdersViewModel ordersViewModel, Setting settingService)
         {
             _logger = logger;
             _databaseService = databaseService;

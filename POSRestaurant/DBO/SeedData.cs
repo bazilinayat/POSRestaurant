@@ -13,13 +13,13 @@ namespace POSRestaurant.DBO
         /// <summary>
         /// DIed SettingService
         /// </summary>
-        private readonly SettingService _settingService;
+        private readonly Setting _settingService;
 
         /// <summary>
         /// Constructor for the SeedingData
         /// </summary>
         /// <param name="settingService">DI for SettingService</param>
-        public SeedData(SettingService settingService)
+        public SeedData(Setting settingService)
         {
             _settingService = settingService;
         }
