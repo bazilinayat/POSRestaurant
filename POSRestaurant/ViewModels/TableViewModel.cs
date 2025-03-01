@@ -11,13 +11,14 @@ using POSRestaurant.Pages;
 using POSRestaurant.Service;
 using POSRestaurant.Service.LoggerService;
 using POSRestaurant.Service.SettingService;
+using Windows.Devices.PointOfService;
 
 namespace POSRestaurant.ViewModels
 {
     /// <summary>
     /// ViewModel For Table Page
     /// </summary>
-    public partial class TableViewModel : ObservableObject, IRecipient<TableChangedMessage>, IRecipient<StaffChangedMessage>
+    public partial class TableViewModel : ObservableObject, IRecipient<TableChangedMessage>, IRecipient<StaffChangedMessage>, IRecipient<TableStateChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -114,6 +115,7 @@ namespace POSRestaurant.ViewModels
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<TableChangedMessage>(this);
             WeakReferenceMessenger.Default.Register<StaffChangedMessage>(this);
+            WeakReferenceMessenger.Default.Register<TableStateChangedMessage>(this);
         }
 
         /// <summary>
@@ -141,6 +143,8 @@ namespace POSRestaurant.ViewModels
                 IsLoading = true;
 
                 await GetTablesAsync();
+
+                await GetTableStateAsync();
 
                 await LoadCashiers();
 
@@ -186,6 +190,33 @@ namespace POSRestaurant.ViewModels
                                     .ToArray();
 
                 TransformTables(tables);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-GetTablesAsync Error", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// To get the latest table state
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        public async ValueTask GetTableStateAsync()
+        {
+            try
+            {
+                var tables = (await _databaseService.TableOperations.GetTableState())
+                                    .Select(TableState.FromEntity)
+                                    .ToArray();
+
+                if (tables.Count() > 0)
+                {
+                    foreach(var table in tables)
+                    {
+                        Receive(new TableChangedMessage(table));
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -341,6 +372,30 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
+        /// To receive the table state change message coming from different places
+        /// To maintain the state
+        /// </summary>
+        /// <param name="tableStateChangedMessage">Table details changed</param>
+        public async void Receive(TableStateChangedMessage tableStateChangedMessage)
+        {
+            var tableModel = tableStateChangedMessage.Value;
+            switch (tableModel.Status)
+            {
+                case TableOrderStatus.Running: // To update the endtime and save
+                case TableOrderStatus.Confirmed: // To update the endtime and save
+                    tableModel.EndTime = DateTime.Now;
+                    await _databaseService.TableOperations.SaveTableStateAsync(tableModel);
+                    break;
+
+                case TableOrderStatus.NoOrder:
+                    await _databaseService.TableOperations.DeleteTableStateAsync(tableModel);
+                    break;
+            }
+
+            TransformTables(Tables);
+        }
+
+        /// <summary>
         /// Refresh staff details when received
         /// </summary>
         /// <param name="message">StaffChangedMessage</param>
@@ -366,9 +421,12 @@ namespace POSRestaurant.ViewModels
                         var vovm = _serviceProvider.GetRequiredService<OrderViewViewModel>();
                         await Application.Current.MainPage.Navigation.PushAsync(new OrderViewPage(vovm, _ordersViewModel, tableModel));
                         break;
+
                     case TableOrderStatus.Confirmed:
                         await PrintFinalBill(tableModel);
+                        await _databaseService.TableOperations.SaveTableStateAsync(tableModel);
                         break;
+
                     case TableOrderStatus.Printed: // To show popup, for marking as paid
                         var orderCompleteVM = _serviceProvider.GetRequiredService<OrderCompleteViewModel>();
                         var completeOrderPopup = new OrderCompletePopup(orderCompleteVM, tableModel);
@@ -410,6 +468,7 @@ namespace POSRestaurant.ViewModels
                 tableModel.OrderTotal = _billingService.OrderModel.GrandTotal;
 
                 Receive(new TableChangedMessage(tableModel));
+                Receive(new TableStateChangedMessage(tableModel));
 
                 IsLoading = false;
             }

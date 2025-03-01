@@ -19,6 +19,11 @@ public partial class OrderCompletePopup : Popup
     private readonly OrderCompleteViewModel _orderCompleteViewModel;
 
     /// <summary>
+    /// To know if the payment details were saved or not
+    /// </summary>
+    public bool IsSaved { get; set; }
+
+    /// <summary>
     /// Constructor for the page for completing order
     /// </summary>
     /// <param name="orderCompleteViewModel">DIed OrderCompleteViewModel</param>

@@ -44,6 +44,16 @@ namespace POSRestaurant.Models
         /// </summary>
         public TimeOnly RunningTime { get; set; }
         /// <summary>
+        /// Will keep track for how long the table was running
+        /// Starting of the table
+        /// </summary>
+        public DateTime StartTime { get; set; }
+        /// <summary>
+        /// Will keep track for how long the table was running
+        /// Ending of the table
+        /// </summary>
+        public DateTime EndTime { get; set; }
+        /// <summary>
         /// To represent the type of order this is
         /// </summary>
         public OrderTypes OrderType { get; set; }
@@ -86,6 +96,29 @@ namespace POSRestaurant.Models
             {
                 Id = entity.Id,
                 TableNo = entity.TableNo,
+            };
+
+        /// <summary>
+        /// To make object of TableState
+        /// </summary>
+        /// <param name="entity">TableModel Object</param>
+        /// <returns>Returns a TableState object</returns>
+        public static TableState FromEntity(TableModel entity) =>
+            new()
+            {
+                Id = entity.Id,
+                TableNo = entity.TableNo,
+                RunningOrderId = entity.RunningOrderId,
+                Status = entity.Status,
+                StartTime = entity.StartTime,
+                EndTime = entity.EndTime,
+                ActionButtonImageIcon = entity.ActionButtonImageIcon,
+                ActionButtonEnabled = entity.ActionButtonEnabled,
+                ActionButtonToolTipText = entity.ActionButtonToolTipText,
+                OrderType = entity.OrderType,
+                NumberOfPeople = entity.NumberOfPeople,
+                WaiterId = entity.WaiterId,
+                OrderTotal = entity.OrderTotal
             };
     }
 }

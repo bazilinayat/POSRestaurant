@@ -1,4 +1,5 @@
 ﻿using POSRestaurant.Data;
+using POSRestaurant.Models;
 using SQLite;
 
 namespace POSRestaurant.DBO
@@ -55,6 +56,77 @@ namespace POSRestaurant.DBO
 
                 await _connection.InsertAsync(table);
 
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+
+            return errorMessage;
+        }
+
+        /// <summary>
+        /// To get the table state for the application in case of closing and all
+        /// </summary>
+        /// <returns>Array of TableState</returns>
+        public async Task<TableState[]> GetTableState() =>
+            await _connection.Table<TableState>().ToArrayAsync();
+
+        /// <summary>
+        /// To save the table state in db
+        /// </summary>
+        /// <param name="tableModel">TableModel to state</param>
+        /// <returns>Returns null in case of success, else error message</returns>
+        public async Task<string?> SaveTableStateAsync(TableModel tableModel)
+        {
+            string? errorMessage = null;
+
+            try
+            {
+                var tableState = TableModel.FromEntity(tableModel);
+
+                var tableDetail = await _connection.Table<TableState>().Where(o => o.Id == tableState.Id).FirstOrDefaultAsync();
+
+                if (tableDetail == null)
+                {
+                    if (await _connection.InsertAsync(tableState) > 0)
+                        return null;
+
+                    errorMessage = "Error in Saving Table State";
+                }
+                else
+                {
+                    if (await _connection.UpdateAsync(tableState) > 0)
+                        return null;
+
+                    errorMessage = "Error in Updating Table State";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+
+            return errorMessage;
+        }
+
+        /// <summary>
+        /// To delete the table state in db
+        /// </summary>
+        /// <param name="tableModel">TableModel to state</param>
+        /// <returns>Returns null in case of success, else error message</returns>
+        public async Task<string?> DeleteTableStateAsync(TableModel tableModel)
+        {
+            string? errorMessage = null;
+
+            try
+            {
+                var tableState = TableModel.FromEntity(tableModel);
+
+                if (await _connection.DeleteAsync(tableState) > 0)
+                    return null;
+
+                errorMessage = "Error in Deleting Table State";
             }
             catch (Exception ex)
             {

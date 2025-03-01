@@ -352,13 +352,7 @@ namespace POSRestaurant.Service
                     .SetFontSize(8));
 
 
-                string qrContent = $"{{" +
-                $"\"receipt\":\"{data.BillNo}\"," +
-                $"\"date\":\"{data.TimeStamp:yyyy-MM-dd HH:mm}\"," +
-                $"\"total\":{data.GrandTotal:F2}," +
-                $"\"store\":\"{data.RestrauntName}\"," +
-                $"\"items\":{data.Items.Count}" +
-                $"}}";
+                string qrContent = $"upi://pay?pa=paytm.s191jue@pty&pn=Gokul Pav Bhaji&am={data.GrandTotal}&cu=INR&tn=Bill #{data.BillNo}";
                 BarcodeQRCode qrCode = new BarcodeQRCode(qrContent);
 
                 // Create the QR code image

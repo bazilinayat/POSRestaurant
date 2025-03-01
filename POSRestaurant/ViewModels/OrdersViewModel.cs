@@ -678,8 +678,6 @@ namespace POSRestaurant.ViewModels
                         await Shell.Current.DisplayAlert("Error", errorMessage.ToString(), "Ok");
                         return false;
                     }
-
-                    await GetOrdersAsync();
                 }
                 else
                 {
@@ -710,7 +708,12 @@ namespace POSRestaurant.ViewModels
 
                     tableModel.RunningOrderId = orderModel.Id;
                     tableModel.Status = TableOrderStatus.Running;
+
+                    // To maintain state
+                    tableModel.StartTime = DateTime.Now;
                 }
+
+                WeakReferenceMessenger.Default.Send(TableStateChangedMessage.From(tableModel));
 
                 await Shell.Current.DisplayAlert("Success", "Order Placeed Successfully", "Ok");
                 return true;

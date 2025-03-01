@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Maui.Controls;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
@@ -669,7 +670,9 @@ namespace POSRestaurant.ViewModels
                 }
 
                 TableModel.Status = TableOrderStatus.Confirmed;
+
                 // Push for change in table info
+                WeakReferenceMessenger.Default.Send(TableStateChangedMessage.From(TableModel));
                 WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
 
                 await Application.Current.MainPage.Navigation.PopAsync();

@@ -41,8 +41,14 @@ namespace POSRestaurant.Data
         public string ActionButtonToolTipText { get; set; }
         /// <summary>
         /// Will keep track for how long the table was running
+        /// Starting of the table
         /// </summary>
-        public DateTime RunningTime { get; set; }
+        public DateTime StartTime { get; set; }
+        /// <summary>
+        /// Will keep track for how long the table was running
+        /// Ending of the table
+        /// </summary>
+        public DateTime EndTime { get; set; }
         /// <summary>
         /// To represent the type of order this is
         /// </summary>
@@ -71,6 +77,8 @@ namespace POSRestaurant.Data
                 TableNo = entity.TableNo,
                 RunningOrderId = entity.RunningOrderId,
                 Status = entity.Status,
+                StartTime = entity.StartTime,
+                EndTime = entity.EndTime,
                 ActionButtonImageIcon = entity.ActionButtonImageIcon,
                 ActionButtonEnabled = entity.ActionButtonEnabled,
                 ActionButtonToolTipText = entity.ActionButtonToolTipText,
