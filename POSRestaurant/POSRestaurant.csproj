@@ -110,6 +110,12 @@
 	  <Compile Update="Pages\PickupPage.xaml.cs">
 	    <DependentUpon>PickupPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Pages\UserManagementPage.xaml.cs">
+	    <DependentUpon>UserManagementPage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Pages\RoleManagementPage.xaml.cs">
+	    <DependentUpon>RoleManagementPage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -176,10 +182,16 @@
 	  <MauiXaml Update="Pages\OrderViewPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Pages\UserManagementPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\SalesReportPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\SettingsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\RoleManagementPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\StaffManagementPage.xaml">

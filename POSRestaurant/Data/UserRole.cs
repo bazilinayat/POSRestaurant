@@ -3,24 +3,24 @@
 namespace POSRestaurant.Data
 {
     /// <summary>
-    /// MenuCategory Entity for SQLite
+    /// Role to be assigned to each user
     /// </summary>
-    public class MenuCategory
+    public class UserRole
     {
         /// <summary>
-        /// Menu Category Id
-        /// Primary Key, autoincremented
+        /// Id of the role
         /// </summary>
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         /// <summary>
-        /// Menu Category Name
+        /// Name of the role
         /// </summary>
         [Unique]
         public string Name { get; set; }
         /// <summary>
-        /// Menu Category Icon Name
+        /// Different permissions assigned to this role
         /// </summary>
-        public string Icon { get; set; }
+        [Ignore]
+        public Permission[] Permissions { get; set; }
     }
 }

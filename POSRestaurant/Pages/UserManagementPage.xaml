@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="POSRestaurant.Pages.UserManagementPage"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
+             Title="StaffManagementPage"
+             x:DataType="vm:UserManagementViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label" x:Key="th">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="Black" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+            <Style TargetType="Label" x:Key="td">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid ColumnDefinitions=".50*, .50*"
+          Margin="10">
+        <Grid Grid.Column="0"
+              RowDefinitions="Auto, Auto, *"
+              RowSpacing="15">
+            <Label Grid.Row="0" 
+                   FontAttributes="Bold"
+                   FontSize="22"
+                   Text="Users"/>
+            <Button Grid.Row="1" Text="Add New Role" HeightRequest="40"
+                    HorizontalOptions="Start"
+                    Command="{Binding AddNewUserCommand}"/>
+
+            <Grid Grid.Row="2" Margin="5" Padding="0">
+                <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid ColumnDefinitions="*, *" BackgroundColor="Gray">
+                            <Label Grid.Column="0" Text="User Name"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource th}"/>
+                            <Label Padding="10"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"
+                                   Style="{StaticResource th}"/>
+                        </Grid>
+                    </Border>
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding Users}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:UserModel">
+                                <Grid ColumnDefinitions="*, *"
+                                          RowDefinitions="Auto, *">
+                                    <Grid.Triggers>
+                                        <DataTrigger TargetType="Grid" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource LightWheat}"/>
+                                        </DataTrigger>
+                                    </Grid.Triggers>
+                                    <Label Grid.Column="0" Text="{Binding Username}"
+                                               VerticalOptions="Center"
+                                               HorizontalOptions="Center"
+                                               Style="{StaticResource td}"/>
+                                    <Button Grid.Column="3" Text="View"
+                                                BackgroundColor="DarkOliveGreen"
+                                                Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:UserManagementViewModel}}, Path=SelectUserCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                    <BoxView Grid.Row="1"
+                                                 Grid.ColumnSpan="6"
+                                                 HeightRequest="1"
+                                                 Color="LightGray"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Border Grid.Column="1" Stroke="Black" Margin="5" StrokeThickness="1">
+            <VerticalStackLayout Padding="20">
+                <Label Text="User Details" FontSize="18" FontAttributes="Bold" Margin="0,0,0,15"/>
+
+                <Label Text="User Name" FontAttributes="Bold"/>
+                <Entry Text="{Binding UserToEdit.Username}" Placeholder="Enter role name" Margin="0,0,0,20"/>
+
+                <Label Text="Password" FontAttributes="Bold"/>
+                <Entry Text="{Binding UserToEdit.Password}" Placeholder="Enter role name" Margin="0,0,0,20"/>
+
+                <!-- Roles table -->
+                <Label Text="Roles" FontAttributes="Bold"/>
+                <Border StrokeThickness="1" StrokeShape="RoundRectangle 5,5,5,5">
+                    <Grid RowDefinitions="Auto, *">
+                        <!-- Header -->
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="10">
+                            <Label Text="Role Name" Grid.Column="0" FontAttributes="Bold"/>
+                            <Label Text="Selected" Grid.Column="1" FontAttributes="Bold" HorizontalOptions="Center"/>
+                        </Grid>
+
+                        <!-- Content -->
+                        <CollectionView Grid.Row="1" ItemsSource="{Binding Roles}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:UserRoleModel">
+                                    <Grid ColumnDefinitions="*, Auto" Padding="10">
+                                        <Label Text="{Binding Name}" Grid.Column="0" VerticalOptions="Center"/>
+                                        <RadioButton IsChecked="{Binding IsSelected}" Grid.Column="1" 
+                                                 GroupName="UserRoles" 
+                                                 CheckedChanged="OnRoleSelectionChanged"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Grid>
+                </Border>
+
+                <Grid Margin="10" ColumnDefinitions="*, *, *">
+                    <Button Grid.Column="0"
+                            Text="Cancel"
+                            BackgroundColor="Red"
+                            HorizontalOptions="Start" 
+                            Command="{Binding CancelCommand}"/>
+                    <Button Grid.Column="1"
+                            Text="Delete"
+                            BackgroundColor="Red"
+                            HorizontalOptions="Center"
+                            IsEnabled="{Binding CanBeDeleted}"
+                            Command="{Binding DeleteItemCommand}"/>
+                    <Button Grid.Column="2"
+                            BackgroundColor="DarkOliveGreen"
+                            Text="Save"
+                            HorizontalOptions="End"
+                            Command="{Binding SaveUserCommand}"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <BoxView IsVisible="{Binding IsLoading}"
+        HorizontalOptions="Fill"
+        VerticalOptions="Fill"
+        Color="{StaticResource LightWheat}"
+        Opacity="0.3"/>
+        <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                  HeightRequest="25" 
+                  WidthRequest="25" 
+                  HorizontalOptions="Center" 
+                  VerticalOptions="Center"
+                  Color="LightBlue"/>
+    </Grid>
+</ContentPage>

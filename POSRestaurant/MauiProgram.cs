@@ -64,6 +64,8 @@ namespace POSRestaurant
                 .AddSingleton<SettingsPage>()
                 .AddSingleton<PickupPage>()
                 .AddSingleton<SalesReportPage>()
+                .AddSingleton<RoleManagementPage>()
+                .AddSingleton<UserManagementPage>()
                 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<HomeViewModel>()
@@ -79,7 +81,9 @@ namespace POSRestaurant
                 .AddSingleton<InventoryReportViewModel>()
                 .AddSingleton<SettingsViewModel>()
                 .AddSingleton<PickupViewModel>()
-                .AddSingleton<SalesReportViewModel>();
+                .AddSingleton<SalesReportViewModel>()
+                .AddSingleton<RoleManagementViewModel>()
+                .AddSingleton<UserManagementViewModel>();
 
             // Force initialize Windows App Runtime components
             if (OperatingSystem.IsWindows())

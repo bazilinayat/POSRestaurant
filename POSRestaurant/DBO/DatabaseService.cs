@@ -60,6 +60,11 @@ namespace POSRestaurant.DBO
         /// </summary>
         public SettingsOperation SettingsOperation;
 
+        /// <summary>
+        /// To handle calls to users related operations in the db
+        /// </summary>
+        public UserOperations UserOperation;
+
 
         /// <summary>
         /// Class constructor, to generate database and connection
@@ -86,6 +91,7 @@ namespace POSRestaurant.DBO
             InventoryOperations = new InventoryOperations(_connection);
             DiscountOperations = new DiscountOperations(_connection);
             SettingsOperation = new SettingsOperation(_connection);
+            UserOperation = new UserOperations(_connection);
         }
 
         /// <summary>
@@ -113,6 +119,12 @@ namespace POSRestaurant.DBO
             await _connection.CreateTableAsync<ExpenseTypes>();
 
             await _connection.CreateTableAsync<TableState>();
+
+            await _connection.CreateTableAsync<Permission>();
+            await _connection.CreateTableAsync<UserRole>();
+            await _connection.CreateTableAsync<RolePermission>();
+            await _connection.CreateTableAsync<User>();
+            await _connection.CreateTableAsync<AssignedUserRole>();
 
             await SeedDataAsync();
         }
