@@ -40,6 +40,9 @@ namespace POSRestaurant
             _shellViewModel = shellViewModel;
             BindingContext = shellViewModel;
 
+            Routing.RegisterRoute("login", typeof(Pages.LoginPage));
+            Routing.RegisterRoute("main", typeof(Pages.TablePage));
+
             Routing.RegisterRoute("Setting", typeof(ManageMenuItemPage));
         }
     }

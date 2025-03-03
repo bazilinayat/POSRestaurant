@@ -29,68 +29,95 @@
             <HorizontalStackLayout Spacing="15" Grid.Column="2" HorizontalOptions="End">
                 <ImageButton Source="setting.png" Command="{Binding NavigateToSettingsCommand}" />
                 <ImageButton Source="phone_solid_24.png" Command="{Binding SupportCommandCommand}"/>
+                <ImageButton Source="logout.png" Command="{Binding LogoutFromAppCommand}"/>
             </HorizontalStackLayout>
         </Grid>
     </Shell.TitleView>
     
-    <TabBar>
-        <ShellContent
-    Title="TablesPage Page"
-    ContentTemplate="{DataTemplate pages:TablePage}"
-    Icon="table.png"
-    Route="TablePage" />
-        <ShellContent
-    Title="Orders"
-    ContentTemplate="{DataTemplate pages:OrdersPage}"
-    Icon="list.png"
-    Route="OrdersPage" />
-        <ShellContent
-    Title="Manage Menu"
-    ContentTemplate="{DataTemplate pages:ManageMenuItemPage}"
-    Icon="edit.png"
-    Route="ManageMenuItemPage" />
-        <ShellContent
-    Title="Manage Staff"
-    ContentTemplate="{DataTemplate pages:StaffManagementPage}"
-    Icon="user_regular_24.png"
-    Route="StaffManagementPage" />
-        <!--<ShellContent
-    Title="Manage Expense Item"
-    ContentTemplate="{DataTemplate pages:ExpenseItemManagementPage}"
-    Icon="grid_alt_solid_24.png"
-    Route="ExpenseItemManagementPage" />-->
-        <ShellContent
-    Title="Item Report"
-    ContentTemplate="{DataTemplate pages:ItemReportPage}"
-    Icon="item_report.png"
-    Route="ItemReportPage" />
-        <ShellContent
-    Title="Manage Inventory"
-    ContentTemplate="{DataTemplate pages:InventoryPage}"
-    Icon="inventory.png"
-    Route="InventoryPage" />
-        <ShellContent
-    Title="Inventory Report"
-    ContentTemplate="{DataTemplate pages:InventoryReport}"
-    Icon="inventory_report.png"
-    Route="InventoryReport" />
-        <ShellContent
-    Title="Sales Report"
-    ContentTemplate="{DataTemplate pages:SalesReportPage}"
-    Icon="sales_report.png"
-    Route="SalesReportPage" />
-        <ShellContent
-    Title="Role Management"
-    ContentTemplate="{DataTemplate pages:RoleManagementPage}"
-    Icon="grid_alt_solid_24.png"
-    Route="RoleManagementPage" />
-        <ShellContent
-    Title="User Management"
-    ContentTemplate="{DataTemplate pages:UserManagementPage}"
-    Icon="grid_alt_solid_24.png"
-    Route="UserManagementPage" />
+    <TabBar Route="main">
+        <Tab Title="Table Page" Icon="table.png" Route="TablePage">
+            <ShellContent ContentTemplate="{DataTemplate pages:TablePage}"/>
+        </Tab>
+        <Tab Title="Orders Page" Icon="list.png" Route="OrdersPage">
+            <ShellContent ContentTemplate="{DataTemplate pages:OrdersPage}"/>
+        </Tab>
+        <Tab Title="Manage Menu" Icon="edit.png" Route="ManageMenuItemPage">
+            <ShellContent ContentTemplate="{DataTemplate pages:ManageMenuItemPage}"/>
+        </Tab>
+        <Tab Title="Manage Staff" Icon="user_regular_24.png" Route="StaffManagementPage">
+            <ShellContent ContentTemplate="{DataTemplate pages:StaffManagementPage}"/>
+        </Tab>
+        <Tab Title="Manage Inventory" Icon="inventory.png" Route="InventoryPage">
+            <ShellContent ContentTemplate="{DataTemplate pages:InventoryPage}"/>
+        </Tab>
+        <Tab Title="Role Management" Icon="grid_alt_solid_24.png" Route="RoleManagementPage">
+            <ShellContent ContentTemplate="{DataTemplate pages:RoleManagementPage}"/>
+        </Tab>
+        <Tab Title="User Management" Icon="grid_alt_solid_24.png" Route="UserManagementPage">
+            <ShellContent ContentTemplate="{DataTemplate pages:UserManagementPage}"/>
+        </Tab>
+        <Tab Title="Inventory Report" Icon="inventory_report.png" Route="InventoryReport">
+            <ShellContent ContentTemplate="{DataTemplate pages:InventoryReport}"/>
+        </Tab>
+        <Tab Title="Item Report" Icon="item_report.png" Route="ItemReportPage">
+            <ShellContent ContentTemplate="{DataTemplate pages:ItemReportPage}"/>
+        </Tab>
+        <Tab Title="Sales Report" Icon="sales_report.png" Route="SalesReportPage">
+            <ShellContent ContentTemplate="{DataTemplate pages:SalesReportPage}"/>
+        </Tab>
     </TabBar>
-    
+
+    <!--<ShellContent
+Title="Orders"
+ContentTemplate="{DataTemplate pages:OrdersPage}"
+Icon="list.png"
+Route="OrdersPage" />
+    <ShellContent
+Title="Manage Menu"
+ContentTemplate="{DataTemplate pages:ManageMenuItemPage}"
+Icon="edit.png"
+Route="ManageMenuItemPage" />
+    <ShellContent
+Title="Manage Staff"
+ContentTemplate="{DataTemplate pages:StaffManagementPage}"
+Icon="user_regular_24.png"
+Route="StaffManagementPage" />
+    --><!--<ShellContent
+Title="Manage Expense Item"
+ContentTemplate="{DataTemplate pages:ExpenseItemManagementPage}"
+Icon="grid_alt_solid_24.png"
+Route="ExpenseItemManagementPage" />--><!--
+    <ShellContent
+Title="Item Report"
+ContentTemplate="{DataTemplate pages:ItemReportPage}"
+Icon="item_report.png"
+Route="ItemReportPage" />
+    <ShellContent
+Title="Manage Inventory"
+ContentTemplate="{DataTemplate pages:InventoryPage}"
+Icon="inventory.png"
+Route="InventoryPage" />
+    <ShellContent
+Title="Inventory Report"
+ContentTemplate="{DataTemplate pages:InventoryReport}"
+Icon="inventory_report.png"
+Route="InventoryReport" />
+    <ShellContent
+Title="Sales Report"
+ContentTemplate="{DataTemplate pages:SalesReportPage}"
+Icon="sales_report.png"
+Route="SalesReportPage" />
+    <ShellContent
+Title="Role Management"
+ContentTemplate="{DataTemplate pages:RoleManagementPage}"
+Icon="grid_alt_solid_24.png"
+Route="RoleManagementPage" />
+    <ShellContent
+Title="User Management"
+ContentTemplate="{DataTemplate pages:UserManagementPage}"
+Icon="grid_alt_solid_24.png"
+Route="UserManagementPage" />-->
+
 
     <!--<Shell.FlyoutFooter>
         <Image

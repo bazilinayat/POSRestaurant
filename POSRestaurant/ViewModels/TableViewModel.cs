@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Maui.Controls;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Controls;
 using POSRestaurant.Data;
@@ -90,6 +91,51 @@ namespace POSRestaurant.ViewModels
         [ObservableProperty]
         private StaffModel _selectedCashier;
 
+        #region Login Fields
+
+        /// <summary>
+        /// DI for IAuthService
+        /// </summary>
+        private readonly IAuthService _authService;
+
+        /// <summary>
+        /// To accept the username
+        /// </summary>
+        [ObservableProperty]
+        private string _username;
+
+        /// <summary>
+        /// To accept the password
+        /// </summary>
+        [ObservableProperty]
+        private string _password;
+
+        /// <summary>
+        /// To know if the application is busy
+        /// </summary>
+        [ObservableProperty]
+        private bool _isBusy;
+
+        /// <summary>
+        /// To display the error message
+        /// </summary>
+        [ObservableProperty]
+        private string _errorMessage;
+
+        /// <summary>
+        /// To know if login has error
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasError;
+
+        /// <summary>
+        /// To know if the user is logged in or not
+        /// </summary>
+        [ObservableProperty]
+        public bool _loggedIn;
+
+        #endregion
+
         /// <summary>
         /// Constructor for the TablesViewModel
         /// </summary>
@@ -101,7 +147,8 @@ namespace POSRestaurant.ViewModels
         public TableViewModel(IServiceProvider serviceProvider, LogService logger, 
             DatabaseService databaseService, HomeViewModel homeViewModel, 
             OrdersViewModel ordersViewModel, Setting settingService,
-            PickupViewModel pickupViewModel, BillingService billingService)
+            PickupViewModel pickupViewModel, BillingService billingService,
+            IAuthService authService)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -111,11 +158,80 @@ namespace POSRestaurant.ViewModels
             _settingService = settingService;
             _pickupViewModel = pickupViewModel;
             _billingService = billingService;
+            _authService = authService;
 
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<TableChangedMessage>(this);
             WeakReferenceMessenger.Default.Register<StaffChangedMessage>(this);
             WeakReferenceMessenger.Default.Register<TableStateChangedMessage>(this);
+        }
+
+        /// <summary>
+        /// Command for logging in
+        /// </summary>
+        /// <returns></returns>
+        [RelayCommand]
+        private async Task Login()
+        {
+            (Application.Current.MainPage as Shell)?.HideAllTabs();
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+            {
+                ErrorMessage = "Username and password are required";
+                HasError = true;
+                return;
+            }
+
+            try
+            {
+                IsBusy = true;
+                HasError = false;
+
+                var result = await _authService.LoginAsync(Username, Password);
+
+                if (result)
+                {
+                    LoggedIn = true;
+                    (Application.Current.MainPage as Shell)?.ConfigureTabVisibility(_authService);
+
+                    OnCommandExecutedSuccessfully();
+                }
+                else
+                {
+                    ErrorMessage = "Invalid username or password";
+                    HasError = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Login error: {ex.Message}";
+                HasError = true;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        // Method to handle successful command execution
+        private void OnCommandExecutedSuccessfully()
+        {
+            // This event can be subscribed to by the view
+            CommandCompletedSuccessfully?.Invoke(this, EventArgs.Empty);
+        }
+
+        // Event that the view can subscribe to
+        public event EventHandler CommandCompletedSuccessfully;
+
+        /// <summary>
+        /// Command for logging out
+        /// </summary>
+        /// <returns></returns>
+        [RelayCommand]
+        private async Task Logout()
+        {
+            (Application.Current.MainPage as Shell)?.HideAllTabs();
+            await _authService.LogoutAsync();
+            LoggedIn = false;
         }
 
         /// <summary>
@@ -127,6 +243,12 @@ namespace POSRestaurant.ViewModels
         {
             try
             {
+                if (LoggedIn)
+                {
+                    (Application.Current.MainPage as Shell)?.HideAllTabs();
+                    OnCommandExecutedSuccessfully();
+                }
+
                 var info = await _databaseService.SettingsOperation.GetRestaurantInfo();
                 if (info == null)
                 {

@@ -190,8 +190,46 @@ namespace POSRestaurant.DBO
             return userModel;
         }
 
+        /// <summary>
+        /// To get the assigned role object for given userid
+        /// </summary>
+        /// <param name="userId">User Id</param>
+        /// <returns>AssignedUserRole object</returns>
         public async Task<AssignedUserRole> GetUserRoleAsync(int userId) =>
             await _connection.Table<AssignedUserRole>().Where(o => o.UserId == userId).FirstOrDefaultAsync();
+
+        /// <summary>
+        /// To get the role names for the roles assigned to user
+        /// </summary>
+        /// <param name="userId">User Id</param>
+        /// <returns>Returns list of role names</returns>
+        public async Task<List<string>> GetUserRolesAsync(int userId)
+        {
+            var query = @"
+            SELECT r.Name 
+            FROM UserRole r
+            JOIN AssignedUserRole ur ON r.Id = ur.RoleId
+            WHERE ur.UserId = ?";
+
+            return await _connection.QueryScalarsAsync<string>(query, userId);
+        }
+
+        /// <summary>
+        /// To get the permission names assigned to the user
+        /// </summary>
+        /// <param name="userId">User Id</param>
+        /// <returns>Returns list of permission names</returns>
+        public async Task<List<string>> GetUserPermissionsAsync(int userId)
+        {
+            var query = @"
+            SELECT DISTINCT p.Name 
+            FROM Permission p
+            JOIN RolePermission rp ON p.Id = rp.PermissionId
+            JOIN AssignedUserRole ur ON rp.RoleId = ur.RoleId
+            WHERE ur.UserId = ?";
+
+            return await _connection.QueryScalarsAsync<string>(query, userId);
+        }
 
         /// <summary>
         /// Method to save the user and its roles to database

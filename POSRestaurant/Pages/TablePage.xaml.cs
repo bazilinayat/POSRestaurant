@@ -26,6 +26,8 @@ public partial class TablePage : ContentPage
         _homeViewModel = homeViewModel;
         _tableViewModel = tableViewModel;
         BindingContext = _tableViewModel;
+
+        ((TableViewModel)BindingContext).CommandCompletedSuccessfully += OnCommandCompleted;
         Initialize();
     }
         
@@ -35,5 +37,36 @@ public partial class TablePage : ContentPage
     private async void Initialize()
     {
         await _tableViewModel.InitializeAsync();
+    }
+
+    /// <summary>
+    /// Make sure we can't navigate away from login screen
+    /// </summary>
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (!_tableViewModel._loggedIn)
+        {
+            Shell.SetNavBarIsVisible(this, false);
+            Shell.SetTabBarIsVisible(this, false);
+        }
+    }
+
+    private void OnCommandCompleted(object sender, EventArgs e)
+    {
+        // Show navigation bar and tab bar when command completes successfully
+        Shell.SetNavBarIsVisible(this, true);
+        Shell.SetTabBarIsVisible(this, true);
+    }
+
+    // Don't forget to unsubscribe to prevent memory leaks
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        if (BindingContext is TableViewModel viewModel)
+        {
+            viewModel.CommandCompletedSuccessfully -= OnCommandCompleted;
+        }
     }
 }

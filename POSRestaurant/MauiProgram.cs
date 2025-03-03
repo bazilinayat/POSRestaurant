@@ -50,6 +50,8 @@ namespace POSRestaurant
                 .AddSingleton<PaytmService>()
                 .AddSingleton<ReceiptService>()
                 .AddSingleton<BillingService>()
+                .AddSingleton<IAuthService, AuthService>()
+                .AddSingleton<INavigationService, NavigationService>()
 
                 .AddSingleton<MainPage>()
                 .AddSingleton<OrdersPage>()
@@ -66,6 +68,7 @@ namespace POSRestaurant
                 .AddSingleton<SalesReportPage>()
                 .AddSingleton<RoleManagementPage>()
                 .AddSingleton<UserManagementPage>()
+                .AddTransient<LoginPage>()
                 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<HomeViewModel>()
@@ -83,7 +86,8 @@ namespace POSRestaurant
                 .AddSingleton<PickupViewModel>()
                 .AddSingleton<SalesReportViewModel>()
                 .AddSingleton<RoleManagementViewModel>()
-                .AddSingleton<UserManagementViewModel>();
+                .AddSingleton<UserManagementViewModel>()
+                .AddTransient<LoginViewModel>();
 
             // Force initialize Windows App Runtime components
             if (OperatingSystem.IsWindows())

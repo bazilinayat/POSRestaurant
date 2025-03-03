@@ -5,114 +5,163 @@
              xmlns:data="clr-namespace:POSRestaurant.Data"
              xmlns:models="clr-namespace:POSRestaurant.Models"
              xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
              x:Class="POSRestaurant.Pages.TablePage"
              Shell.NavBarIsVisible="True"
              Title="Table View"
              x:DataType="vm:TableViewModel">
 
-    <Grid RowDefinitions="Auto, Auto, *" Margin="10">
-        <FlexLayout Grid.Row="0" JustifyContent="SpaceBetween" Margin="10">
-            <HorizontalStackLayout Spacing="10">
-                <Label Text="Cashier" FontSize="16" VerticalOptions="Center"/>
-                <Picker ItemsSource="{Binding Cashiers}" SelectedItem="{Binding SelectedCashier, Mode=TwoWay}"
-                        ItemDisplayBinding="{Binding Name}"
-                        BackgroundColor="LightYellow"
-                        WidthRequest="150"/>
-            </HorizontalStackLayout>
-            <Border WidthRequest="100" Stroke="Gray" StrokeShape="RoundRectangle 10">
-                <Label Text="+ Add Table" TextColor="Gray" HorizontalOptions="Center" VerticalOptions="Center"/>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=AddNewTableCommand}"
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center" IsVisible="{Binding LoggedIn, Converter={StaticResource InverseBooleanConverter}}">
+            <Image Source="app_logo.png" 
+           HeightRequest="100" 
+           HorizontalOptions="Center" />
+
+            <Label Text="Welcome Back!"
+           FontSize="28"
+           HorizontalOptions="Center" />
+
+            <Frame BorderColor="Gray" Padding="10" CornerRadius="5">
+                <Entry x:Name="UsernameEntry" 
+               Placeholder="Username"
+               Text="{Binding Username}" />
+            </Frame>
+
+            <Frame BorderColor="Gray" Padding="10" CornerRadius="5">
+                <Entry x:Name="PasswordEntry" 
+               Placeholder="Password" 
+               IsPassword="True"
+               Text="{Binding Password}" />
+            </Frame>
+
+            <Button Text="Login" 
+            Command="{Binding LoginCommand}"
+            HorizontalOptions="Fill"
+            BackgroundColor="#3E8EED"
+            TextColor="White" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                       IsVisible="{Binding IsBusy}"
+                       HorizontalOptions="Center" />
+
+            <Label Text="{Binding ErrorMessage}"
+           IsVisible="{Binding HasError}"
+           TextColor="Red"
+           HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <Grid RowDefinitions="Auto, Auto, *" Margin="10" IsVisible="{Binding LoggedIn}">
+            <FlexLayout Grid.Row="0" JustifyContent="SpaceBetween" Margin="10">
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Cashier" FontSize="16" VerticalOptions="Center"/>
+                    <Picker ItemsSource="{Binding Cashiers}" SelectedItem="{Binding SelectedCashier, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding Name}"
+                    BackgroundColor="LightYellow"
+                    WidthRequest="150"/>
+                </HorizontalStackLayout>
+                <Border WidthRequest="100" Stroke="Gray" StrokeShape="RoundRectangle 10">
+                    <Label Text="+ Add Table" TextColor="Gray" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=AddNewTableCommand}"
+                                      CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                </Border>
+            </FlexLayout>
+
+            <FlexLayout Grid.Row="1" JustifyContent="SpaceBetween" Margin="10">
+                <Border WidthRequest="100" Stroke="Orange" StrokeShape="RoundRectangle 10" HeightRequest="50">
+                    <Label Text="Pickup" TextColor="Orange" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=MakePickupOrderCommand}"
+                                      CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <HorizontalStackLayout Spacing="20">
+                    <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Free Table to Put Order">
+                        <Rectangle Fill="Maroon" HeightRequest="20" WidthRequest="20" />
+                        <Label Text="Free" FontSize="12" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Can Add New Items">
+                        <Rectangle Fill="Yellow" HeightRequest="20" WidthRequest="20" />
+                        <Label Text="Running" FontSize="12" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Order Confirmed, Ready for Printing">
+                        <Rectangle Fill="Orange" HeightRequest="20" WidthRequest="20" />
+                        <Label Text="Confirmed" FontSize="12" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Printed, Ready for Saving">
+                        <Rectangle Fill="Green" HeightRequest="20" WidthRequest="20" />
+                        <Label Text="Printed" FontSize="12" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </HorizontalStackLayout>
+            </FlexLayout>
+
+            <CollectionView Grid.Row="2" ItemsSource="{Binding Tables}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Span="5"
+                 HorizontalItemSpacing="10"
+                 VerticalItemSpacing="10"
+                 Orientation="Vertical"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TableModel">
+                        <VerticalStackLayout Spacing="5">
+                            <Border Padding="10"
+                            Stroke="{Binding BorderColour}"
+                            StrokeThickness="5"
+                            StrokeShape="RoundRectangle 10"
+                            StrokeDashOffset="2">
+                                <VerticalStackLayout Spacing="10">
+                                    <Label Text="{Binding TableNo}"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"/>
+                                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                                        <Image Source="user_regular_24.png" HeightRequest="25" WidthRequest="25"/>
+                                        <Label Text="{Binding NumberOfPeople}" HorizontalOptions="Center"/>
+                                    </HorizontalStackLayout>
+
+                                    <Label Text="TimeRunning"
+                           HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableSelectedCommand}"
                                           CommandParameter="{Binding .}" />
-                </Border.GestureRecognizers>
-            </Border>
-        </FlexLayout>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <ImageButton Source="{Binding ActionButtonImageIcon}" 
+                                 IsEnabled="{Binding ActionButtonEnabled}"
+                                 ToolTipProperties.Text="{Binding ActionButtonToolTipText}"
+                                 HeightRequest="25" 
+                                 WidthRequest="25"
+                                 Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableActionButtonCommand}"
+                                 CommandParameter="{Binding .}" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-        <FlexLayout Grid.Row="1" JustifyContent="SpaceBetween" Margin="10">
-            <Border WidthRequest="100" Stroke="Orange" StrokeShape="RoundRectangle 10" HeightRequest="50">
-                <Label Text="Pickup" TextColor="Orange" HorizontalOptions="Center" VerticalOptions="Center"/>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=MakePickupOrderCommand}"
-                                          CommandParameter="{Binding .}" />
-                </Border.GestureRecognizers>
-            </Border>
-
-            <HorizontalStackLayout Spacing="20">
-                <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Free Table to Put Order">
-                    <Rectangle Fill="Maroon" HeightRequest="20" WidthRequest="20" />
-                    <Label Text="Free" FontSize="12" VerticalOptions="Center" />
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Can Add New Items">
-                    <Rectangle Fill="Yellow" HeightRequest="20" WidthRequest="20" />
-                    <Label Text="Running" FontSize="12" VerticalOptions="Center" />
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Order Confirmed, Ready for Printing">
-                    <Rectangle Fill="Orange" HeightRequest="20" WidthRequest="20" />
-                    <Label Text="Confirmed" FontSize="12" VerticalOptions="Center" />
-                </HorizontalStackLayout>
-                <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Printed, Ready for Saving">
-                    <Rectangle Fill="Green" HeightRequest="20" WidthRequest="20" />
-                    <Label Text="Printed" FontSize="12" VerticalOptions="Center" />
-                </HorizontalStackLayout>
-            </HorizontalStackLayout>
-        </FlexLayout>
-        
-        <CollectionView Grid.Row="2" ItemsSource="{Binding Tables}">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Span="5"
-                     HorizontalItemSpacing="10"
-                     VerticalItemSpacing="10"
-                     Orientation="Vertical"/>
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:TableModel">
-                    <VerticalStackLayout Spacing="5">
-                        <Border Padding="10"
-                                Stroke="{Binding BorderColour}"
-                                StrokeThickness="5"
-                                StrokeShape="RoundRectangle 10"
-                                StrokeDashOffset="2">
-                            <VerticalStackLayout Spacing="10">
-                                <Label Text="{Binding TableNo}"
-                               FontAttributes="Bold"
-                               HorizontalOptions="Center"/>
-                                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                                    <Image Source="user_regular_24.png" HeightRequest="25" WidthRequest="25"/>
-                                    <Label Text="{Binding NumberOfPeople}" HorizontalOptions="Center"/>
-                                </HorizontalStackLayout>
-                                
-                                <Label Text="TimeRunning"
-                               HorizontalOptions="Center"/>
-                            </VerticalStackLayout>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableSelectedCommand}"
-                                              CommandParameter="{Binding .}" />
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <ImageButton Source="{Binding ActionButtonImageIcon}" 
-                                     IsEnabled="{Binding ActionButtonEnabled}"
-                                     ToolTipProperties.Text="{Binding ActionButtonToolTipText}"
-                                     HeightRequest="25" 
-                                     WidthRequest="25"
-                                     Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=TableActionButtonCommand}"
-                                     CommandParameter="{Binding .}" />
-                    </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-
-        <BoxView IsVisible="{Binding IsLoading}"
-         HorizontalOptions="Fill"
-         VerticalOptions="Fill"
-         Color="{StaticResource LightWheat}"
-         Opacity="0.3"
-         AbsoluteLayout.LayoutBounds="0,0,1,1"
-         AbsoluteLayout.LayoutFlags="All"/>
-        <ActivityIndicator IsRunning="{Binding IsLoading}" 
-           HeightRequest="50" 
-           WidthRequest="50" 
-           HorizontalOptions="Center" 
-           VerticalOptions="Center"
-           Color="LightBlue"/>
-    </Grid>
+            <BoxView IsVisible="{Binding IsLoading}"
+     HorizontalOptions="Fill"
+     VerticalOptions="Fill"
+     Color="{StaticResource LightWheat}"
+     Opacity="0.3"
+     AbsoluteLayout.LayoutBounds="0,0,1,1"
+     AbsoluteLayout.LayoutFlags="All"/>
+            <ActivityIndicator IsRunning="{Binding IsLoading}" 
+       HeightRequest="50" 
+       WidthRequest="50" 
+       HorizontalOptions="Center" 
+       VerticalOptions="Center"
+       Color="LightBlue"/>
+        </Grid>
+    </VerticalStackLayout>
+    
 </ContentPage>

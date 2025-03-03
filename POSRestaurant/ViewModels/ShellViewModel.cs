@@ -132,6 +132,25 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
+        /// Command to logout the user
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        [RelayCommand]
+        private async Task LogoutFromApp()
+        {
+            // Navigate to SettingsPage
+            try
+            {
+                var tableViewModel = _serviceProvider.GetRequiredService<TableViewModel>();
+                await tableViewModel.LogoutCommand.ExecuteAsync(null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ShellVM-LogoutFromApp Error", ex);
+            }
+        }
+
+        /// <summary>
         /// Command to open the support popup
         /// </summary>
         /// <returns>Return a Task Object</returns>
