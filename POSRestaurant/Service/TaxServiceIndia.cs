@@ -47,7 +47,7 @@ namespace POSRestaurant.Service
         {
             var restaurantInfo = await _databaseService.SettingsOperation.GetRestaurantInfo();
 
-            if (restaurantInfo.UsingGST)
+            if (restaurantInfo != null && restaurantInfo.UsingGST)
             {
                 UsingGST = restaurantInfo.UsingGST;
                 CGST = restaurantInfo.CGST;

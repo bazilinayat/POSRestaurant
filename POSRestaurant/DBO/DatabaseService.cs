@@ -1,5 +1,6 @@
 ﻿using POSRestaurant.Data;
 using POSRestaurant.Models;
+using POSRestaurant.Service;
 using POSRestaurant.Service.SettingService;
 using SQLite;
 
@@ -65,6 +66,15 @@ namespace POSRestaurant.DBO
         /// </summary>
         public UserOperations UserOperation;
 
+        /// <summary>
+        /// A list of different entity types we have
+        /// </summary>
+        private readonly List<Type> _entityTypes;
+
+        /// <summary>
+        /// The migration manager used for altering or creating new tables.
+        /// </summary>
+        private MigrationManager _migrationManager;
 
         /// <summary>
         /// Class constructor, to generate database and connection
@@ -92,6 +102,34 @@ namespace POSRestaurant.DBO
             DiscountOperations = new DiscountOperations(_connection);
             SettingsOperation = new SettingsOperation(_connection);
             UserOperation = new UserOperations(_connection);
+
+            // Register all your entity types here
+            _entityTypes = new List<Type>
+            {
+                typeof(MenuCategory),
+                typeof(ItemOnMenu),
+                typeof(Order),
+                typeof(OrderItem),
+                typeof(Discount),
+                typeof(Table),
+                typeof(KOT),
+                typeof(KOTItem),
+                typeof(Staff),
+                typeof(ExpenseItem),
+                typeof(Inventory),
+                typeof(OrderPayment),
+                typeof(RestaurantInfo),
+                typeof(ExpenseTypes),
+                typeof(TableState),
+                typeof(Permission),
+                typeof(UserRole),
+                typeof(RolePermission),
+                typeof(User),
+                typeof(AssignedUserRole)
+            };
+
+            // Create the migration manager
+            _migrationManager = new MigrationManager(dbPath, _entityTypes);
         }
 
         /// <summary>
@@ -100,31 +138,14 @@ namespace POSRestaurant.DBO
         /// <returns>Returns a Task object</returns>
         public async Task InitializeDatabaseAsync()
         {
-            await _connection.CreateTableAsync<MenuCategory>();
-            await _connection.CreateTableAsync<ItemOnMenu>();
-            await _connection.CreateTableAsync<Order>();
-            await _connection.CreateTableAsync<OrderItem>();
-            await _connection.CreateTableAsync<Discount>();
+            // Create tables for your entities if they don't exist
+            foreach (var entityType in _entityTypes)
+            {
+                await _connection.CreateTableAsync(entityType, CreateFlags.None);
+            }
 
-            await _connection.CreateTableAsync<Table>();
-            await _connection.CreateTableAsync<KOT>();
-            await _connection.CreateTableAsync<KOTItem>();
-
-            await _connection.CreateTableAsync<Staff>();
-            await _connection.CreateTableAsync<ExpenseItem>();
-            await _connection.CreateTableAsync<Inventory>();
-
-            await _connection.CreateTableAsync<OrderPayment>();
-            await _connection.CreateTableAsync<RestaurantInfo>();
-            await _connection.CreateTableAsync<ExpenseTypes>();
-
-            await _connection.CreateTableAsync<TableState>();
-
-            await _connection.CreateTableAsync<Permission>();
-            await _connection.CreateTableAsync<UserRole>();
-            await _connection.CreateTableAsync<RolePermission>();
-            await _connection.CreateTableAsync<User>();
-            await _connection.CreateTableAsync<AssignedUserRole>();
+            // Run automated migrations
+            await _migrationManager.MigrateAsync();
 
             await SeedDataAsync();
         }
@@ -137,53 +158,68 @@ namespace POSRestaurant.DBO
         {
             // Checking and return if data is already seeded
             var firstCategory = await _connection.Table<MenuCategory>().FirstOrDefaultAsync();
-            if (firstCategory != null)
-                return;
-
-            var categories = _seedData.GetMenuCategories();
-            var menuItems = _seedData.GetMenuItems();
-            var tables = _seedData.GetTables();
-
-            await _connection.InsertAllAsync(categories);
-            await _connection.InsertAllAsync(menuItems);
-            await _connection.InsertAllAsync(tables);
-
-            await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Swiggy", PhoneNumber = "NA", Role = StaffRole.Delivery });
-            await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Zomato", PhoneNumber = "NA", Role = StaffRole.Delivery });
-            await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Self", PhoneNumber = "NA", Role = StaffRole.Delivery });
-
-            // Permissions, Role and Admin 
-            await UserOperation.SavePermissionAsync("MakeOrders");
-            await UserOperation.SavePermissionAsync("ViewOrders");
-            await UserOperation.SavePermissionAsync("EditMenu");
-            await UserOperation.SavePermissionAsync("EditStaff");
-            await UserOperation.SavePermissionAsync("ViewReport");
-            await UserOperation.SavePermissionAsync("EditInventory");
-            await UserOperation.SavePermissionAsync("EditRoles");
-            await UserOperation.SavePermissionAsync("EditUser");
-
-            var adminRole = new UserRoleEditModel
+            if (firstCategory == null)
             {
-                Name = "Admin",
-                Permissions = new List<PermissionModel>()
-            };
-            var permissions = await UserOperation.GetAllPermissionsAsync();
-            foreach (var permission in permissions)
+                var categories = _seedData.GetMenuCategories();
+                var menuItems = _seedData.GetMenuItems();
+                var tables = _seedData.GetTables();
+
+                await _connection.InsertAllAsync(categories);
+                await _connection.InsertAllAsync(menuItems);
+                await _connection.InsertAllAsync(tables);
+            }
+
+            var firstDelivery = await _connection.Table<Staff>().FirstOrDefaultAsync();
+            if (firstDelivery == null)
             {
-                adminRole.Permissions.Add(new PermissionModel
+                await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Swiggy", PhoneNumber = "NA", Role = StaffRole.Delivery });
+                await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Zomato", PhoneNumber = "NA", Role = StaffRole.Delivery });
+                await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Self", PhoneNumber = "NA", Role = StaffRole.Delivery });
+            }
+
+            var firstPermission = await _connection.Table<Permission>().FirstOrDefaultAsync();
+            if (firstPermission == null)
+            {
+                // Permissions, Role and Admin 
+                await UserOperation.SavePermissionAsync("MakeOrders");
+                await UserOperation.SavePermissionAsync("ViewOrders");
+                await UserOperation.SavePermissionAsync("EditMenu");
+                await UserOperation.SavePermissionAsync("EditStaff");
+                await UserOperation.SavePermissionAsync("ViewReport");
+                await UserOperation.SavePermissionAsync("EditInventory");
+                await UserOperation.SavePermissionAsync("EditRoles");
+                await UserOperation.SavePermissionAsync("EditUser");
+            }
+
+            if ((await _connection.Table<UserRole>().Where(o => o.Name == "Admin").FirstOrDefaultAsync() == null))
+            {
+                var adminRole = new UserRoleEditModel
                 {
-                    Id = permission.Id,
-                    Name = permission.Name,
-                    IsSelected = true
+                    Name = "Admin",
+                    Permissions = new List<PermissionModel>()
+                };
+                var permissions = await UserOperation.GetAllPermissionsAsync();
+                foreach (var permission in permissions)
+                {
+                    adminRole.Permissions.Add(new PermissionModel
+                    {
+                        Id = permission.Id,
+                        Name = permission.Name,
+                        IsSelected = true
+                    });
+                }
+                await UserOperation.SaveRoleAsync(adminRole);
+            }
+
+            if ((await _connection.Table<User>().Where(o => o.Username == "Admin").FirstOrDefaultAsync() == null))
+            {
+                await UserOperation.SaveUserAsync(new UserEditModel
+                {
+                    Username = "Admin",
+                    Password = "Admin",
+                    AssignedRoleId = 1
                 });
             }
-            await UserOperation.SaveRoleAsync(adminRole);
-            await UserOperation.SaveUserAsync(new UserEditModel
-            {
-                Username = "Admin",
-                Password = "Admin",
-                AssignedRoleId = 1
-            });
         }
 
         /// <summary>
