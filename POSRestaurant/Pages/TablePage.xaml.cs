@@ -28,6 +28,7 @@ public partial class TablePage : ContentPage
         BindingContext = _tableViewModel;
 
         ((TableViewModel)BindingContext).CommandCompletedSuccessfully += OnCommandCompleted;
+        ((TableViewModel)BindingContext).LogoutCompletedSuccessfully += OnLogoutCompleted;
         Initialize();
     }
         
@@ -60,13 +61,10 @@ public partial class TablePage : ContentPage
         Shell.SetTabBarIsVisible(this, true);
     }
 
-    // Don't forget to unsubscribe to prevent memory leaks
-    protected override void OnDisappearing()
+    private void OnLogoutCompleted(object sender, EventArgs e)
     {
-        base.OnDisappearing();
-        if (BindingContext is TableViewModel viewModel)
-        {
-            viewModel.CommandCompletedSuccessfully -= OnCommandCompleted;
-        }
+        // Show navigation bar and tab bar when command completes successfully
+        Shell.SetNavBarIsVisible(this, false);
+        Shell.SetTabBarIsVisible(this, false);
     }
 }

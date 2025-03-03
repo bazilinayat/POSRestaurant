@@ -134,6 +134,40 @@ namespace POSRestaurant.ViewModels
         [ObservableProperty]
         public bool _loggedIn;
 
+        /// <summary>
+        /// To know if the logged in user is admin
+        /// </summary>
+        [ObservableProperty]
+        private bool _isAdminLogin;
+
+        /// <summary>
+        /// Method to handle successful command execution
+        /// </summary>
+        private void OnCommandExecutedSuccessfully()
+        {
+            // This event can be subscribed to by the view
+            CommandCompletedSuccessfully?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Event that the view can subscribe to
+        /// </summary>
+        public event EventHandler CommandCompletedSuccessfully;
+
+        /// <summary>
+        /// Method to handle successful command execution
+        /// </summary>
+        private void OnLogoutExecutedSuccessfully()
+        {
+            // This event can be subscribed to by the view
+            LogoutCompletedSuccessfully?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Event that the view can subscribe to
+        /// </summary>
+        public event EventHandler LogoutCompletedSuccessfully;
+
         #endregion
 
         /// <summary>
@@ -190,10 +224,34 @@ namespace POSRestaurant.ViewModels
 
                 if (result)
                 {
+                    var info = await _databaseService.SettingsOperation.GetRestaurantInfo();
+                    if (info == null)
+                    {
+                        if (_authService.GetCurrentUser().Username == "Admin")
+                        {
+                            await GetRestaurantInfo();
+                        }
+                        else
+                        {
+                            await Shell.Current.DisplayAlert("Error", "Admin Login Required to set Restaurant Details", "OK");
+                            LoggedIn = false;
+                            return;
+                        }
+                    }
+                    if (_authService.GetCurrentUser().Username == "Admin")
+                    {
+                        IsAdminLogin = true;
+                        (App.Current.MainPage as AppShell)?.UpdateSetting(true);
+                    }
+                    else
+                    {
+                        IsAdminLogin = false;
+                        (App.Current.MainPage as AppShell)?.UpdateSetting(false);
+                    }
                     LoggedIn = true;
                     (Application.Current.MainPage as Shell)?.ConfigureTabVisibility(_authService);
-
                     OnCommandExecutedSuccessfully();
+                    await Task.Delay(10);
                 }
                 else
                 {
@@ -212,16 +270,6 @@ namespace POSRestaurant.ViewModels
             }
         }
 
-        // Method to handle successful command execution
-        private void OnCommandExecutedSuccessfully()
-        {
-            // This event can be subscribed to by the view
-            CommandCompletedSuccessfully?.Invoke(this, EventArgs.Empty);
-        }
-
-        // Event that the view can subscribe to
-        public event EventHandler CommandCompletedSuccessfully;
-
         /// <summary>
         /// Command for logging out
         /// </summary>
@@ -229,9 +277,10 @@ namespace POSRestaurant.ViewModels
         [RelayCommand]
         private async Task Logout()
         {
+            LoggedIn = IsAdminLogin = false;
             (Application.Current.MainPage as Shell)?.HideAllTabs();
+            OnLogoutExecutedSuccessfully();
             await _authService.LogoutAsync();
-            LoggedIn = false;
         }
 
         /// <summary>
@@ -246,15 +295,8 @@ namespace POSRestaurant.ViewModels
                 if (LoggedIn)
                 {
                     (Application.Current.MainPage as Shell)?.HideAllTabs();
+                    (Application.Current.MainPage as Shell)?.ConfigureTabVisibility(_authService);
                     OnCommandExecutedSuccessfully();
-                }
-
-                var info = await _databaseService.SettingsOperation.GetRestaurantInfo();
-                if (info == null)
-                {
-                    var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
-                    var setInfo = new InitialPopup(settingsViewModel);
-                    await Shell.Current.ShowPopupAsync(setInfo);
                 }
 
                 if (_isInitialized)
@@ -277,6 +319,21 @@ namespace POSRestaurant.ViewModels
                 _logger.LogError("TableVM-InitializeAsync Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "There was an error loading the screen", "OK");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// To get the restaurant info from user
+        /// </summary>
+        /// <returns>Returns task</returns>
+        private async Task GetRestaurantInfo()
+        {
+            var info = await _databaseService.SettingsOperation.GetRestaurantInfo();
+            if (info == null)
+            {
+                var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
+                var setInfo = new InitialPopup(settingsViewModel);
+                await Shell.Current.ShowPopupAsync(setInfo);
             }
         }
 

@@ -37,8 +37,7 @@ namespace POSRestaurant.Service
         public async Task<bool> LoginAsync(string username, string password)
         {
             // In a real application, you should hash the password and compare with stored hash
-            var users = await _databaseService.UserOperation.GetAllUsersAsync();
-            var user = users.Where(o => o.Username == username && o.Password == password).FirstOrDefault();
+            var user = await _databaseService.UserOperation.GetUserAsync(username, password);
 
             if (user == null)
                 return false;

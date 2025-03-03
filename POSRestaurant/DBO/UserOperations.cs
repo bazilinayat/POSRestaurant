@@ -31,11 +31,25 @@ namespace POSRestaurant.DBO
             await _connection.Table<Permission>().ToListAsync();
 
         /// <summary>
+        /// Method to save the permission from database
+        /// </summary>
+        /// <returns>Returns bool</returns>
+        public async Task<bool> SavePermissionAsync(string permissionName)
+        {
+
+            if (await _connection.InsertAsync(new Permission { Name = permissionName }) > 0)
+                return true;
+            else
+                return false;
+        }
+            
+
+        /// <summary>
         /// Method to get all the roles from database
         /// </summary>
         /// <returns>Array of Table</returns>
         public async Task<UserRole[]> GetAllRolesAsync() =>
-            await _connection.Table<UserRole>().ToArrayAsync();
+            await _connection.Table<UserRole>().Where(o => o.Name != "Admin").ToArrayAsync();
 
         /// <summary>
         /// Method to get a role with its permissions
@@ -157,7 +171,14 @@ namespace POSRestaurant.DBO
         /// </summary>
         /// <returns>Array of User</returns>
         public async Task<User[]> GetAllUsersAsync() =>
-            await _connection.Table<User>().ToArrayAsync();
+            await _connection.Table<User>().Where(o => o.Username != "Admin").ToArrayAsync();
+
+        /// <summary>
+        /// Method to get the login user details from database
+        /// </summary>
+        /// <returns>Array of User</returns>
+        public async Task<User> GetUserAsync(string username, string password) =>
+            await _connection.Table<User>().Where(o => o.Username == username && o.Password == password).FirstOrDefaultAsync();
 
         /// <summary>
         /// Method to get a user with its roles

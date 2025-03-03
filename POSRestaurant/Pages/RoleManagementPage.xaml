@@ -83,7 +83,9 @@
             </Grid>
         </Grid>
         <Border Grid.Column="1" Stroke="Black" Margin="5" StrokeThickness="1">
+            <ScrollView>
             <VerticalStackLayout Padding="20">
+                
                 <Label Text="Role Details" FontSize="18" FontAttributes="Bold" Margin="0,0,0,15"/>
 
                 <Label Text="Role Name" FontAttributes="Bold"/>
@@ -92,6 +94,7 @@
                 <!-- Permissions table -->
                 <Label Text="Permissions" FontAttributes="Bold"/>
                 <Border StrokeThickness="1" StrokeShape="RoundRectangle 5,5,5,5">
+                    
                     <Grid RowDefinitions="Auto, *">
                         <!-- Header -->
                         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="10">
@@ -111,6 +114,7 @@
                             </CollectionView.ItemTemplate>
                         </CollectionView>
                     </Grid>
+                    
                 </Border>
 
                 <Grid Margin="10" ColumnDefinitions="*, *, *">
@@ -131,7 +135,9 @@
                             HorizontalOptions="End"
                             Command="{Binding SaveRoleCommand}"/>
                 </Grid>
+                
             </VerticalStackLayout>
+            </ScrollView>
         </Border>
 
         <BoxView IsVisible="{Binding IsLoading}"

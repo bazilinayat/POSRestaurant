@@ -27,14 +27,14 @@
 
             <!-- Right: Navigation Icons -->
             <HorizontalStackLayout Spacing="15" Grid.Column="2" HorizontalOptions="End">
-                <ImageButton Source="setting.png" Command="{Binding NavigateToSettingsCommand}" />
+                <ImageButton x:Name="SettingsStuff" Source="setting.png" Command="{Binding NavigateToSettingsCommand}" />
                 <ImageButton Source="phone_solid_24.png" Command="{Binding SupportCommandCommand}"/>
                 <ImageButton Source="logout.png" Command="{Binding LogoutFromAppCommand}"/>
             </HorizontalStackLayout>
         </Grid>
     </Shell.TitleView>
     
-    <TabBar Route="main">
+    <TabBar>
         <Tab Title="Table Page" Icon="table.png" Route="TablePage">
             <ShellContent ContentTemplate="{DataTemplate pages:TablePage}"/>
         </Tab>

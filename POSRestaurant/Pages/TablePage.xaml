@@ -66,7 +66,7 @@
                     BackgroundColor="LightYellow"
                     WidthRequest="150"/>
                 </HorizontalStackLayout>
-                <Border WidthRequest="100" Stroke="Gray" StrokeShape="RoundRectangle 10">
+                <Border WidthRequest="100" Stroke="Gray" StrokeShape="RoundRectangle 10" IsVisible="{Binding IsAdminLogin}">
                     <Label Text="+ Add Table" TextColor="Gray" HorizontalOptions="Center" VerticalOptions="Center"/>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:TableViewModel}}, Path=AddNewTableCommand}"

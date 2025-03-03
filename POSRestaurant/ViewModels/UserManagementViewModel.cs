@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using iText.Layout.Element;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
@@ -13,7 +14,7 @@ namespace POSRestaurant.ViewModels
     /// <summary>
     /// ViewModel to be used with UserManagementPage
     /// </summary>
-    public partial class UserManagementViewModel : ObservableObject
+    public partial class UserManagementViewModel : ObservableObject, IRecipient<UserRoleChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -62,6 +63,8 @@ namespace POSRestaurant.ViewModels
         {
             _logger = logger;
             _databaseService = databaseService;
+
+            WeakReferenceMessenger.Default.Register<UserRoleChangedMessage>(this);
         }
 
         /// <summary>
@@ -87,15 +90,7 @@ namespace POSRestaurant.ViewModels
                     Users.Add(user);
                 }
 
-                Roles.Clear();
-                var allRoles = (await _databaseService.UserOperation.GetAllRolesAsync())
-                                .Select(UserRoleModel.FromEntity)
-                                .ToList();
-
-                foreach (var role in allRoles)
-                {
-                    Roles.Add(role);
-                }
+                LoadRoles();
 
                 IsLoading = false;
             }
@@ -279,6 +274,32 @@ namespace POSRestaurant.ViewModels
             {
                 _logger.LogError("UserManagementVM-SaveUserAsync Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "Error in Saving User", "OK");
+            }
+        }
+
+        /// <summary>
+        /// To receive the user role changed message coming from different places
+        /// </summary>
+        /// <param name="userRoleChanged">UserRole details changed</param>
+        public void Receive(UserRoleChangedMessage userRoleChanged)
+        {
+            LoadRoles();
+        }
+
+        /// <summary>
+        /// To load the roles from different places
+        /// </summary>
+        /// <returns></returns>
+        private async Task LoadRoles()
+        {
+            Roles.Clear();
+            var allRoles = (await _databaseService.UserOperation.GetAllRolesAsync())
+                            .Select(UserRoleModel.FromEntity)
+                            .ToList();
+
+            foreach (var role in allRoles)
+            {
+                Roles.Add(role);
             }
         }
     }

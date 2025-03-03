@@ -55,27 +55,6 @@ namespace POSRestaurant
         }
 
         /// <summary>
-        /// To navigate to login screen on startup of application
-        /// </summary>
-        protected override async void OnStart()
-        {
-            base.OnStart();
-
-            //// Check if user is authenticated
-            //if (_authService.IsAuthenticated())
-            //{
-            //    await _navigationService.NavigateToMainAsync();
-
-            //    // Configure tab visibility based on permissions
-            //    (MainPage as Shell)?.ConfigureTabVisibility(_authService);
-            //}
-            //else
-            //{
-            //    await _navigationService.NavigateToLoginAsync();
-            //}
-        }
-
-        /// <summary>
         /// Overriding the create window method for changes as we need.
         /// </summary>
         /// <param name="activationState"></param>

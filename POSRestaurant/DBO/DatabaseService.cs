@@ -151,6 +151,39 @@ namespace POSRestaurant.DBO
             await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Swiggy", PhoneNumber = "NA", Role = StaffRole.Delivery });
             await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Zomato", PhoneNumber = "NA", Role = StaffRole.Delivery });
             await StaffOperaiotns.SaveStaffAsync(new StaffModel { Id = 0, Name = "Self", PhoneNumber = "NA", Role = StaffRole.Delivery });
+
+            // Permissions, Role and Admin 
+            await UserOperation.SavePermissionAsync("MakeOrders");
+            await UserOperation.SavePermissionAsync("ViewOrders");
+            await UserOperation.SavePermissionAsync("EditMenu");
+            await UserOperation.SavePermissionAsync("EditStaff");
+            await UserOperation.SavePermissionAsync("ViewReport");
+            await UserOperation.SavePermissionAsync("EditInventory");
+            await UserOperation.SavePermissionAsync("EditRoles");
+            await UserOperation.SavePermissionAsync("EditUser");
+
+            var adminRole = new UserRoleEditModel
+            {
+                Name = "Admin",
+                Permissions = new List<PermissionModel>()
+            };
+            var permissions = await UserOperation.GetAllPermissionsAsync();
+            foreach (var permission in permissions)
+            {
+                adminRole.Permissions.Add(new PermissionModel
+                {
+                    Id = permission.Id,
+                    Name = permission.Name,
+                    IsSelected = true
+                });
+            }
+            await UserOperation.SaveRoleAsync(adminRole);
+            await UserOperation.SaveUserAsync(new UserEditModel
+            {
+                Username = "Admin",
+                Password = "Admin",
+                AssignedRoleId = 1
+            });
         }
 
         /// <summary>

@@ -45,5 +45,14 @@ namespace POSRestaurant
 
             Routing.RegisterRoute("Setting", typeof(ManageMenuItemPage));
         }
+
+        /// <summary>
+        /// To set the setting button not visible
+        /// </summary>
+        /// <param name="visible"></param>
+        public void UpdateSetting(bool visible)
+        {
+            SettingsStuff.IsVisible = visible;
+        }
     }
 }
