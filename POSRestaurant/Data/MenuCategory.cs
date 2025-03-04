@@ -16,7 +16,6 @@ namespace POSRestaurant.Data
         /// <summary>
         /// Menu Category Name
         /// </summary>
-        [Unique]
         public string Name { get; set; }
         /// <summary>
         /// Menu Category Icon Name

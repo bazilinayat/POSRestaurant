@@ -823,6 +823,7 @@ namespace POSRestaurant.ViewModels
                 // Group items together
                 var dict = kotItems.GroupBy(o => o.ItemId).ToDictionary(g => g.Key, g => g.Select(o => o));
 
+                OrderKOTItems.Clear();
                 foreach (var groupedItems in dict)
                 {
                     OrderKOTItems.Add(new KOTItemBillModel

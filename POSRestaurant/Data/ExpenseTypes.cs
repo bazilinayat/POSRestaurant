@@ -20,7 +20,6 @@ namespace POSRestaurant.Data
         /// <summary>
         /// the name of the expense type
         /// </summary>
-        [Unique]
         public string Name { get; set; }
     }
 }

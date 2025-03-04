@@ -22,7 +22,6 @@ namespace POSRestaurant.Data
         /// <summary>
         /// Menu Category Item Name
         /// </summary>
-        [Unique]
         public string Name { get; set; }
         /// <summary>
         /// Menu Category Item Icon
@@ -39,7 +38,6 @@ namespace POSRestaurant.Data
         /// <summary>
         /// Shortcode for the menu item for quick search
         /// </summary>
-        [Unique]
         public string ShortCode { get; set; }
     }
 }

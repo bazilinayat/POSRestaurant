@@ -20,7 +20,6 @@ namespace POSRestaurant.Data
         /// <summary>
         /// Name of the waiter
         /// </summary>
-        [Unique]
         public string Name { get; set; }
         /// <summary>
         /// Mobile number of the waiter

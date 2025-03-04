@@ -21,7 +21,6 @@ namespace POSRestaurant.Data
         /// <summary>
         /// Name of the item
         /// </summary>
-        [Unique]
         public string Name { get; set; }
 
         /// <summary>
