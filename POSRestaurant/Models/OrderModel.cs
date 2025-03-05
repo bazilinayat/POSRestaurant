@@ -154,6 +154,61 @@ namespace POSRestaurant.Models
         /// <summary>
         /// The id for delivery staff who has delivered the order
         /// </summary>
-        public int DeliveryPersion { get; set; }
+        public int DeliveryPerson { get; set; }
+
+        /// <summary>
+        /// To know if the order is DineIn or not
+        /// </summary>
+        public bool IsDineIn
+        {
+            get
+            {
+                if (OrderType == OrderTypes.DineIn)
+                    return true;
+                else
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// To create OrderModel from order entity
+        /// </summary>
+        /// <param name="entity">Order entity</param>
+        /// <returns>OrderModel object</returns>
+        public static OrderModel FromEntity(Order entity) =>
+            new()
+            {
+                Id = entity.Id,
+                TableId = entity.TableId,
+                OrderDate = entity.OrderDate,
+                TotalItemCount = entity.TotalItemCount,
+                TotalAmount = entity.TotalAmount,
+                PaymentMode = entity.PaymentMode,
+                OrderStatus = entity.OrderStatus,
+                OrderType = entity.OrderType,
+                NumberOfPeople = entity.NumberOfPeople,
+                OrderNumber = entity.OrderNumber,
+                WaiterId = entity.WaiterId,
+
+                IsDiscountGiven = entity.IsDiscountGiven,
+                IsFixedBased = entity.IsFixedBased,
+                IsPercentageBased = entity.IsPercentageBased,
+                DiscountFixed = entity.DiscountFixed,
+                DiscountPercentage = entity.DiscountPercentage,
+                TotalAmountAfterDiscount = entity.TotalAmountAfterDiscount,
+
+                UsingGST = entity.UsingGST,
+                CGST = entity.CGST,
+                SGST = entity.SGST,
+                CGSTAmount = entity.CGSTAmount,
+                SGSTAmount = entity.SGSTAmount,
+
+                RoundOff = entity.RoundOff,
+                GrandTotal = entity.GrandTotal,
+
+                Source = entity.Source,
+                ReferenceNo = entity.ReferenceNo,
+                DeliveryPerson = entity.DeliveryPerson,
+            };
     }
 }

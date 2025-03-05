@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using POSRestaurant.Models;
+using SQLite;
 
 namespace POSRestaurant.Data
 {
@@ -121,5 +122,45 @@ namespace POSRestaurant.Data
         /// </summary>
         public int DeliveryPerson { get; set; }
 
+        /// <summary>
+        /// To create Order from order entity
+        /// </summary>
+        /// <param name="entity">OrderModel entity</param>
+        /// <returns>Order object</returns>
+        public static Order FromEntity(OrderModel entity) =>
+            new()
+            {
+                Id = entity.Id,
+                TableId = entity.TableId,
+                OrderDate = entity.OrderDate,
+                TotalItemCount = entity.TotalItemCount,
+                TotalAmount = entity.TotalAmount,
+                PaymentMode = entity.PaymentMode,
+                OrderStatus = entity.OrderStatus,
+                OrderType = entity.OrderType,
+                NumberOfPeople = entity.NumberOfPeople,
+                OrderNumber = entity.OrderNumber,
+                WaiterId = entity.WaiterId,
+
+                IsDiscountGiven = entity.IsDiscountGiven,
+                IsFixedBased = entity.IsFixedBased,
+                IsPercentageBased = entity.IsPercentageBased,
+                DiscountFixed = entity.DiscountFixed,
+                DiscountPercentage = entity.DiscountPercentage,
+                TotalAmountAfterDiscount = entity.TotalAmountAfterDiscount,
+
+                UsingGST = entity.UsingGST,
+                CGST = entity.CGST,
+                SGST = entity.SGST,
+                CGSTAmount = entity.CGSTAmount,
+                SGSTAmount = entity.SGSTAmount,
+
+                RoundOff = entity.RoundOff,
+                GrandTotal = entity.GrandTotal,
+
+                Source = entity.Source,
+                ReferenceNo = entity.ReferenceNo,
+                DeliveryPerson = entity.DeliveryPerson,
+            };
     }
 }

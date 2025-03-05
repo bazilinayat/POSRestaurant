@@ -61,6 +61,16 @@ namespace POSRestaurant.Service
                     ordersTab.IsVisible = true;
             }
 
+            // Configure Reports tab visibility
+            if (authService.HasPermission("EditOrders"))
+            {
+                var manageKOT = tabBar.Items.FirstOrDefault(t =>
+                    t.Route != null && t.Route.Contains("ManageKOT", StringComparison.OrdinalIgnoreCase));
+
+                if (manageKOT != null)
+                    manageKOT.IsVisible = true;
+            }
+
             // Configure Settings tab visibility
             if (authService.HasPermission("EditMenu"))
             {

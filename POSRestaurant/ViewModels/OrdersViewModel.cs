@@ -365,40 +365,7 @@ namespace POSRestaurant.ViewModels
 
                 foreach (var o in paginatedOrders)
                 {
-                    Orders.Add(new OrderModel
-                    {
-                        Id = o.Id,
-                        TableId = o.TableId,
-                        OrderDate = o.OrderDate,
-                        TotalItemCount = o.TotalItemCount,
-                        TotalAmount = o.TotalAmount,
-                        PaymentMode = o.PaymentMode,
-                        OrderStatus = o.OrderStatus,
-                        OrderType = o.OrderType,
-                        NumberOfPeople = o.NumberOfPeople,
-                        OrderNumber = o.OrderNumber,
-                        WaiterId = o.WaiterId,
-
-                        IsDiscountGiven = o.IsDiscountGiven,
-                        IsFixedBased = o.IsFixedBased,
-                        IsPercentageBased = o.IsPercentageBased,
-                        DiscountFixed = o.DiscountFixed,
-                        DiscountPercentage = o.DiscountPercentage,
-                        TotalAmountAfterDiscount = o.TotalAmountAfterDiscount,
-
-                        UsingGST = o.UsingGST,
-                        CGST = o.CGST,
-                        SGST = o.SGST,
-                        CGSTAmount = o.CGSTAmount,
-                        SGSTAmount = o.SGSTAmount,
-
-                        RoundOff = o.RoundOff,
-                        GrandTotal = o.GrandTotal,
-
-                        Source = o.Source,
-                        ReferenceNo = o.ReferenceNo,
-                        DeliveryPersion = o.DeliveryPerson,
-                    });
+                    Orders.Add(OrderModel.FromEntity(o));
                 }
 
                 CurrentPageLabel = $"Page: {_currentPage}";
@@ -565,7 +532,7 @@ namespace POSRestaurant.ViewModels
                 if (IsPickup)
                 {
                     PickupSource = EnumExtensions.GetDescription((PickupSources)orderModel.Source);
-                    PickupDelivery = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.DeliveryPersion);
+                    PickupDelivery = await _databaseService.StaffOperaiotns.GetStaffNameBasedOnId(orderModel.DeliveryPerson);
 
                     if (PickupSource == EnumExtensions.GetDescription(PickupSources.Swiggy) || PickupSource == EnumExtensions.GetDescription(PickupSources.Zomato))
                         ShowReference = true;

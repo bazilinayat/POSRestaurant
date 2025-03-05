@@ -405,13 +405,6 @@ namespace POSRestaurant.ViewModels
                 DiscountAmount = 0;
                 CartItems.Clear();
 
-                SelectedPaymentMode = 1;
-
-                IsPartPayment = false;
-                IsNotPartPayment = true;
-                IsCashForPart = IsCardForPart = IsOnlineForPart = false;
-                PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
-
                 DiscountOptionsTS.Clear();
                 foreach (ValueForPicker desc in EnumExtensions.GetAllDescriptions<DiscountOptions>())
                 {
@@ -735,7 +728,7 @@ namespace POSRestaurant.ViewModels
 
                 string? errorMessage;
 
-                var lastOrderNumber = await _databaseService.GetLastestOrderNumberForToday();
+                var lastOrderNumber = await _databaseService.GetLastestPickupOrderNumberForToday();
 
                 // new order, place order
                 var orderModel = new OrderModel
@@ -745,7 +738,7 @@ namespace POSRestaurant.ViewModels
                     TotalItemCount = kots.Sum(x => x.TotalItemCount),
                     TotalAmount = kots.Sum(x => x.TotalPrice),
                     KOTs = kots.ToArray(),
-                    OrderStatus = TableOrderStatus.Paid,
+                    OrderStatus = TableOrderStatus.Running,
                     OrderNumber = lastOrderNumber + 1,
                     OrderType = Data.OrderTypes.Pickup,
                     NumberOfPeople = 0,
@@ -769,7 +762,7 @@ namespace POSRestaurant.ViewModels
 
                     Source = SelectedSource.Key,
                     ReferenceNo = ReferenceNo,
-                    DeliveryPersion = SelectedDeliveryPerson.Id
+                    DeliveryPerson = SelectedDeliveryPerson.Id
                 };
 
                 if (await _ordersViewModel.PlacePickupAsync(orderModel))
@@ -777,11 +770,13 @@ namespace POSRestaurant.ViewModels
                     OrderId = orderModel.Id;
                 }
 
-                await SaveOrderPaymentAsync();
+                //await SaveOrderPaymentAsync();
 
                 await PrintReceipt(orderModel);
 
                 CartItems.Clear();
+
+                WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(orderModel));
 
                 IsLoading = false;
 
@@ -972,185 +967,6 @@ namespace POSRestaurant.ViewModels
             {
                 _logger.LogError("PickupVM-Recieve MenuItemChangedMessage Error", ex);
                 Shell.Current.DisplayAlert("Fault", "Error while Changing Menu Item", "OK");
-            }
-        }
-
-        /// <summary>
-        /// To track the payment mode on UI
-        /// </summary>
-        private PaymentModes PaymentMode;
-
-        /// <summary>
-        /// To manage the selected order type on main page
-        /// </summary>
-        private int _selectedPaymentMode;
-
-        /// <summary>
-        /// To know if the payment is done in parts
-        /// </summary>
-        [ObservableProperty]
-        private bool _isPartPayment;
-
-        /// <summary>
-        /// To know if the payment is done in parts
-        /// </summary>
-        [ObservableProperty]
-        private bool _isNotPartPayment;
-
-        /// <summary>
-        /// In case of part payment, is cash selected
-        /// </summary>
-        [ObservableProperty]
-        private bool _isCashForPart;
-
-        /// <summary>
-        /// In case of part payment, is card selected
-        /// </summary>
-        [ObservableProperty]
-        private bool _isCardForPart;
-
-        /// <summary>
-        /// In case of part payment, is online selected
-        /// </summary>
-        [ObservableProperty]
-        private bool _isOnlineForPart;
-
-        /// <summary>
-        /// In case of part payment, how much is paid in cash
-        /// </summary>
-        [ObservableProperty]
-        private decimal _paidByCustomerInCash;
-
-        /// <summary>
-        /// In case of part payment, how much is paid in card
-        /// </summary>
-        [ObservableProperty]
-        private decimal _paidByCustomerInCard;
-
-        /// <summary>
-        /// In case of part payment, how much is paid in online
-        /// </summary>
-        [ObservableProperty]
-        private decimal _paidByCustomerInOnline;
-
-        /// <summary>
-        /// To manage the selected order type on main page
-        /// Should be handled by code as well
-        /// </summary>
-        public int SelectedPaymentMode
-        {
-            get => _selectedPaymentMode;
-            set
-            {
-                if (_selectedPaymentMode != value)
-                {
-                    try
-                    {
-                        _selectedPaymentMode = value;
-                        if (_selectedPaymentMode != 0)
-                            PaymentMode = (PaymentModes)_selectedPaymentMode;
-                        if (PaymentMode == PaymentModes.Part)
-                        {
-                            IsPartPayment = true;
-                            IsNotPartPayment = false;
-                            IsCashForPart = IsCardForPart = IsOnlineForPart = false;
-                            PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
-                        }
-                        else if (PaymentMode == PaymentModes.Online || PaymentMode == PaymentModes.Card || PaymentMode == PaymentModes.Cash)
-                        {
-                            IsPartPayment = false;
-                            IsNotPartPayment = true;
-                        }
-                        CalculateReturn();
-                        OnPaymenModeChanged();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError("PickupVM-SelectedPaymentMode Set Error", ex);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// To handle the property changed event for the radio button switch
-        /// </summary>
-        public event PropertyChangedEventHandler PaymentModePropertyChanged;
-
-        /// <summary>
-        /// Called when OrderType is changed
-        /// </summary>
-        /// <param name="orderType">Selected OrderType name</param>
-        protected virtual void OnPaymenModeChanged([CallerMemberName] string orderType = null)
-        {
-            PaymentModePropertyChanged?.Invoke(this, new PropertyChangedEventArgs(orderType));
-        }
-
-        /// <summary>
-        /// Command to be called when search box changes
-        /// </summary>
-        [RelayCommand]
-        private void CalculateReturn()
-        {
-            if (IsPartPayment)
-            {
-                if (!IsCashForPart)
-                    PaidByCustomerInCash = 0;
-                if (!IsCardForPart)
-                    PaidByCustomerInCard = 0;
-                if (!IsOnlineForPart)
-                    PaidByCustomerInOnline = 0;
-
-                var totalPaid = PaidByCustomerInCash + PaidByCustomerInCard + PaidByCustomerInOnline;
-            }
-        }
-
-        /// <summary>
-        /// Command to save the order payment details
-        /// </summary>
-        /// <returns>retuns a taks object</returns>
-        [RelayCommand]
-        private async Task SaveOrderPaymentAsync()
-        {
-            try
-            {
-                var orderPayment = new OrderPayment
-                {
-                    OrderId = OrderId,
-                    SettlementDate = DateTime.Now,
-                    PaymentMode = PaymentMode,
-                    OrderType = OrderTypes.Pickup,
-                    Total = GrandTotal,
-                    IsCardForPart = IsCardForPart,
-                    IsCashForPart = IsCashForPart,
-                    IsOnlineForPart = IsOnlineForPart,
-                    PartPaidInCard = PaidByCustomerInCard,
-                    PartPaidInCash = PaidByCustomerInCash,
-                    PartPaidInOnline = PaidByCustomerInOnline,
-                };
-
-                var errorMessage = await _databaseService.OrderPaymentOperations.SaveOrderPaymentAsync(orderPayment);
-
-                if (errorMessage != null)
-                {
-                    await Shell.Current.DisplayAlert("Order Payment Error", errorMessage, "Ok");
-                    return;
-                }
-
-                var order = await _databaseService.GetOrderById(OrderId);
-                if (order != null)
-                {
-                    order.OrderStatus = TableOrderStatus.Paid;
-                    order.PaymentMode = PaymentMode;
-                    await _databaseService.UpdateOrder(order);
-                }
-
-                WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(true));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("PickupVM-SaveOrderPaymentAsync Error", ex);
-                await Shell.Current.DisplayAlert("Fault", "Error in Saving Payment Details", "OK");
             }
         }
     }

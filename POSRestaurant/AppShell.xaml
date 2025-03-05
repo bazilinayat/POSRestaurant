@@ -41,6 +41,9 @@
         <Tab Title="Orders Page" Icon="list.png" Route="OrdersPage">
             <ShellContent ContentTemplate="{DataTemplate pages:OrdersPage}"/>
         </Tab>
+        <Tab Title="Manage Orders" Icon="orderedit.png" Route="ManageKOT">
+            <ShellContent ContentTemplate="{DataTemplate pages:ManageKOTPage}"/>
+        </Tab>
         <Tab Title="Manage Menu" Icon="edit.png" Route="ManageMenuItemPage">
             <ShellContent ContentTemplate="{DataTemplate pages:ManageMenuItemPage}"/>
         </Tab>

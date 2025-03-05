@@ -226,66 +226,6 @@
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </Border>
-                <Border BackgroundColor="{StaticResource AllBackground}"
-                        Padding="10"
-                        StrokeShape="RoundRectangle 10"
-                        StrokeThickness="0">
-                    <Border.Shadow>
-                        <Shadow Brush="red"/>
-                    </Border.Shadow>
-                    <VerticalStackLayout>
-                        <VerticalStackLayout Spacing="10"
-                         Padding="20">
-                                <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
-                                    <RadioButton GroupName="PaymentMode" Content="Cash" 
-                                            IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=1}">
-                                    </RadioButton>
-                                    <RadioButton GroupName="PaymentMode" Content="Online"
-                                            IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=2}">
-                                    </RadioButton>
-                                    <RadioButton GroupName="PaymentMode" Content="Card"
-                                            IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=3}">
-                                    </RadioButton>
-                                    <RadioButton GroupName="PaymentMode" Content="Part"
-                                            IsChecked="{Binding SelectedPaymentMode, Converter={StaticResource IntToBoolConverter}, ConverterParameter=4}">
-                                    </RadioButton>
-                                </HorizontalStackLayout>
-                                <VerticalStackLayout IsVisible="{Binding IsPartPayment}">
-                                    <HorizontalStackLayout Spacing="10">
-                                        <CheckBox IsChecked="{Binding IsCashForPart}" CheckedChanged="CheckBox_CheckedChanged" />
-                                        <Label Text="Cash" VerticalOptions="Center" />
-                                        <CheckBox IsChecked="{Binding IsCardForPart}" CheckedChanged="CheckBox_CheckedChanged" />
-                                        <Label Text="Card" VerticalOptions="Center" />
-                                        <CheckBox IsChecked="{Binding IsOnlineForPart}" CheckedChanged="CheckBox_CheckedChanged" />
-                                        <Label Text="Online" VerticalOptions="Center" />
-                                    </HorizontalStackLayout>
-                                    <VerticalStackLayout Spacing="10">
-                                        <HorizontalStackLayout Spacing="10">
-                                            <Label Text="Paid By Cash:" VerticalOptions="Center" />
-                                            <Entry IsEnabled="{Binding IsCashForPart}"
-                                               TextChanged="Entry_TextChanged"
-                                               Placeholder="Enter cash amount" 
-                                               Text="{Binding PaidByCustomerInCash}" />
-                                        </HorizontalStackLayout>
-                                        <HorizontalStackLayout Spacing="10">
-                                            <Label Text="Paid By Card:" VerticalOptions="Center" />
-                                            <Entry IsEnabled="{Binding IsCardForPart}"
-                                               TextChanged="Entry_TextChanged"
-                                               Placeholder="Enter card amount"
-                                               Text="{Binding PaidByCustomerInCard}" />
-                                        </HorizontalStackLayout>
-                                        <HorizontalStackLayout Spacing="10">
-                                            <Label Text="Paid By Online:" VerticalOptions="Center" />
-                                            <Entry IsEnabled="{Binding IsOnlineForPart}" 
-                                               TextChanged="Entry_TextChanged"
-                                               Placeholder="Enter online amount"
-                                               Text="{Binding PaidByCustomerInOnline}" />
-                                        </HorizontalStackLayout>
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
                 <VerticalStackLayout Spacing="10">
                     <Button Text="Cancel"
                             CornerRadius="5"

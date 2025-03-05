@@ -735,6 +735,8 @@ namespace POSRestaurant.ViewModels
                     order.RoundOff = order.GrandTotal - order.TotalAmountAfterDiscount;
                 }
 
+                order.OrderStatus = TableOrderStatus.Confirmed;
+
                 return await _databaseService.UpdateOrder(order);
             }
             catch (Exception ex)

@@ -33,7 +33,11 @@
                   BackgroundColor="{StaticResource AllBackground}"
                   Padding="15, 10">
                 <HorizontalStackLayout Grid.Column="0">
-                    <Label
+                    <Label IsVisible="{Binding IsDineIn}"
+                           Text="{Binding TableModel.TableNo, StringFormat='Table No. {0} - '}"
+                           TextColor="Black"
+                           FontSize="15"/>
+                    <Label IsVisible="{Binding IsDineIn, Converter={StaticResource InverseBooleanConverter}}"
                            Text="{Binding TableModel.TableNo, StringFormat='Table No. {0} - '}"
                            TextColor="Black"
                            FontSize="15"/>

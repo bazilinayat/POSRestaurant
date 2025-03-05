@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
+             x:Class="POSRestaurant.Pages.ManageKOTPage"
+             Shell.NavBarIsVisible="True"
+             Title="Manage KOTs">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, *" RowSpacing="10" Margin="10">
+        <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Manage Menu Items"/>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding RunningOrders}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Span="5"
+                                 HorizontalItemSpacing="10"
+                                 VerticalItemSpacing="10"
+                                 Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:OrderModel">
+                    <Border>
+                        <VerticalStackLayout Spacing="5">
+                            <Border Padding="10">
+                                <HorizontalStackLayout>
+                                    <Label Text="{Binding OrderNumber, StringFormat='Order #{0}'}"
+                                           IsVisible="{Binding IsDineIn}"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="Start"/>
+                                    <Label Text="{Binding OrderNumber, StringFormat='Pickup #{0}'}"
+                                           IsVisible="{Binding IsDineIn, Converter={StaticResource InverseBooleanConverter}}"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="Start"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                            <VerticalStackLayout Spacing="10" Padding="10">
+                                <Label Text="{Binding TableId, StringFormat='Table #{0}'}"
+                                       IsVisible="{Binding IsDineIn}"
+                                       HorizontalOptions="Start"/>
+                                <Label Text="Pickup Order"
+                                       IsVisible="{Binding IsDineIn, Converter={StaticResource InverseBooleanConverter}}"
+                                       HorizontalOptions="Start"/>
+                                <Label Text="{Binding TotalItemCount, StringFormat='Total Item(s): {0}'}"
+                                       HorizontalOptions="Start"/>
+                                <Label Text="{Binding GrandTotal, StringFormat='Total: {0:C}'}"
+                                       HorizontalOptions="Start"/>
+                            </VerticalStackLayout>
+                            <Border Padding="10">
+                                <ImageButton Source="delete.png" 
+                                             Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:ManageKOTViewModel}}, Path=DeleteOrderCommand}"
+                                             CommandParameter="{Binding .}"
+                                             WidthRequest="30" HeightRequest="30"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+
+</ContentPage>

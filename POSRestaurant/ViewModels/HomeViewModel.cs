@@ -424,6 +424,7 @@ namespace POSRestaurant.ViewModels
                 {
                     tableModel.OrderType = OrderTypes.DineIn;
                     tableModel.Waiter = SelectedWaiter;
+                    tableModel.WaiterId = SelectedWaiter.Id;
                     tableModel.NumberOfPeople = NumberOfPeople;
                 }
 

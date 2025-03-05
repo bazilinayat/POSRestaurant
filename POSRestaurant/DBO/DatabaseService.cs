@@ -183,6 +183,7 @@ namespace POSRestaurant.DBO
                 // Permissions, Role and Admin 
                 await UserOperation.SavePermissionAsync("MakeOrders");
                 await UserOperation.SavePermissionAsync("ViewOrders");
+                await UserOperation.SavePermissionAsync("EditOrders");
                 await UserOperation.SavePermissionAsync("EditMenu");
                 await UserOperation.SavePermissionAsync("EditStaff");
                 await UserOperation.SavePermissionAsync("ViewReport");
@@ -366,7 +367,7 @@ namespace POSRestaurant.DBO
 
                 Source = orderModel.Source,
                 ReferenceNo = orderModel.ReferenceNo,
-                DeliveryPerson = orderModel.DeliveryPersion,
+                DeliveryPerson = orderModel.DeliveryPerson,
             };
 
             if (await _connection.InsertAsync(order) > 0)
@@ -408,12 +409,47 @@ namespace POSRestaurant.DBO
         }
 
         /// <summary>
-        /// Delete order based on given OrderId
+        /// Delete order based on given Order
         /// </summary>
         /// <param name="order">Order to delete</param>
         /// <returns>Returns a Task object</returns>
         public async Task DeleteOrderAsync(Order order) =>
             await _connection.DeleteAsync(order);
+
+
+        /// <summary>
+        /// Delete order based on given OrderId
+        /// </summary>
+        /// <param name="orderId">Id for Order to delete</param>
+        /// <returns>Returns a Task object</returns>
+        public async Task<bool> DeleteCompleteOrderAsync(long orderId)
+        {
+            try
+            {
+                var kots = await GetOrderKotsAsync(orderId);
+
+                await _connection.RunInTransactionAsync(async (transaction) =>
+                {
+                    foreach(var kot in kots)
+                    {
+                        // Delete the KOTItems for our specific KOTs
+                        await _connection.ExecuteAsync("DELETE FROM KOTItem WHERE KOTId = ?", kot.Id);
+
+                        // Delete the KOT from Ids
+                        await _connection.ExecuteAsync("DELETE FROM KOT WHERE Id = ?", kot.Id);
+                    }
+
+                    // Delete the role
+                    await _connection.ExecuteAsync("DELETE FROM [Order] WHERE Id = ?", orderId);
+                });
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// To get the last order id
@@ -723,12 +759,43 @@ namespace POSRestaurant.DBO
             var oneDateMore = DateTime.Today.AddDays(1);
             var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
 
-            var latestOrder = await _connection.Table<Order>().Where(y => y.OrderDate > yesterday && y.OrderDate < tomorrow).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
+            var latestOrder = await _connection.Table<Order>().Where(y => y.OrderDate > yesterday && y.OrderDate < tomorrow && y.OrderType != OrderTypes.Pickup).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
             if (latestOrder != null) 
                 return latestOrder.OrderNumber;
             else
                 return 0;
         }
+
+        /// <summary>
+        /// Get the latest pickup ordernumber from today
+        /// </summary>
+        /// <returns>Return the last pickup ordernumber</returns>
+        public async Task<long> GetLastestPickupOrderNumberForToday()
+        {
+            var yesterday = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 0, 0, 0);
+            var oneDateMore = DateTime.Today.AddDays(1);
+            var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
+
+            var latestOrder = await _connection.Table<Order>().Where(y => y.OrderDate > yesterday && y.OrderDate < tomorrow && y.OrderType == OrderTypes.Pickup).OrderByDescending(o => o.OrderDate).FirstOrDefaultAsync();
+            if (latestOrder != null)
+                return latestOrder.OrderNumber;
+            else
+                return 0;
+        }
+
+        /// <summary>
+        /// Get the list of all the running pickup orders
+        /// </summary>
+        /// <returns>Returns a list of Order object</returns>
+        public async Task<Order[]> GetRunningPickupOrders() =>
+            await _connection.Table<Order>().Where(o => o.OrderType == OrderTypes.Pickup && o.OrderStatus == TableOrderStatus.Running).ToArrayAsync();
+
+        /// <summary>
+        /// Get the list of all the running orders
+        /// </summary>
+        /// <returns>Returns a list of Order object</returns>
+        public async Task<Order[]> GetRunningOrdersAsync() =>
+            await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running).ToArrayAsync();
 
         /// <summary>
         /// Implementation of IAsyncDisposable interface

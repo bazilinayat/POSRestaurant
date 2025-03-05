@@ -29,6 +29,17 @@ namespace POSRestaurant.ViewModels
         public TableModel TableModel { get; set; }
 
         /// <summary>
+        /// To add details to the UI
+        /// </summary>
+        public OrderModel OrderModel { get; set; }
+
+        /// <summary>
+        /// To know if the order is on table or pickup
+        /// </summary>
+        [ObservableProperty]
+        private bool _isDineIn;
+
+        /// <summary>
         /// To track the payment mode on UI
         /// </summary>
         private PaymentModes PaymentMode;
@@ -147,6 +158,11 @@ namespace POSRestaurant.ViewModels
             IsNotPartPayment = true;
             IsCashForPart = IsCardForPart = IsOnlineForPart = false;
             PaidByCustomerInCash = PaidByCustomerInCard = PaidByCustomerInOnline = 0;
+
+            if (TableModel != null)
+                IsDineIn = true;
+            else
+                IsDineIn = false;
         }
 
         /// <summary>
@@ -193,11 +209,11 @@ namespace POSRestaurant.ViewModels
             {
                 var orderPayment = new OrderPayment
                 {
-                    OrderId = TableModel.RunningOrderId,
+                    OrderId = TableModel != null ? TableModel.RunningOrderId : OrderModel.Id,
                     SettlementDate = DateTime.Now,
                     PaymentMode = PaymentMode,
                     OrderType = OrderTypes.DineIn,
-                    Total = TableModel.OrderTotal,
+                    Total = TableModel != null ? TableModel.OrderTotal : OrderModel.GrandTotal,
                     IsCardForPart = IsCardForPart,
                     IsCashForPart = IsCashForPart,
                     IsOnlineForPart = IsOnlineForPart,
@@ -222,15 +238,21 @@ namespace POSRestaurant.ViewModels
                     await _databaseService.UpdateOrder(order);
                 }
 
-                TableModel.Status = TableOrderStatus.NoOrder;
-                TableModel.Waiter = null;
-                TableModel.OrderTotal = 0;
-                TableModel.RunningOrderId = 0;
-                TableModel.NumberOfPeople = 0;
+                if (TableModel != null)
+                {
+                    TableModel.Status = TableOrderStatus.NoOrder;
+                    TableModel.Waiter = null;
+                    TableModel.OrderTotal = 0;
+                    TableModel.RunningOrderId = 0;
+                    TableModel.NumberOfPeople = 0;
 
-                WeakReferenceMessenger.Default.Send(TableStateChangedMessage.From(TableModel));
-                WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
-                WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(true));
+                    WeakReferenceMessenger.Default.Send(TableStateChangedMessage.From(TableModel));
+                    WeakReferenceMessenger.Default.Send(TableChangedMessage.From(TableModel));
+                }
+                
+
+                var orderModel = OrderModel.FromEntity(order);
+                WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(orderModel));
             }
             catch (Exception ex)
             {

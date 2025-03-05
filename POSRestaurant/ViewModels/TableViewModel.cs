@@ -12,6 +12,7 @@ using POSRestaurant.Pages;
 using POSRestaurant.Service;
 using POSRestaurant.Service.LoggerService;
 using POSRestaurant.Service.SettingService;
+using System.Collections.ObjectModel;
 using Windows.Devices.PointOfService;
 
 namespace POSRestaurant.ViewModels
@@ -19,7 +20,9 @@ namespace POSRestaurant.ViewModels
     /// <summary>
     /// ViewModel For Table Page
     /// </summary>
-    public partial class TableViewModel : ObservableObject, IRecipient<TableChangedMessage>, IRecipient<StaffChangedMessage>, IRecipient<TableStateChangedMessage>
+    public partial class TableViewModel : ObservableObject, 
+        IRecipient<TableChangedMessage>, IRecipient<StaffChangedMessage>, 
+        IRecipient<TableStateChangedMessage>, IRecipient<OrderChangedMessage>
     {
         /// <summary>
         /// DIed variable for DatabaseService
@@ -90,6 +93,11 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         [ObservableProperty]
         private StaffModel _selectedCashier;
+
+        /// <summary>
+        /// To have a list of running pickup orders
+        /// </summary>
+        public ObservableCollection<OrderModel> RunningPickupOrders { get; set; } = new();
 
         #region Login Fields
 
@@ -198,6 +206,7 @@ namespace POSRestaurant.ViewModels
             WeakReferenceMessenger.Default.Register<TableChangedMessage>(this);
             WeakReferenceMessenger.Default.Register<StaffChangedMessage>(this);
             WeakReferenceMessenger.Default.Register<TableStateChangedMessage>(this);
+            WeakReferenceMessenger.Default.Register<OrderChangedMessage>(this);
         }
 
         /// <summary>
@@ -310,6 +319,8 @@ namespace POSRestaurant.ViewModels
 
                 await GetTableStateAsync();
 
+                await GetRunningPickups();
+
                 await LoadCashiers();
 
                 IsLoading = false;
@@ -378,7 +389,7 @@ namespace POSRestaurant.ViewModels
         }
 
         /// <summary>
-        /// To get the latest table state
+        /// To get all the pickup orders which are running
         /// </summary>
         /// <returns>Returns a Task Object</returns>
         public async ValueTask GetTableStateAsync()
@@ -391,8 +402,12 @@ namespace POSRestaurant.ViewModels
 
                 if (tables.Count() > 0)
                 {
-                    foreach(var table in tables)
+                    foreach (var table in tables)
                     {
+                        var staff = await _databaseService.StaffOperaiotns.GetStaffBasedOnId(table.WaiterId);
+                        if (staff != null)
+                            table.Waiter = StaffModel.FromEntity(staff);
+
                         Receive(new TableChangedMessage(table));
                     }
                 }
@@ -401,6 +416,32 @@ namespace POSRestaurant.ViewModels
             {
                 _logger.LogError("TableVM-GetTablesAsync Error", ex);
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// To get the latest table state
+        /// </summary>
+        /// <returns>Returns a Task Object</returns>
+        public async ValueTask GetRunningPickups()
+        {
+            try
+            {
+                var orders = (await _databaseService.GetRunningPickupOrders())
+                                    .Select(OrderModel.FromEntity)
+                                    .ToArray();
+
+                if (orders.Count() > 0)
+                {
+                    foreach(var order in orders)
+                    {
+                        Receive(new OrderChangedMessage(order));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-GetRunningPickups Error", ex);
             }
         }
 
@@ -539,11 +580,29 @@ namespace POSRestaurant.ViewModels
         public void Receive(TableChangedMessage tableChangedMessage)
         {
             var tableModel = tableChangedMessage.Value;
-            for(int i = 0; i < Tables.Length; i++)
+
+            if (tableModel.Status == TableOrderStatus.NoOrder)
             {
-                if (Tables[i].Id == tableModel.Id)
+                for (int i = 0; i < Tables.Length; i++)
                 {
-                    Tables[i] = tableModel;
+                    if (Tables[i].Id == tableModel.Id)
+                    {
+                        Tables[i].Status = TableOrderStatus.NoOrder;
+                        Tables[i].RunningOrderId = 0;
+                        Tables[i].Waiter = null;
+                        Tables[i].NumberOfPeople = 0;
+                        Tables[i].OrderTotal = 0;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Tables.Length; i++)
+                {
+                    if (Tables[i].Id == tableModel.Id)
+                    {
+                        Tables[i] = tableModel;
+                    }
                 }
             }
 
@@ -646,6 +705,10 @@ namespace POSRestaurant.ViewModels
                 tableModel.Status = Data.TableOrderStatus.Printed;
                 tableModel.OrderTotal = _billingService.OrderModel.GrandTotal;
 
+                var order = await _databaseService.GetOrderById(tableModel.RunningOrderId);
+                order.OrderStatus = TableOrderStatus.Printed;
+                await _databaseService.UpdateOrder(order);
+
                 Receive(new TableChangedMessage(tableModel));
                 Receive(new TableStateChangedMessage(tableModel));
 
@@ -656,6 +719,49 @@ namespace POSRestaurant.ViewModels
                 _logger.LogError("TableVM-PrintFinalBill Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "Error in Printing the Bill", "OK");
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// To know that there are some changes in order details
+        /// </summary>
+        /// <param name="orderChangedMessage">Order Details are changed</param>
+        public void Receive(OrderChangedMessage orderChangedMessage)
+        {
+            var receivedOrder = orderChangedMessage.Value;
+            if (receivedOrder != null)
+            {
+                if (receivedOrder.OrderStatus == TableOrderStatus.Paid)
+                {
+                    var orderToRemove = RunningPickupOrders.Where(o => o.Id == receivedOrder.Id).FirstOrDefault();
+                    if (orderToRemove != null)
+                        RunningPickupOrders.Remove(orderToRemove);
+                }
+                else
+                {
+                    RunningPickupOrders.Add(receivedOrder);
+                }
+            }
+        }
+
+        /// <summary>
+        /// When the pickup order is clicked from the list
+        /// </summary>
+        /// <param name="orderModel">OrderModel for selected pickup order</param>
+        /// <returns>Returns a Task Object</returns>
+        [RelayCommand]
+        private async Task PickupComplete(OrderModel orderModel)
+        {
+            try
+            {
+                var orderCompleteVM = _serviceProvider.GetRequiredService<OrderCompleteViewModel>();
+                var completeOrderPopup = new OrderCompletePopup(orderCompleteVM, null, orderModel);
+                await Shell.Current.ShowPopupAsync(completeOrderPopup);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TableVM-PickupComplete Error", ex);
+                await Shell.Current.DisplayAlert("Fault", "Error in Loading Actions", "OK");
             }
         }
     }

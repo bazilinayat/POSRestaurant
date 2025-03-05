@@ -87,24 +87,4 @@ public partial class PickupPage : ContentPage
     {
         await Application.Current.MainPage.Navigation.PopAsync();
     }
-
-    /// <summary>
-    /// Event called when 'Paid By Customer' field is changed
-    /// </summary>
-    /// <param name="sender">Sender of the event</param>
-    /// <param name="e">Event args</param>
-    private void Entry_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        _pickupViewModel.CalculateReturnCommand.Execute(e.NewTextValue);
-    }
-
-    /// <summary>
-    /// Event called when check for payment type is changed in Part payment
-    /// </summary>
-    /// <param name="sender">CheckBox</param>
-    /// <param name="e">EventArgs</param>
-    private void CheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
-    {
-        _pickupViewModel.CalculateReturnCommand.Execute(null);
-    }
 }

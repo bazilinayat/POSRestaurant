@@ -69,6 +69,7 @@ namespace POSRestaurant
                 .AddSingleton<RoleManagementPage>()
                 .AddSingleton<UserManagementPage>()
                 .AddTransient<LoginPage>()
+                .AddTransient<ManageKOTPage>()
                 
                 .AddSingleton<ShellViewModel>()
                 .AddSingleton<HomeViewModel>()
@@ -87,7 +88,8 @@ namespace POSRestaurant
                 .AddSingleton<SalesReportViewModel>()
                 .AddSingleton<RoleManagementViewModel>()
                 .AddSingleton<UserManagementViewModel>()
-                .AddTransient<LoginViewModel>();
+                .AddTransient<LoginViewModel>()
+                .AddTransient<ManageKOTViewModel>();
 
             // Force initialize Windows App Runtime components
             if (OperatingSystem.IsWindows())

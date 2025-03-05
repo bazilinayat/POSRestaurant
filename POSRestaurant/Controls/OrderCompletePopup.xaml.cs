@@ -28,13 +28,14 @@ public partial class OrderCompletePopup : Popup
     /// </summary>
     /// <param name="orderCompleteViewModel">DIed OrderCompleteViewModel</param>
     /// <param name="tableModel">Passed TableModel value</param>
-    public OrderCompletePopup(OrderCompleteViewModel orderCompleteViewModel, TableModel tableModel)
+    public OrderCompletePopup(OrderCompleteViewModel orderCompleteViewModel, TableModel tableModel, OrderModel orderModel = null)
     {
         InitializeComponent();
 
         _orderCompleteViewModel = orderCompleteViewModel;
 
         _orderCompleteViewModel.TableModel = tableModel;
+        _orderCompleteViewModel.OrderModel = orderModel;
 
         BindingContext = _orderCompleteViewModel;
 
