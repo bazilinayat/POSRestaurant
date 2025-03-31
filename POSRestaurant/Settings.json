@@ -4,6 +4,12 @@
   "Email": "abc@gmail.com",
   "WebsiteURL": "https://google.com",
   "NumberOfTables": 12,
+  "RazorPayInfo": {
+    "CreateQRURL": "https://api.razorpay.com/v1/payments/qr_codes",
+    "FetchPaymentURL": "https://api.razorpay.com/v1/payments/qr_codes/{0}/payments",
+    "KEYID": "rzp_live_hKzg79pPp5NTs8",
+    "KEYSECRET": "dAltuhTYRbEFRzpBAZ2TfKa6"
+  },
   "PaytmInfo": {
     "CreateQR": "https://securegw-stage.paytm.in/paymentservices/qr/create",
     "TransactionStatus": "https://securegw-stage.paytm.in/v3/order/status",

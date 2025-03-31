@@ -1,9 +1,14 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using POSRestaurant.DBO;
+﻿using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.PaymentService.Online;
 using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.PaymentService;
 using POSRestaurant.Service.SettingService;
 using POSRestaurant.ViewModels;
+using System.Drawing;
+using System.Drawing.Imaging;
+using ZXing;
+using ZXing.Common;
 
 namespace POSRestaurant.Service
 {
@@ -31,6 +36,16 @@ namespace POSRestaurant.Service
         /// DIed Setting
         /// </summary>
         private readonly Setting _settingService;
+        
+        /// <summary>
+        /// DIed Setting
+        /// </summary>
+        private readonly RazorPayService _razorPayService;
+
+        /// <summary>
+        /// DIed PaymentMonitoringService
+        /// </summary>
+        private readonly PaymentMonitoringService _paymentMonitoringService;
 
         /// <summary>
         /// To store the order items of selected order
@@ -76,12 +91,15 @@ namespace POSRestaurant.Service
         /// <param name="settingService">DI for SettingService</param>
         /// <param name="receiptService">DI for ReceiptService</param>
         public BillingService(DatabaseService databaseService, LogService logger, OrdersViewModel ordersViewModel,
-            Setting settingService, ReceiptService receiptService)
+            Setting settingService, ReceiptService receiptService, RazorPayService razorPayService,
+            PaymentMonitoringService paymentMonitoringService)
         {
             _logger = logger;
             _databaseService = databaseService;
             _settingService = settingService;
             _receiptService = receiptService;
+            _razorPayService = razorPayService;
+            _paymentMonitoringService = paymentMonitoringService;
         }
 
         /// <summary>
@@ -193,7 +211,20 @@ namespace POSRestaurant.Service
                     }
                 }
 
-                await PrintReceiptAsync();
+                var (imageUrl, qrCodeId) = await _razorPayService.GenerateDynamicQR(OrderModel.Id, 1);
+
+                // var imageUrl = "https://rzp.io/i/BWcUVrLp";
+                var qrContent = await GetQRContent(imageUrl);
+                await PrintReceiptAsync(qrContent);
+
+                _paymentMonitoringService.QrCodes.TryAdd(qrCodeId, new PaymentNecessaryDetail
+                {
+                    QrCodeId = qrCodeId,
+                    Orderid = OrderModel.Id,
+                    OrderTotal = OrderModel.GrandTotal,
+                    OrderType = OrderModel.OrderType,
+                    TableModelToUpdate = TableModel
+                });
             }
             catch (Exception ex)
             {
@@ -203,10 +234,102 @@ namespace POSRestaurant.Service
         }
 
         /// <summary>
+        /// To download the image and extract the qr code content to make our own
+        /// </summary>
+        /// <param name="imageUrl">Image url to get the content</param>
+        /// <returns>QR code content if success, else null</returns>
+        private async Task<string?> GetQRContent(string imageUrl)
+        {
+            string qrContent = null;
+            string tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".jpg");
+
+            // Step 1: Download image to temp file
+            using (HttpClient client = new HttpClient())
+            using (var response = await client.GetAsync(imageUrl))
+            using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await response.Content.CopyToAsync(fileStream);
+            }
+
+            try
+            {
+                // Step 2: Extract QR code content using ZXing.Net
+                qrContent = DecodeQrCode(tempFilePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("BillingService-PrintReceiptAsync Error", ex);
+            }
+
+            return qrContent;
+        }
+
+        /// <summary>
+        /// Method to decode the qr code from image and return the scanned content from the qrcode needed
+        /// </summary>
+        /// <param name="imagePath">Temporary image path</param>
+        /// <returns>The scanned qr code content</returns>
+        private string DecodeQrCode(string imagePath)
+        {
+            try
+            {
+                using (Bitmap bitmap = new Bitmap(imagePath))
+                {
+                    // Convert bitmap to byte array
+                    var luminanceSource = ConvertBitmapToLuminanceSource(bitmap);
+
+                    if (luminanceSource == null)
+                    {
+                        Console.WriteLine("Failed to convert image to luminance source.");
+                        return "";
+                    }
+
+                    var binarizer = new HybridBinarizer(luminanceSource);
+                    var bitmapMatrix = new BinaryBitmap(binarizer);
+
+                    var reader = new MultiFormatReader();
+                    var result = reader.decode(bitmapMatrix);
+
+                    return result?.Text ?? "";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error decoding QR Code: {ex.Message}");
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// To convert the downloaded image to a RGB Luminance source for processing further
+        /// </summary>
+        /// <param name="bitmap">Bitmap image to convert</param>
+        /// <returns>The LuminanceSource required to process</returns>
+        private LuminanceSource ConvertBitmapToLuminanceSource(Bitmap bitmap)
+        {
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+
+            // Lock the bitmap data to access pixel bytes
+            var rect = new Rectangle(0, 0, width, height);
+            var bitmapData = bitmap.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
+
+            int stride = bitmapData.Stride;
+            byte[] pixelBuffer = new byte[stride * height];
+
+            // Copy pixel data
+            System.Runtime.InteropServices.Marshal.Copy(bitmapData.Scan0, pixelBuffer, 0, pixelBuffer.Length);
+            bitmap.UnlockBits(bitmapData);
+
+            // Convert to LuminanceSource for ZXing
+            return new RGBLuminanceSource(pixelBuffer, width, height, RGBLuminanceSource.BitmapFormat.RGB32);
+        }
+
+        /// <summary>
         /// Command to call when we want to print the receipt
         /// </summary>
         /// <returns>Returns a Task Object</returns>
-        private async Task PrintReceiptAsync()
+        private async Task PrintReceiptAsync(string? qrContent)
         {
             await Task.Delay(10); // Give UI time to update
             try
@@ -250,7 +373,7 @@ namespace POSRestaurant.Service
                     GrandTotal = OrderModel.GrandTotal,
 
                     FassaiNo = restaurantInfo.FSSAI,
-                    QRCode = "Data"
+                    QRCode = qrContent != null ? qrContent : "Data"
                 };
 
                 var pdfData = await _receiptService.GenerateReceipt(billModel);
@@ -258,7 +381,7 @@ namespace POSRestaurant.Service
             }
             catch (Exception ex)
             {
-                _logger.LogError("BillVM-PrintReceiptAsync Error", ex);
+                _logger.LogError("BillingService-PrintReceiptAsync Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "Error in Printing the Bill", "OK");
             }
         }

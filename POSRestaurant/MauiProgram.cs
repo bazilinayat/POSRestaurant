@@ -1,13 +1,14 @@
 ﻿using CommunityToolkit.Maui;
-using POSRestaurant.Service.LoggerService;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
-using POSRestaurant.PaymentService.Online;
 using POSRestaurant.DBO;
 using POSRestaurant.Pages;
+using POSRestaurant.PaymentService.Online;
 using POSRestaurant.Service;
-using POSRestaurant.ViewModels;
+using POSRestaurant.Service.LoggerService;
+using POSRestaurant.Service.PaymentService;
 using POSRestaurant.Service.SettingService;
+using POSRestaurant.ViewModels;
 
 namespace POSRestaurant
 {
@@ -48,10 +49,12 @@ namespace POSRestaurant
                 .AddSingleton<TaxService>()
                 .AddSingleton<MenuService>()
                 .AddSingleton<PaytmService>()
+                .AddSingleton<RazorPayService>()
                 .AddSingleton<ReceiptService>()
                 .AddSingleton<BillingService>()
                 .AddSingleton<IAuthService, AuthService>()
                 .AddSingleton<INavigationService, NavigationService>()
+                .AddSingleton<PaymentMonitoringService>()
 
                 .AddSingleton<MainPage>()
                 .AddSingleton<OrdersPage>()

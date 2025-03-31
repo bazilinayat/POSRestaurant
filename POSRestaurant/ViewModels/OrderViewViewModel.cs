@@ -291,6 +291,8 @@ namespace POSRestaurant.ViewModels
                 IsLoading = true;
 
                 TableNumber = TableModel.TableNo;
+                
+                _updatedKOTItemIds.Clear();
 
                 OrderItems.Clear();
 
@@ -636,8 +638,8 @@ namespace POSRestaurant.ViewModels
                     {
                         KOTNumber = lastKOTNumber + 1,
                         KOTDateTime = DateTime.Now,
-                        TotalItemCount = toAdd.Length,
-                        TotalPrice = toAdd.Sum(x => x.Price),
+                        TotalItemCount = toAdd.Sum(x => x.Quantity),
+                        TotalPrice = toAdd.Sum(x => x.Amount),
                         Items = toAdd
                     };
                     List<KOTModel> kots = new List<KOTModel>();

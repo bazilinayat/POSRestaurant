@@ -271,4 +271,17 @@ namespace POSRestaurant.Data
         [Description("Bank")]
         Bank = 3
     }
+
+    /// <summary>
+    /// To list down and use the status codes which we will understand for online payments
+    /// </summary>
+    public enum OnlinePaymentStatus
+    {
+        NoStatus = 0,
+        Created = 1,
+        Authorized = 2,
+        Completed = 3,
+        Refunded = 4,
+        Failed = 5
+    }
 }

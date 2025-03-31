@@ -2,6 +2,7 @@
 using POSRestaurant.ViewModels;
 using POSRestaurant.Service.SettingService;
 using POSRestaurant.Service;
+using POSRestaurant.Service.PaymentService;
 
 namespace POSRestaurant
 {
@@ -29,7 +30,9 @@ namespace POSRestaurant
         /// Constructor for the class, just starting the application
         /// </summary>
         /// <param name="databaseService">DI for DatabaseService</param>
-        public App(IServiceProvider serviceProvider, DatabaseService databaseService, Setting settingService, IAuthService authService, INavigationService navigationService)
+        public App(IServiceProvider serviceProvider, DatabaseService databaseService, 
+            Setting settingService, IAuthService authService, 
+            INavigationService navigationService, PaymentMonitoringService paymentMonitoringService)
         {
             try
             {
@@ -47,6 +50,9 @@ namespace POSRestaurant
 
                 // Initialize and Seed Database
                 Task.Run(async () => await databaseService.InitializeDatabaseAsync()).GetAwaiter().GetResult();
+
+                // Start monitoring for payments
+                Task.Run(async () => await paymentMonitoringService.CheckPaymentStatus()).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {

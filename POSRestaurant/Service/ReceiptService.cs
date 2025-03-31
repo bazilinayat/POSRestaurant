@@ -352,8 +352,8 @@ namespace POSRestaurant.Service
                     .SetFontSize(8));
 
 
-                string qrContent = $"upi://pay?pa=paytm.s191jue@pty&pn=Gokul Pav Bhaji&am={data.GrandTotal}&cu=INR&tn=Bill #{data.BillNo}";
-                BarcodeQRCode qrCode = new BarcodeQRCode(qrContent);
+                // string qrContent = $"upi://pay?pa=paytm.s191jue@pty&pn=Gokul Pav Bhaji&am={data.GrandTotal}&cu=INR&tn=Bill #{data.BillNo}";
+                BarcodeQRCode qrCode = new BarcodeQRCode(data.QRCode);
 
                 // Create the QR code image
                 float qrSize = 150; // Size in points

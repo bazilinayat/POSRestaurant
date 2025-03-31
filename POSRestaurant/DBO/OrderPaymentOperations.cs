@@ -66,5 +66,39 @@ namespace POSRestaurant.DBO
                 return ordersOnDate.Where(o => o.OrderType == (OrderTypes)orderType).ToArray();
             }
         }
+
+        /// <summary>
+        /// Method to save the order online reference
+        /// </summary>
+        /// <param name="orderOnlineReference">OrderOnlineReference to save</param>
+        /// <returns>False in Error, True on success</returns>
+        public async Task<bool> SaveOrderOnlineReferenceAsync(OrderOnlineReference orderOnlineReference)
+        {
+            if (await _connection.InsertAsync(orderOnlineReference) > 0)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Method to get the order online reference
+        /// </summary>
+        /// <param name="orderId">OrderOnlineReference OrderId</param>
+        /// <returns>OrderOnlineReference object</returns>
+        public async Task<OrderOnlineReference> GetOrderOnlineReferenceAsync(long orderId) =>
+            await _connection.Table<OrderOnlineReference>().Where(o => o.OrderId == orderId).FirstOrDefaultAsync();
+
+        /// <summary>
+        /// Method to delete the order online reference
+        /// </summary>
+        /// <param name="orderOnlineReference">OrderOnlineReference to delete</param>
+        /// <returns>False in Error, True on success</returns>
+        public async Task<bool> DeleteOrderOnlineReferenceAsync(OrderOnlineReference orderOnlineReference)
+        {
+            if (await _connection.DeleteAsync(orderOnlineReference) > 0)
+                return true;
+
+            return false;
+        }
     }
 }

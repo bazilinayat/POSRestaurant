@@ -31,6 +31,10 @@
         /// </summary>
         public int NumberOfTables { get; set; }
         /// <summary>
+        /// To get the RazorPay info needed for the RazorPay transactions
+        /// </summary>
+        public RazorPayInfo RazorPayInfo { get; set; }
+        /// <summary>
         /// To get the paytm info needed for the paytm transactions
         /// </summary>
         public PaytmInfo PaytmInfo { get; set; }

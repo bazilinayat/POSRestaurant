@@ -125,7 +125,8 @@ namespace POSRestaurant.DBO
                 typeof(UserRole),
                 typeof(RolePermission),
                 typeof(User),
-                typeof(AssignedUserRole)
+                typeof(AssignedUserRole),
+                typeof(OrderOnlineReference)
             };
 
             // Create the migration manager
