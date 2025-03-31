@@ -7,8 +7,8 @@
   "RazorPayInfo": {
     "CreateQRURL": "https://api.razorpay.com/v1/payments/qr_codes",
     "FetchPaymentURL": "https://api.razorpay.com/v1/payments/qr_codes/{0}/payments",
-    "KEYID": "rzp_live_hKzg79pPp5NTs8",
-    "KEYSECRET": "dAltuhTYRbEFRzpBAZ2TfKa6"
+    "KEYID": "YOUR_KEY_ID",
+    "KEYSECRET": "YOUR_KEY_SECRET"
   },
   "PaytmInfo": {
     "CreateQR": "https://securegw-stage.paytm.in/paymentservices/qr/create",
