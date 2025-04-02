@@ -164,6 +164,9 @@
 	  <MauiXaml Update="Pages\ExpenseItemManagementPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Pages\InventoryEdit.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\InventoryReport.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

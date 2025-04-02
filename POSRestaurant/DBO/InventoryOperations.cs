@@ -156,5 +156,28 @@ namespace POSRestaurant.DBO
             return filteredData;
         }
 
+        /// <summary>
+        /// To filter the data for reports as per the conditions given
+        /// </summary>
+        /// <param name="selectedDate">Selected date of the data entry</param>
+        /// <returns>Array of Inventory</returns>
+        public async Task<Inventory[]> GetInventoryItemsAsync(DateTime selectedDate)
+        {
+            var yesterday = new DateTime(selectedDate.Year, selectedDate.Month, selectedDate.Day, 0, 0, 0);
+            var oneDateMore = selectedDate.AddDays(1);
+            var tomorrow = new DateTime(oneDateMore.Year, oneDateMore.Month, oneDateMore.Day, 0, 0, 0);
+
+            var inventoryOnDate = await _connection.Table<Inventory>().Where(o => o.EntryDate > yesterday && o.EntryDate < tomorrow).ToArrayAsync();
+
+            return inventoryOnDate;
+        }
+
+        /// <summary>
+        /// Delete Inventory from the database
+        /// </summary>
+        /// <param name="inventory">Inventory to delete</param>
+        /// <returns>Returns the number of rows deleted</returns>
+        public async Task<int> DeleteInventoryAsync(Inventory inventory) =>
+            await _connection.DeleteAsync(inventory);
     }
 }

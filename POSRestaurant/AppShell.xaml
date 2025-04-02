@@ -50,8 +50,11 @@
         <Tab Title="Manage Staff" Icon="user_regular_24.png" Route="StaffManagementPage">
             <ShellContent ContentTemplate="{DataTemplate pages:StaffManagementPage}"/>
         </Tab>
-        <Tab Title="Manage Inventory" Icon="inventory.png" Route="InventoryPage">
+        <Tab Title="Add Inventory" Icon="inventory.png" Route="InventoryPage">
             <ShellContent ContentTemplate="{DataTemplate pages:InventoryPage}"/>
+        </Tab>
+        <Tab Title="Manage Inventory" Icon="inventory.png" Route="InventoryEdit">
+            <ShellContent ContentTemplate="{DataTemplate pages:InventoryEdit}"/>
         </Tab>
         <Tab Title="Role Management" Icon="grid_alt_solid_24.png" Route="RoleManagementPage">
             <ShellContent ContentTemplate="{DataTemplate pages:RoleManagementPage}"/>

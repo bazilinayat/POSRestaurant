@@ -1,4 +1,5 @@
-﻿using SQLite;
+﻿using POSRestaurant.Models;
+using SQLite;
 
 namespace POSRestaurant.Data
 {
@@ -74,5 +75,28 @@ namespace POSRestaurant.Data
         /// Date of record entry
         /// </summary>
         public DateTime EntryDate { get; set; }
+
+        /// <summary>
+        /// To make object of Inventory
+        /// </summary>
+        /// <param name="entity">InventoryReportModel Object</param>
+        /// <returns>Returns a Inventory object</returns>
+        public static Inventory FromEntity(InventoryReportModel entity) =>
+            new()
+            {
+                Id = entity.Id,
+                ExpenseTypeId = entity.ExpenseTypeId,
+                ExpenseTypeName = entity.ExpenseTypeName,
+                EntryDate = entity.EntryDate,
+                ExpenseItemId = entity.ExpenseItemId,
+                IsWeighted = entity.IsWeighted,
+                QuantityOrWeight = entity.QuantityOrWeight,
+                TotalPrice = entity.TotalPrice,
+                StaffId = entity.StaffId,
+                ExpenseItemName = entity.ExpenseItemName,
+                StaffName = entity.StaffName,
+                PaymentMode = entity.PaymentMode,
+                PaymentModeName = entity.PaymentModeName
+            };
     }
 }

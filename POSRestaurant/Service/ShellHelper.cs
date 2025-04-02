@@ -114,13 +114,22 @@ namespace POSRestaurant.Service
             }
 
             // Configure Settings tab visibility
-            if (authService.HasPermission("EditInventory"))
+            if (authService.HasPermission("AddInventory"))
             {
-                var inventoryTab = tabBar.Items.FirstOrDefault(t =>
+                var inventoryAddTab = tabBar.Items.FirstOrDefault(t =>
                     t.Route != null && t.Route.Contains("InventoryPage", StringComparison.OrdinalIgnoreCase));
 
-                if (inventoryTab != null)
-                    inventoryTab.IsVisible = true;
+                if (inventoryAddTab != null)
+                    inventoryAddTab.IsVisible = true;
+            }
+
+            if (authService.HasPermission("EditInventory"))
+            {
+                var inventoryEditTab = tabBar.Items.FirstOrDefault(t =>
+                    t.Route != null && t.Route.Contains("InventoryEdit", StringComparison.OrdinalIgnoreCase));
+
+                if (inventoryEditTab != null)
+                    inventoryEditTab.IsVisible = true;
             }
 
             // Configure Settings tab visibility

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="POSRestaurant.Pages.InventoryEdit"
+             xmlns:vm="clr-namespace:POSRestaurant.ViewModels"
+             xmlns:data="clr-namespace:POSRestaurant.Data"
+             xmlns:models="clr-namespace:POSRestaurant.Models"
+             xmlns:controls="clr-namespace:POSRestaurant.Controls"
+             xmlns:converters="clr-namespace:POSRestaurant.Converters"
+             Title="InventoryEdit"
+             x:DataType="vm:InventoryEditViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label" x:Key="th">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="Black" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
+            </Style>
+            <Style TargetType="Label" x:Key="td">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Padding" Value="10"/>
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid Padding="10" Margin="10">
+        <Grid RowDefinitions="Auto, Auto, *" RowSpacing="15">
+            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Inventory Report"/>
+            <HorizontalStackLayout Grid.Row="1" Spacing="10">
+                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Select Date:" Style="{StaticResource th}" />
+                    <DatePicker Date="{Binding SelectedDate}" BackgroundColor="{StaticResource DropDownBackground}" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout>
+                    <Button Text="Search" Command="{Binding SearchCommand}" />
+                </HorizontalStackLayout>
+            </HorizontalStackLayout>
+
+            <Grid Grid.Row="2" Margin="5">
+                <Grid RowSpacing="0" ColumnSpacing="0" RowDefinitions="Auto, *">
+                    <Border Grid.Row="0" Stroke="Black" StrokeThickness="1" StrokeShape="RoundRectangle 10">
+                        <Grid BackgroundColor="Gray" ColumnDefinitions="*, *, *, *, *, *, *">
+                            <Label Grid.Column="0" Text="Expense Type" 
+                           Style="{StaticResource th}" />
+                            <Label Grid.Column="1" Text="Item Name"
+                           Style="{StaticResource th}" />
+                            <Label Grid.Column="2" Text="Weight/Quantity" 
+                           Style="{StaticResource th}" />
+                            <Label Grid.Column="3" Text="Amount" 
+                           Style="{StaticResource th}" />
+                            <Label Grid.Column="4" Text="Payment Mode" 
+                               Style="{StaticResource th}" />
+                            <Label Grid.Column="5" Text="Paid By" 
+                           Style="{StaticResource th}" />
+                            <Label Grid.Column="6" />
+                        </Grid>
+                    </Border>
+                    <CollectionView ItemsSource="{Binding InventoryReportData}" Grid.Row="1">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:InventoryReportModel">
+                                <Grid ColumnDefinitions="*, *, *, *, *, *, *" RowDefinitions="*, Auto">
+                                    <Label Grid.Column="0"
+                                         Text="{Binding ExpenseTypeName}"
+                                         Style="{StaticResource td}"/>
+                                    <Label Grid.Column="1"
+                                         Text="{Binding ExpenseItemName}"
+                                         Style="{StaticResource td}"/>
+                                    <Label Grid.Column="2"
+                                         Text="{Binding QuantityOrWeight}"
+                                         Style="{StaticResource td}"/>
+                                    <Label Grid.Column="3"
+                                         Text="{Binding TotalPrice}"
+                                         Style="{StaticResource td}"/>
+                                    <Label Grid.Column="4"
+                                         Text="{Binding PaymentModeName}"
+                                         Style="{StaticResource td}"/>
+                                    <Label Grid.Column="5"
+                                         Text="{Binding StaffName}"
+                                         Style="{StaticResource td}"/>
+                                    <Button Grid.Column="6"
+                                            Text="Delete Entry"
+                                            Command="{Binding Source={x:RelativeSource AncestorType={x:Type vm:InventoryEditViewModel}}, Path=DeleteInventoryEntryCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    <BoxView Grid.Row="1"
+                                         Grid.ColumnSpan="6"
+                                         HeightRequest="1"
+                                         Color="LightGray"/>
+                                </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+
+</ContentPage>

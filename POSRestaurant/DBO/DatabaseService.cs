@@ -188,6 +188,7 @@ namespace POSRestaurant.DBO
                 await UserOperation.SavePermissionAsync("EditMenu");
                 await UserOperation.SavePermissionAsync("EditStaff");
                 await UserOperation.SavePermissionAsync("ViewReport");
+                await UserOperation.SavePermissionAsync("AddInventory");
                 await UserOperation.SavePermissionAsync("EditInventory");
                 await UserOperation.SavePermissionAsync("EditRoles");
                 await UserOperation.SavePermissionAsync("EditUser");

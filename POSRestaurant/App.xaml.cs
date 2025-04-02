@@ -52,7 +52,7 @@ namespace POSRestaurant
                 Task.Run(async () => await databaseService.InitializeDatabaseAsync()).GetAwaiter().GetResult();
 
                 // Start monitoring for payments
-                Task.Run(async () => await paymentMonitoringService.CheckPaymentStatus()).GetAwaiter().GetResult();
+                Task.Run(async () => await paymentMonitoringService.CheckPaymentStatus());
             }
             catch (Exception ex)
             {
