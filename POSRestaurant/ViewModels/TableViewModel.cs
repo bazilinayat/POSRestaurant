@@ -3,6 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Maui.Controls;
+using Microsoft.Toolkit.Uwp.Notifications;
+using Plugin.LocalNotification;
+using Plugin.LocalNotification.EventArgs;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Controls;
 using POSRestaurant.Data;
@@ -81,6 +84,8 @@ namespace POSRestaurant.ViewModels
         /// DIed BillingService
         /// </summary>
         private readonly BillingService _billingService;
+
+        private readonly WindowsNotificationService _notificationService;
 
         /// <summary>
         /// List of waiters to be assigned to the order
@@ -190,7 +195,7 @@ namespace POSRestaurant.ViewModels
             DatabaseService databaseService, HomeViewModel homeViewModel, 
             OrdersViewModel ordersViewModel, Setting settingService,
             PickupViewModel pickupViewModel, BillingService billingService,
-            IAuthService authService)
+            IAuthService authService, WindowsNotificationService notificationService)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -201,6 +206,7 @@ namespace POSRestaurant.ViewModels
             _pickupViewModel = pickupViewModel;
             _billingService = billingService;
             _authService = authService;
+            _notificationService = notificationService;
 
             // Registering for listetning to the WeakReferenceMessenger for item change
             WeakReferenceMessenger.Default.Register<TableChangedMessage>(this);
@@ -731,6 +737,9 @@ namespace POSRestaurant.ViewModels
             var receivedOrder = orderChangedMessage.Value;
             if (receivedOrder != null)
             {
+                if (receivedOrder.OrderType != OrderTypes.Pickup)
+                    return;
+
                 if (receivedOrder.OrderStatus == TableOrderStatus.Paid)
                 {
                     var orderToRemove = RunningPickupOrders.Where(o => o.Id == receivedOrder.Id).FirstOrDefault();

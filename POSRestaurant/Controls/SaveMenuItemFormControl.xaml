@@ -20,7 +20,7 @@
     <ScrollView BindingContext="{x:Reference this}">
         <VerticalStackLayout Spacing="5">
             <VerticalStackLayout Spacing="5">
-                <Label Text="Name" FontSize="16"/>
+                <Label Text="Name" Style="{StaticResource LabelFeilds}"/>
                 <Entry Text="{Binding Item.Name}" Placeholder="Enter name" Style="{StaticResource txt}"/>
             </VerticalStackLayout>
             <VerticalStackLayout Spacing="5">

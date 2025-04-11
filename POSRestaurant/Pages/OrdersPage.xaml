@@ -14,26 +14,12 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
-            <Style TargetType="Label" x:Key="th">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="FontAttributes" Value="Bold" />
-                <Setter Property="TextColor" Value="Black" />
-                <Setter Property="VerticalOptions" Value="Center" />
-                <Setter Property="HorizontalOptions" Value="Center" />
-                <Setter Property="Padding" Value="10"/>
-            </Style>
-            <Style TargetType="Label" x:Key="td">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="VerticalOptions" Value="Center" />
-                <Setter Property="HorizontalOptions" Value="Center" />
-                <Setter Property="Padding" Value="5"/>
-            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
     <Grid ColumnDefinitions="0.40*, 0.60*" Margin="10">
         <Grid Grid.Column="0" RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="15">
-            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Orders"/>
+            <Label Grid.Row="0" Text="Orders" Style="{StaticResource LabelPageHeader}" />
             <HorizontalStackLayout Grid.Row="1" Spacing="10">
                 <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                     <Label Text="Select Date:" Style="{StaticResource th}" />

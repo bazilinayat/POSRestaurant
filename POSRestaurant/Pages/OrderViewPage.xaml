@@ -13,13 +13,6 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
-            <Style TargetType="Entry" x:Key="txt">
-                <Setter Property="BackgroundColor" Value="Wheat" />
-                <Setter Property="PlaceholderColor" Value="Black" />
-            </Style>
-            <Style TargetType="Label" x:Key="lbl">
-                <Setter Property="FontSize" Value="16" />
-            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -72,11 +65,9 @@
                              Spacing="5"
                              Padding="10, 0">
                     <Label Text="{Binding TableNumber, StringFormat='Table: {0}'}"
-                            FontSize="25"
-                            FontAttributes="Bold"/>
+                            Style="{StaticResource LabelPageHeader}"/>
                     <Label Text="Order Items"
-                   FontSize="25"
-                   FontAttributes="Bold"/>
+                   Style="{StaticResource LabelPageHeader}"/>
                     <Label Text="{Binding OrderModelToDisplay.Id, StringFormat='Order Id - {0}'}" />
                     <Label Text="{Binding OrderModelToDisplay.OrderDate, StringFormat='DateTime - {0}'}" />
                 </VerticalStackLayout>
@@ -96,13 +87,11 @@
                                         StrokeShape="RoundRectangle 10">
                                         <VerticalStackLayout Spacing="5">
                                             <Label Text="{Binding Name}" 
-                                               FontSize="18"
-                                               FontAttributes="Bold"/>
+                                               Style="{StaticResource LabelFeilds}"/>
                                             <Grid ColumnDefinitions="Auto, *">
                                                 <Label Grid.Column="0"
                                                    Text="{Binding Price, StringFormat='{0:C}'}"
-                                                   FontSize="18"
-                                                   FontAttributes="Bold"
+                                                   Style="{StaticResource LabelFeilds}"
                                                    TextColor="MediumSeaGreen"/>
                                                 <Grid Grid.Column="1"
                                                   ColumnDefinitions="*, 2*, *"
@@ -122,7 +111,7 @@
                                                        HeightRequest="30"
                                                        WidthRequest="60"
                                                        Padding="5"
-                                                       FontSize="18"
+                                                       Style="{StaticResource LabelFeilds}"
                                                        HorizontalOptions="Center"
                                                        HorizontalTextAlignment="Center"
                                                        VerticalTextAlignment="Center"/>

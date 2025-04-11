@@ -33,7 +33,7 @@ namespace POSRestaurant.Service.PaymentService.Models.RazorPay
         public string Entity { get; set; }
 
         [JsonPropertyName("amount")]
-        public int Amount { get; set; }
+        public double Amount { get; set; }
 
         [JsonPropertyName("currency")]
         public string Currency { get; set; }
@@ -54,7 +54,7 @@ namespace POSRestaurant.Service.PaymentService.Models.RazorPay
         public string Method { get; set; }
 
         [JsonPropertyName("amount_refunded")]
-        public int AmountRefunded { get; set; }
+        public int? AmountRefunded { get; set; }
 
         [JsonPropertyName("refund_status")]
         public string RefundStatus { get; set; }
@@ -87,13 +87,13 @@ namespace POSRestaurant.Service.PaymentService.Models.RazorPay
         public string CustomerId { get; set; }
 
         [JsonPropertyName("notes")]
-        public List<string> Notes { get; set; }
+        public Note Notes { get; set; }
 
         [JsonPropertyName("fee")]
-        public int Fee { get; set; }
+        public int? Fee { get; set; }
 
         [JsonPropertyName("tax")]
-        public int Tax { get; set; }
+        public int? Tax { get; set; }
 
         [JsonPropertyName("error_code")]
         public string ErrorCode { get; set; }
@@ -115,11 +115,26 @@ namespace POSRestaurant.Service.PaymentService.Models.RazorPay
 
         [JsonPropertyName("created_at")]
         public long CreatedAt { get; set; }
+        
+        [JsonPropertyName("source_channel")]
+        public string SourceChannel { get; set; }
+
+        [JsonPropertyName("upi")]
+        public UPIPayment UPIPayment { get; set; }
     }
 
     public class AcquirerData
     {
         [JsonPropertyName("rrn")]
         public string Rrn { get; set; }
+    }
+
+    public class UPIPayment
+    {
+        [JsonPropertyName("payer_account_type")]
+        public string PayerAccountType { get; set; }
+
+        [JsonPropertyName("vpa")]
+        public string VPA { get; set; }
     }
 }

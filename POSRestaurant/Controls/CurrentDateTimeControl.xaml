@@ -4,10 +4,10 @@
              x:Class="POSRestaurant.Controls.CurrentDateTimeControl">
     <VerticalStackLayout>
         <Label Text="DAY_TIME" 
-               FontSize="16" 
+               Style="{StaticResource LabelFeilds}"
                x:Name="dayTimeLabel" />
         <Label Text="DATE" 
-               FontSize="16" 
+               Style="{StaticResource LabelFeilds}"
                x:Name="dateLabel" />
     </VerticalStackLayout>
 </ContentView>

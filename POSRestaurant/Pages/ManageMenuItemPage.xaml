@@ -50,9 +50,7 @@
                 <VerticalStackLayout Grid.Row="0" 
                                  Spacing="5"
                                  Padding="10, 0">
-                    <Label Text="Save Menu Item"
-                       FontSize="25"
-                       FontAttributes="Bold"/>
+                    <Label Text="Save Menu Item" Style="{StaticResource LabelPageHeader}"/>
                     <controls:CurrentDateTimeControl />
                 </VerticalStackLayout>
                 <Grid Grid.Row="1"

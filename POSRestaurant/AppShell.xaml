@@ -19,7 +19,7 @@
 
             <!-- Center: Welcome Text -->
             <Label Text="{Binding RestaurantName, StringFormat='Welcome to {0}'}" 
-                   FontSize="20" 
+                   Style="{StaticResource LabelPageHeader}"
                    VerticalOptions="Center" 
                    HorizontalOptions="Center" 
                    Grid.Column="1" 

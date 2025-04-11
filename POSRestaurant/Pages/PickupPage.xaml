@@ -45,7 +45,7 @@
                     <VerticalStackLayout Grid.Row="0" 
                                          Spacing="5"
                                          Padding="10, 0">
-                        <Label Text="Current Order Items" FontSize="25" FontAttributes="Bold"/>
+                        <Label Text="Current Order Items" Style="{StaticResource LabelPageHeader}"/>
                         <controls:CurrentDateTimeControl />
                     </VerticalStackLayout>
                     <Grid Grid.Row="1" Padding="10" BackgroundColor="{StaticResource AllBackground}">
@@ -59,13 +59,11 @@
                                         <Border Padding="5" StrokeShape="RoundRectangle 10">
                                             <VerticalStackLayout Spacing="5">
                                                 <Label Text="{Binding Name}" 
-                                                       FontSize="18"
-                                                       FontAttributes="Bold"/>
+                                                       Style="{StaticResource LabelFeilds}"/>
                                                 <Grid ColumnDefinitions="Auto, *">
                                                     <Label Grid.Column="0"
                                                            Text="{Binding Price, StringFormat='{0:C}'}"
-                                                           FontSize="18"
-                                                           FontAttributes="Bold"
+                                                           Style="{StaticResource LabelFeilds}"
                                                            TextColor="MediumSeaGreen"/>
                                                     <Grid Grid.Column="1"
                                                           ColumnDefinitions="*, 2*, *"
@@ -85,10 +83,10 @@
                                                                HeightRequest="30"
                                                                WidthRequest="60"
                                                                Padding="5"
-                                                               FontSize="18"
                                                                HorizontalOptions="Center"
                                                                HorizontalTextAlignment="Center"
-                                                               VerticalTextAlignment="Center"/>
+                                                               VerticalTextAlignment="Center"
+                                                               Style="{StaticResource LabelFeilds}"/>
                                                         <ImageButton Grid.Column="2"
                                                                      Source="plus_regular_24.png"
                                                                      BackgroundColor="LightYellow"
@@ -132,7 +130,7 @@
                     BackgroundColor="{StaticResource AllBackground}">
                 <Grid ColumnDefinitions="0.33*, 0.33*, 0.33*">
                     <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
-                        <Label Text="Source" FontSize="16" VerticalOptions="Center"/>
+                        <Label Text="Source" VerticalOptions="Center" Style="{StaticResource LabelFeilds}"/>
                         <Picker ItemsSource="{Binding PickupSources}"
                                 SelectedItem="{Binding SelectedSource, Mode=TwoWay}"
                                 ItemDisplayBinding="{Binding Value}"
@@ -141,12 +139,12 @@
                     </HorizontalStackLayout>
 
                     <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center" IsVisible="{Binding ReferenceNeeded}">
-                        <Label Text="Reference No." FontSize="16" VerticalOptions="Center"/>
-                        <Entry Text="{Binding ReferenceNo}" FontSize="16" VerticalOptions="Center" />
+                        <Label Text="Reference No." VerticalOptions="Center" Style="{StaticResource LabelPageHeader}"/>
+                        <Entry Text="{Binding ReferenceNo}" VerticalOptions="Center" />
                     </HorizontalStackLayout>
 
                     <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center">
-                        <Label Text="Delivery" FontSize="16" VerticalOptions="Center"/>
+                        <Label Text="Delivery" VerticalOptions="Center" Style="{StaticResource LabelFeilds}"/>
                         <Picker ItemsSource="{Binding DeliveryPersons}"
                                 SelectedItem="{Binding SelectedDeliveryPerson, Mode=TwoWay}"
                                 ItemDisplayBinding="{Binding Name}"
@@ -157,30 +155,30 @@
             </Border>
         </Grid>
 
-        
+
         <Border Grid.Column="2"
                 Padding="0, 10"
                 Margin="5"
                 Stroke="Black">
             <ScrollView>
                 <VerticalStackLayout Grid.Column="1" Padding="10" Spacing="10">
-                <Border BackgroundColor="{StaticResource AllBackground}"
+                    <Border BackgroundColor="{StaticResource AllBackground}"
                         Padding="10"
                         StrokeShape="RoundRectangle 10"
                         StrokeThickness="0">
-                    <Border.Shadow>
-                        <Shadow Brush="red"/>
-                    </Border.Shadow>
-                    <VerticalStackLayout Spacing="10">
-                        <HorizontalStackLayout Spacing="100">
-                            <Label Text="Total Qty:" />
-                            <Label Text="{Binding TotalItemCount}" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="100">
-                            <Label Text="SubTotal:" />
-                            <Label Text="{Binding TotalAmount, StringFormat='{0:C}'}" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2">
+                        <Border.Shadow>
+                            <Shadow Brush="red"/>
+                        </Border.Shadow>
+                        <VerticalStackLayout Spacing="10">
+                            <HorizontalStackLayout Spacing="100">
+                                <Label Text="Total Qty:" />
+                                <Label Text="{Binding TotalItemCount}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="100">
+                                <Label Text="SubTotal:" />
+                                <Label Text="{Binding TotalAmount, StringFormat='{0:C}'}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2">
                                 <Label Text="Discount:" VerticalOptions="Center"/>
                                 <!-- Expense Item Picker -->
                                 <Picker Grid.Column="1" ItemsSource="{Binding DiscountOptionsTS}" 
@@ -202,55 +200,56 @@
                                     </Label.GestureRecognizers>
                                 </Label>
                             </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="100" IsVisible="{Binding IsDiscountGiven}">
-                            <Label Text="SubTotal After Discount:" />
-                            <Label Text="{Binding TotalAmountAfterDiscount, StringFormat='{0:C}'}" />
-                        </HorizontalStackLayout>
-                        <VerticalStackLayout Spacing="10" IsVisible="{Binding UsingGst}">
+                            <HorizontalStackLayout Spacing="100" IsVisible="{Binding IsDiscountGiven}">
+                                <Label Text="SubTotal After Discount:" />
+                                <Label Text="{Binding TotalAmountAfterDiscount, StringFormat='{0:C}'}" />
+                            </HorizontalStackLayout>
+                            <VerticalStackLayout Spacing="10" IsVisible="{Binding UsingGst}">
+                                <HorizontalStackLayout Spacing="100">
+                                    <Label Text="{Binding Cgst, StringFormat='CGST@{0}%'}" />
+                                    <Label Text="{Binding CgstAmount, StringFormat='{0:C}'}" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="100">
+                                    <Label Text="{Binding Sgst, StringFormat='SGST@{0}%'}" />
+                                    <Label Text="{Binding SgstAmount, StringFormat='{0:C}'}" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
                             <HorizontalStackLayout Spacing="100">
-                                <Label Text="{Binding Cgst, StringFormat='CGST@{0}%'}" />
-                                <Label Text="{Binding CgstAmount, StringFormat='{0:C}'}" />
+                                <Label Text="Round Off:" />
+                                <Label Text="{Binding RoundOff, StringFormat='{0:C}'}" />
                             </HorizontalStackLayout>
                             <HorizontalStackLayout Spacing="100">
-                                <Label Text="{Binding Sgst, StringFormat='SGST@{0}%'}" />
-                                <Label Text="{Binding SgstAmount, StringFormat='{0:C}'}" />
+                                <Label Text="Grand Total:" />
+                                <Label Text="{Binding GrandTotal, StringFormat='{0:C}'}" />
                             </HorizontalStackLayout>
                         </VerticalStackLayout>
-                        <HorizontalStackLayout Spacing="100">
-                            <Label Text="Round Off:" />
-                            <Label Text="{Binding RoundOff, StringFormat='{0:C}'}" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="100">
-                            <Label Text="Grand Total:" />
-                            <Label Text="{Binding GrandTotal, StringFormat='{0:C}'}" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
-                <VerticalStackLayout Spacing="10">
-                    <Button Text="Cancel"
+                    </Border>
+                    <VerticalStackLayout Spacing="10">
+                        <Button Text="Cancel"
                             CornerRadius="5"
                             BackgroundColor="Red"
                             Clicked="CancelButton_Clicked" />
-                    <Button Text="Place Order"
+                        <Button Text="Place Order"
                             CornerRadius="5"
                             BackgroundColor="MediumSeaGreen"
                             Clicked="PlaceOrder_Clicked">
-                    </Button>
+                        </Button>
+                    </VerticalStackLayout>
+
                 </VerticalStackLayout>
-                
-            </VerticalStackLayout>
             </ScrollView>
         </Border>
-        
 
         <BoxView IsVisible="{Binding IsLoading}"
          HorizontalOptions="Fill"
          VerticalOptions="Fill"
          Color="{StaticResource LightWheat}"
-         Opacity="0.3"/>
+         Opacity="0.3"
+         AbsoluteLayout.LayoutBounds="0,0,1,1"
+         AbsoluteLayout.LayoutFlags="All"/>
         <ActivityIndicator IsRunning="{Binding IsLoading}" 
-                   HeightRequest="25" 
-                   WidthRequest="25" 
+                   HeightRequest="50" 
+                   WidthRequest="50" 
                    HorizontalOptions="Center" 
                    VerticalOptions="Center"
                    Color="LightBlue"/>

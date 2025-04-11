@@ -20,9 +20,9 @@
 
     <ScrollView BindingContext="{x:Reference this}">
         <VerticalStackLayout Spacing="5">
-            <Label Text="{Binding SaveExpenseItemHeader}" FontSize="20" />
+            <Label Text="{Binding SaveExpenseItemHeader}" Style="{StaticResource LabelPageHeader}" />
             <VerticalStackLayout Spacing="5">
-                <Label Text="Name" FontSize="16"/>
+                <Label Text="Name" Style="{StaticResource LabelFeilds}"/>
                 <Entry Text="{Binding ExpenseItemToSave.Name}" Placeholder="Enter name" Style="{StaticResource txt}"/>
             </VerticalStackLayout>
             <VerticalStackLayout Spacing="5">

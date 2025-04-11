@@ -1,5 +1,6 @@
 ﻿using POSRestaurant.DBO;
 using POSRestaurant.Models;
+using POSRestaurant.Service.LoggerService;
 
 namespace POSRestaurant.Service
 {
@@ -14,6 +15,11 @@ namespace POSRestaurant.Service
         private readonly DatabaseService _databaseService;
 
         /// <summary>
+        /// DIed LogService
+        /// </summary>
+        private readonly LogService _logger;
+
+        /// <summary>
         /// Instance for current user
         /// </summary>
         private CurrentUser _currentUser;
@@ -22,9 +28,10 @@ namespace POSRestaurant.Service
         /// Constructor for AuthService
         /// </summary>
         /// <param name="databaseService">DIed DatabaseService</param>
-        public AuthService(DatabaseService databaseService)
+        public AuthService(DatabaseService databaseService, LogService logger)
         {
             _databaseService = databaseService;
+            _logger = logger;
             LoadUserFromStorage();
         }
 
@@ -141,8 +148,9 @@ namespace POSRestaurant.Service
 
                 _currentUser = System.Text.Json.JsonSerializer.Deserialize<CurrentUser>(json);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError("BillingService-GetOrderDetailsAsync Error", ex);
                 _currentUser = null;
             }
         }

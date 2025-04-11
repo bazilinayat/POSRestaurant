@@ -269,7 +269,12 @@ namespace POSRestaurant.Data
         /// Choose when payment method is card
         /// </summary>
         [Description("Bank")]
-        Bank = 3
+        Bank = 3,
+        /// <summary>
+        /// Choose when the payment is going to be made later
+        /// </summary>
+        [Description("Credit")]
+        Credit = 4
     }
 
     /// <summary>

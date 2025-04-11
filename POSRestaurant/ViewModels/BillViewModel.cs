@@ -317,6 +317,7 @@ namespace POSRestaurant.ViewModels
                 var billModel = new BillModel
                 {
                     RestrauntName = restaurantInfo.Name,
+                    Phone = restaurantInfo.PhoneNumber,
                     Address = restaurantInfo.Address,
                     GSTIn = restaurantInfo.GSTIN,
                     CustomerName = "Customer Name",

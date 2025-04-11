@@ -332,8 +332,6 @@ namespace POSRestaurant.ViewModels
                     OrderTypes.Add(desc);
                 }
 
-                await GetOrdersAsync();
-
                 IsLoading = false;
             }
             catch (Exception ex)
@@ -663,6 +661,7 @@ namespace POSRestaurant.ViewModels
                         OrderType = orderType,
                         NumberOfPeople = tableModel.NumberOfPeople,
                         WaiterId = selectedWaiter.Id,
+                        GrandTotal = kots.Sum(x => x.TotalPrice),
                     };
 
                     errorMessage = await _databaseService.PlaceOrderAsync(orderModel);
@@ -678,6 +677,7 @@ namespace POSRestaurant.ViewModels
 
                     // To maintain state
                     tableModel.StartTime = DateTime.Now;
+                    WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(orderModel));
                 }
 
                 WeakReferenceMessenger.Default.Send(TableStateChangedMessage.From(tableModel));

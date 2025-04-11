@@ -124,7 +124,9 @@ namespace POSRestaurant.ViewModels
                         if (orderToRemove != null)
                             RunningOrders.Remove(orderToRemove);
                     }
-                    else if (receivedOrder.OrderStatus == TableOrderStatus.Running)
+                    else if (receivedOrder.OrderStatus == TableOrderStatus.Running ||
+                        receivedOrder.OrderStatus == TableOrderStatus.Confirmed ||
+                        receivedOrder.OrderStatus == TableOrderStatus.Printed)
                     {
                         RunningOrders.Add(receivedOrder);
                     }

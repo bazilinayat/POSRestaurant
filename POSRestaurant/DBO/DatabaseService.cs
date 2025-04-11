@@ -1,4 +1,6 @@
-﻿using POSRestaurant.Data;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using POSRestaurant.ChangedMessages;
+using POSRestaurant.Data;
 using POSRestaurant.Models;
 using POSRestaurant.Service;
 using POSRestaurant.Service.SettingService;
@@ -292,7 +294,7 @@ namespace POSRestaurant.DBO
         /// <returns>Returns Error Message or null(in case of success)</returns>
         public async Task<string?> InsertOrderKOTAsync(KOTModel[] KOTs, long runningOrderId)
         {
-            var orderModel = await GetOrderById(runningOrderId);
+            var order = await GetOrderById(runningOrderId);
 
             // First we add the kot for the order
             foreach (var kotItem in KOTs)
@@ -318,14 +320,16 @@ namespace POSRestaurant.DBO
                     }
 
                     // Update the order details, for each kot
-                    orderModel.TotalAmount += kotItem.TotalPrice;
-                    orderModel.TotalItemCount += kotItem.TotalItemCount;
-                    orderModel.OrderDate = DateTime.Now;
+                    order.TotalAmount += kotItem.TotalPrice;
+                    order.TotalItemCount += kotItem.TotalItemCount;
+                    order.OrderDate = DateTime.Now;
                 }
             }
 
             // Update the order object with latest details
-            await _connection.UpdateAsync(orderModel);
+            await _connection.UpdateAsync(order);
+
+            WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(OrderModel.FromEntity(order)));
 
             return null;
         }
@@ -443,6 +447,8 @@ namespace POSRestaurant.DBO
 
                     // Delete the role
                     await _connection.ExecuteAsync("DELETE FROM [Order] WHERE Id = ?", orderId);
+
+                    await _connection.ExecuteAsync("DELETE FROM [TableState] WHERE RunningOrderId = ?", orderId);
                 });
 
                 return true;
@@ -797,7 +803,7 @@ namespace POSRestaurant.DBO
         /// </summary>
         /// <returns>Returns a list of Order object</returns>
         public async Task<Order[]> GetRunningOrdersAsync() =>
-            await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running).ToArrayAsync();
+            await _connection.Table<Order>().Where(o => o.OrderStatus == TableOrderStatus.Running || o.OrderStatus == TableOrderStatus.Confirmed || o.OrderStatus == TableOrderStatus.Printed).ToArrayAsync();
 
         /// <summary>
         /// Implementation of IAsyncDisposable interface

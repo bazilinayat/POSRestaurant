@@ -9,30 +9,12 @@
              xmlns:converters="clr-namespace:POSRestaurant.Converters"
              Title="ExpenseItemManagementPage"
              x:DataType="vm:ExpenseItemViewModel">
-
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <Style TargetType="Label" x:Key="th">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="FontAttributes" Value="Bold" />
-                <Setter Property="TextColor" Value="Black" />
-                <Setter Property="VerticalOptions" Value="Center" />
-            </Style>
-            <Style TargetType="Label" x:Key="td">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="VerticalOptions" Value="Center" />
-            </Style>
-        </ResourceDictionary>
-    </ContentPage.Resources>
-
+    
     <Grid ColumnDefinitions=".70*, .30*" Margin="10">
         <Grid Grid.Column="0"
           RowDefinitions="Auto, Auto, *" 
           RowSpacing="15">
-            <Label Grid.Row="0" 
-               FontAttributes="Bold"
-               FontSize="22"
-               Text="Expense Items"/>
+            <Label Grid.Row="0" Style="{StaticResource LabelPageHeader}" Text="Expense Items"/>
             <Button Grid.Row="1" Text="Add New Expense Item" HeightRequest="40"
                 HorizontalOptions="Start"
                 Command="{Binding AddNewExpenseItemCommand}"/>

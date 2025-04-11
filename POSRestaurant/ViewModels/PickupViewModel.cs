@@ -791,7 +791,7 @@ namespace POSRestaurant.ViewModels
 
                 //await SaveOrderPaymentAsync();
 
-                var (imageUrl, qrCodeId) = await _razorPayService.GenerateDynamicQR(orderModel.Id, 1);
+                var (imageUrl, qrCodeId) = await _razorPayService.GenerateDynamicQR(orderModel.Id, orderModel.GrandTotal);
 
                 // var imageUrl = "https://rzp.io/i/BWcUVrLp";
                 var qrContent = await GetQRContent(imageUrl);
@@ -965,6 +965,7 @@ namespace POSRestaurant.ViewModels
                 var billModel = new BillModel
                 {
                     RestrauntName = restaurantInfo.Name,
+                    Phone = restaurantInfo.PhoneNumber,
                     Address = restaurantInfo.Address,
                     GSTIn = restaurantInfo.GSTIN,
                     CustomerName = "Customer Name",

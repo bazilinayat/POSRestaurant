@@ -14,6 +14,7 @@
     <toolkit:Popup.Resources>
         <ResourceDictionary>
             <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <Style TargetType="Entry" x:Key="txt">
                 <Setter Property="BackgroundColor" Value="Wheat" />
                 <Setter Property="PlaceholderColor" Value="Black" />
@@ -36,15 +37,15 @@
                     <Label IsVisible="{Binding IsDineIn}"
                            Text="{Binding TableModel.TableNo, StringFormat='Table No. {0} - '}"
                            TextColor="Black"
-                           FontSize="15"/>
+                           Style="{StaticResource LabelFeilds}"/>
                     <Label IsVisible="{Binding IsDineIn, Converter={StaticResource InverseBooleanConverter}}"
                            Text="{Binding TableModel.TableNo, StringFormat='Table No. {0} - '}"
                            TextColor="Black"
-                           FontSize="15"/>
+                           Style="{StaticResource LabelFeilds}"/>
                     <Label
                            Text="{Binding TableModel.OrderTotal, StringFormat='[{0:C}]'}"
                            TextColor="Black"
-                           FontSize="15"/>
+                           Style="{StaticResource LabelFeilds}"/>
                 </HorizontalStackLayout>
                 
                 <Label Grid.Column="1"
@@ -56,7 +57,7 @@
                        VerticalTextAlignment="Center"
                        TextColor="Black"
                        FontAttributes="Bold"
-                       FontSize="15"
+                       Style="{StaticResource LabelFeilds}"
                        HorizontalOptions="End">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="CloseLabel_Tapped"/>

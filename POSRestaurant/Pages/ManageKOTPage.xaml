@@ -17,7 +17,7 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, *" RowSpacing="10" Margin="10">
-        <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Manage Menu Items"/>
+        <Label Grid.Row="0" Text="Manage Menu Items" Style="{StaticResource LabelPageHeader}"/>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding RunningOrders}">
             <CollectionView.ItemsLayout>

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
+using Plugin.LocalNotification;
 using POSRestaurant.DBO;
 using POSRestaurant.Pages;
 using POSRestaurant.PaymentService.Online;
@@ -33,7 +34,8 @@ namespace POSRestaurant
                     fonts.AddFont("Poppins-Bold.ttf", "PoppinsBold");
                     fonts.AddFont("Poppins-Regular.ttf", "PoppinsRegular");
                 })
-                .UseMauiCommunityToolkit();
+                .UseMauiCommunityToolkit()
+                .UseLocalNotification();
 
 #if DEBUG
     		builder.Logging.AddDebug();
@@ -55,6 +57,7 @@ namespace POSRestaurant
                 .AddSingleton<IAuthService, AuthService>()
                 .AddSingleton<INavigationService, NavigationService>()
                 .AddSingleton<PaymentMonitoringService>()
+                .AddSingleton<WindowsNotificationService>()
 
                 .AddSingleton<MainPage>()
                 .AddSingleton<OrdersPage>()
@@ -71,8 +74,7 @@ namespace POSRestaurant
                 .AddSingleton<SalesReportPage>()
                 .AddSingleton<RoleManagementPage>()
                 .AddSingleton<UserManagementPage>()
-                .AddTransient<LoginPage>()
-                .AddTransient<ManageKOTPage>()
+                .AddSingleton<ManageKOTPage>()
                 .AddSingleton<InventoryEdit>()
                 
                 .AddSingleton<ShellViewModel>()
@@ -92,8 +94,7 @@ namespace POSRestaurant
                 .AddSingleton<SalesReportViewModel>()
                 .AddSingleton<RoleManagementViewModel>()
                 .AddSingleton<UserManagementViewModel>()
-                .AddTransient<LoginViewModel>()
-                .AddTransient<ManageKOTViewModel>()
+                .AddSingleton<ManageKOTViewModel>()
                 .AddSingleton<InventoryEditViewModel>();
 
             // Force initialize Windows App Runtime components

@@ -9,28 +9,9 @@
              Title="BillPage"
              x:DataType="vm:BillViewModel">
 
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <Style TargetType="Label" x:Key="th">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="FontAttributes" Value="Bold" />
-                <Setter Property="TextColor" Value="Black" />
-                <Setter Property="VerticalOptions" Value="Center" />
-                <Setter Property="HorizontalOptions" Value="Center" />
-                <Setter Property="Padding" Value="10"/>
-            </Style>
-            <Style TargetType="Label" x:Key="td">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="VerticalOptions" Value="Center" />
-                <Setter Property="HorizontalOptions" Value="Center" />
-                <Setter Property="Padding" Value="5"/>
-            </Style>
-        </ResourceDictionary>
-    </ContentPage.Resources>
-
     <Grid ColumnDefinitions="0.60*, 0.40*" Margin="10">
         <Grid Grid.Column="0" RowDefinitions="Auto, Auto, Auto, Auto, *" RowSpacing="15">
-            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Bill"/>
+            <Label Grid.Row="0" Style="{StaticResource LabelPageHeader}" Text="Bill"/>
             <HorizontalStackLayout Grid.Row="1" Spacing="100">
                 <HorizontalStackLayout Spacing="5">
                     <Label Text="Order No.:" />
@@ -112,7 +93,7 @@
         </Grid>
         <VerticalStackLayout Grid.Column="1" Margin="10" Spacing="10">
             <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center">
-                <Label Text="Cashier" FontSize="16" VerticalOptions="Center"/>
+                <Label Text="Cashier" Style="{StaticResource LabelFeilds}" VerticalOptions="Center"/>
                 <Picker ItemsSource="{Binding Cashiers}"
             SelectedItem="{Binding SelectedCashier, Mode=TwoWay}"
             ItemDisplayBinding="{Binding Name}"

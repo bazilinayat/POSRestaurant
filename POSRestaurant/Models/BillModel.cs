@@ -10,6 +10,7 @@ namespace POSRestaurant.Models
     public class BillModel
     {
         public string RestrauntName { get; set; }
+        public string Phone { get; set; }
         public string Address { get; set; }
         public string GSTIn { get; set; }
         public string CustomerName { get; set; }

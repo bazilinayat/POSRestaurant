@@ -138,10 +138,10 @@ namespace POSRestaurant.Service
         {
             // Basic height calculation (adjust based on your needs)
             float height = 100; // Header space
-            height += data.Items.Count * 5; // Items space
+            height += data.Items.Count * 10; // Items space
             height += 50; // Totals space
             height += 5; // Footer space
-            return height+100;
+            return height + 40;
         }
 
         /// <summary>
@@ -153,26 +153,30 @@ namespace POSRestaurant.Service
         {
             try
             {
-                //Paragraph header = new Paragraph(data.RestrauntName)
-                //    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                //    .SetFontSize(12);
-                //document.Add(header);
+                Paragraph header = new Paragraph(data.RestrauntName)
+                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                    .SetFontSize(12);
+                document.Add(header);
 
-                ImageData imageData = ImageDataFactory.Create("gokul.scale-100.png");
-                Image image = new Image(imageData);
+                //ImageData imageData = ImageDataFactory.Create("gokul.scale-100.png");
+                //Image image = new Image(imageData);
 
-                // Set size if needed
-                image.SetWidth(150);  // Width in points
-                                      //image.SetHeight(100); // Height in points
+                //// Set size if needed
+                //image.SetWidth(150);  // Width in points
+                //                      //image.SetHeight(100); // Height in points
 
-                //image.SetAutoScale(true);
+                ////image.SetAutoScale(true);
 
-                image.SetHorizontalAlignment(iText.Layout.Properties.HorizontalAlignment.CENTER);  // This centers the image
-                image.SetMarginTop(20);    // Remove top margin
-                image.SetMarginBottom(20); // Remove bottom margin
+                //image.SetHorizontalAlignment(iText.Layout.Properties.HorizontalAlignment.CENTER);  // This centers the image
+                //image.SetMarginTop(20);    // Remove top margin
+                //image.SetMarginBottom(20); // Remove bottom margin
 
-                // Add to document
-                document.Add(image);
+                //// Add to document
+                //document.Add(image);
+
+                document.Add(new Paragraph(data.Phone)
+                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                    .SetFontSize(8));
 
                 document.Add(new Paragraph(data.Address)
                     .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
@@ -248,13 +252,13 @@ namespace POSRestaurant.Service
                 LineSeparator topLine = new LineSeparator(new SolidLine());
                 document.Add(topLine);
 
-                table.AddCell(new Cell(1, 1).Add(new Paragraph("Item").SetFontSize(8))
+                table.AddCell(new Cell(1, 1).Add(new Paragraph("Item").SetFontSize(10))
                 .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-                table.AddCell(new Cell(1, 1).Add(new Paragraph("Qty").SetFontSize(8))
+                table.AddCell(new Cell(1, 1).Add(new Paragraph("Qty").SetFontSize(10))
                     .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-                table.AddCell(new Cell(1, 1).Add(new Paragraph("Price").SetFontSize(8))
+                table.AddCell(new Cell(1, 1).Add(new Paragraph("Price").SetFontSize(10))
                     .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-                table.AddCell(new Cell(1, 1).Add(new Paragraph("Total").SetFontSize(8))
+                table.AddCell(new Cell(1, 1).Add(new Paragraph("Total").SetFontSize(10))
                 .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
 
                 table.AddCell(new Cell().Add(new Paragraph().SetFontSize(1)).SetBorder(iText.Layout.Borders.Border.NO_BORDER).SetBorderBottom(new SolidBorder(1)));
@@ -265,13 +269,13 @@ namespace POSRestaurant.Service
                 // Add items
                 foreach (var item in items)
                 {
-                    table.AddCell(new Cell().Add(new Paragraph(item.Name).SetFontSize(8))
-                    .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-                    table.AddCell(new Cell().Add(new Paragraph(item.Quantity.ToString()).SetFontSize(8))
+                    table.AddCell(new Cell().Add(new Paragraph(item.Name).SetFontSize(10))
+                     .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
+                    table.AddCell(new Cell().Add(new Paragraph(item.Quantity.ToString()).SetFontSize(10))
                         .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-                    table.AddCell(new Cell().Add(new Paragraph(item.Price.ToString("F2")).SetFontSize(8))
+                    table.AddCell(new Cell().Add(new Paragraph(item.Price.ToString("F2")).SetFontSize(10))
                         .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
-                    table.AddCell(new Cell().Add(new Paragraph((item.Quantity * item.Price).ToString("F2")).SetFontSize(8))
+                    table.AddCell(new Cell().Add(new Paragraph((item.Quantity * item.Price).ToString("F2")).SetFontSize(10))
                         .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
                 }
 
@@ -297,11 +301,11 @@ namespace POSRestaurant.Service
             {
                 document.Add(new Paragraph($"Total Qty: {data.TotalQty}")
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                        .SetFontSize(8));
+                        .SetFontSize(10));
 
                 document.Add(new Paragraph($"SubTotal: {data.SubTotal:F2}")
                     .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                    .SetFontSize(8));
+                    .SetFontSize(10));
 
                 if (data.IsDiscountGiven)
                 {
@@ -309,37 +313,37 @@ namespace POSRestaurant.Service
                     {
                         document.Add(new Paragraph($"Fixed Discount: {data.DiscountFixed}")
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                        .SetFontSize(8));
+                        .SetFontSize(10));
                     }
                     else if (data.IsPercentageBased)
                     {
                         document.Add(new Paragraph($"Discount@{data.DiscountPercentage}: {(data.SubTotal * data.DiscountPercentage / 100):F2}")
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                        .SetFontSize(8));
+                        .SetFontSize(10));
                     }
                     document.Add(new Paragraph($"SubTotal After: {data.SubTotalAfterDiscount:F2}")
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                        .SetFontSize(8));
+                        .SetFontSize(10));
                 }
 
                 if (data.UsginGST)
                 {
                     document.Add(new Paragraph($"CGST@{data.CGST}: {data.CGSTAmount:F2}")
                     .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                    .SetFontSize(8));
+                    .SetFontSize(10));
 
                     document.Add(new Paragraph($"SGST@{data.SGST}: {data.SGSTAmount:F2}")
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                        .SetFontSize(8));
+                        .SetFontSize(10));
                 }
 
                 document.Add(new Paragraph($"RoundOff: {data.RoundOff:F2}")
                     .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                    .SetFontSize(8));
+                    .SetFontSize(10));
 
                 var grandTotalPara = new Paragraph($"Grand Total: {data.GrandTotal:F2}")
                     .SetTextAlignment(iText.Layout.Properties.TextAlignment.RIGHT)
-                    .SetFontSize(8);
+                    .SetFontSize(10);
 
                 grandTotalPara.SetBorderTop(new SolidBorder(1));
                 grandTotalPara.SetBorderBottom(new SolidBorder(1));
@@ -351,8 +355,6 @@ namespace POSRestaurant.Service
                     .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
                     .SetFontSize(8));
 
-
-                // string qrContent = $"upi://pay?pa=paytm.s191jue@pty&pn=Gokul Pav Bhaji&am={data.GrandTotal}&cu=INR&tn=Bill #{data.BillNo}";
                 BarcodeQRCode qrCode = new BarcodeQRCode(data.QRCode);
 
                 // Create the QR code image
@@ -412,7 +414,7 @@ namespace POSRestaurant.Service
         {
             // Temporary PDF file path
             string tempPdfFile = System.IO.Path.GetTempFileName();
-            tempPdfFile = "E:\\ResumeBuilding\\bills.pdf";
+            //tempPdfFile = "E:\\ResumeBuilding\\bills.pdf";
 
             try
             {
@@ -421,7 +423,7 @@ namespace POSRestaurant.Service
 
                 // Ghostscript conversion command
                 string tempImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "receipt.bmp");
-                tempImageFile = "E:\\ResumeBuilding\\receipt.bmp";
+                //tempImageFile = "E:\\ResumeBuilding\\receipt.bmp";
 
 
                 var processInfo = new ProcessStartInfo

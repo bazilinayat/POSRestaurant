@@ -230,12 +230,23 @@ namespace POSRestaurant.ViewModels
                     return;
                 }
 
-                var order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
+                Order order = null;
+                if (TableModel != null)
+                    order = await _databaseService.GetOrderById(TableModel.RunningOrderId);
+                else
+                    order = await _databaseService.GetOrderById(OrderModel.Id);
+
                 if (order != null)
                 {
                     order.OrderStatus = TableOrderStatus.Paid;
                     order.PaymentMode = PaymentMode;
                     await _databaseService.UpdateOrder(order);
+                }
+                else
+                {
+                    _logger.LogError("OrderCompleteVM-SaveOrderPaymentAsync Order is Empty");
+                    await Shell.Current.DisplayAlert("Fault", "Order is Empty", "OK");
+                    return;
                 }
 
                 if (TableModel != null)

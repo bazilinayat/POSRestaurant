@@ -24,9 +24,7 @@
            HeightRequest="100" 
            HorizontalOptions="Center" />
 
-            <Label Text="Welcome Back!"
-           FontSize="28"
-           HorizontalOptions="Center" />
+            <Label Text="Welcome!" FontSize="28" HorizontalOptions="Center" />
 
             <Frame BorderColor="Gray" Padding="10" CornerRadius="5">
                 <Entry x:Name="UsernameEntry" 
@@ -103,7 +101,7 @@
 
                     <FlexLayout Grid.Row="0" JustifyContent="SpaceBetween" Margin="10">
                         <HorizontalStackLayout Spacing="10">
-                            <Label Text="Cashier" FontSize="16" VerticalOptions="Center"/>
+                            <Label Text="Cashier" VerticalOptions="Center"/>
                             <Picker ItemsSource="{Binding Cashiers}" SelectedItem="{Binding SelectedCashier, Mode=TwoWay}"
                                     ItemDisplayBinding="{Binding Name}"
                                     BackgroundColor="LightYellow"
@@ -122,19 +120,19 @@
                         <HorizontalStackLayout Spacing="20">
                             <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Free Table to Put Order">
                                 <Rectangle Fill="Maroon" HeightRequest="20" WidthRequest="20" />
-                                <Label Text="Free" FontSize="12" VerticalOptions="Center" />
+                                <Label Text="Free" VerticalOptions="Center" />
                             </HorizontalStackLayout>
                             <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Can Add New Items">
                                 <Rectangle Fill="Yellow" HeightRequest="20" WidthRequest="20" />
-                                <Label Text="Running" FontSize="12" VerticalOptions="Center" />
+                                <Label Text="Running" VerticalOptions="Center" />
                             </HorizontalStackLayout>
                             <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Order Confirmed, Ready for Printing">
                                 <Rectangle Fill="Orange" HeightRequest="20" WidthRequest="20" />
-                                <Label Text="Confirmed" FontSize="12" VerticalOptions="Center" />
+                                <Label Text="Confirmed" VerticalOptions="Center" />
                             </HorizontalStackLayout>
                             <HorizontalStackLayout Spacing="5" ToolTipProperties.Text="Printed, Ready for Saving">
                                 <Rectangle Fill="Green" HeightRequest="20" WidthRequest="20" />
-                                <Label Text="Printed" FontSize="12" VerticalOptions="Center" />
+                                <Label Text="Printed" VerticalOptions="Center" />
                             </HorizontalStackLayout>
                         </HorizontalStackLayout>
                     </HorizontalStackLayout>

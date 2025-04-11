@@ -10,28 +10,9 @@
              Shell.NavBarIsVisible="True"
              x:DataType="vm:SalesReportViewModel">
 
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <Style TargetType="Label" x:Key="th">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="FontAttributes" Value="Bold" />
-                <Setter Property="TextColor" Value="Black" />
-                <Setter Property="VerticalOptions" Value="Center" />
-                <Setter Property="HorizontalOptions" Value="Center" />
-                <Setter Property="Padding" Value="10"/>
-            </Style>
-            <Style TargetType="Label" x:Key="td">
-                <Setter Property="FontSize" Value="14" />
-                <Setter Property="VerticalOptions" Value="Center" />
-                <Setter Property="HorizontalOptions" Value="Center" />
-                <Setter Property="Padding" Value="10"/>
-            </Style>
-        </ResourceDictionary>
-    </ContentPage.Resources>
-
     <Grid Padding="10" Margin="10">
         <Grid RowDefinitions="Auto, Auto, Auto, Auto, *" RowSpacing="15">
-            <Label Grid.Row="0" FontAttributes="Bold" FontSize="22" Text="Sales Report"/>
+            <Label Grid.Row="0" Text="Sales Report" Style="{StaticResource LabelPageHeader}"/>
             <HorizontalStackLayout Grid.Row="1" Spacing="10">
                 <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
                     <Label Text="Select Date:" Style="{StaticResource th}" />

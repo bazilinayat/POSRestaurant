@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Toolkit.Uwp.Notifications;
 using POSRestaurant.ChangedMessages;
 using POSRestaurant.Data;
 using POSRestaurant.DBO;
@@ -58,6 +59,9 @@ namespace POSRestaurant.Service.PaymentService
         {
             while (true)
             {
+                int _min = 1000;
+                int _max = 9999;
+                Random _rdm = new Random();
                 List<string> qrCodesToRemove = new List<string>();
 
                 foreach(var qrCode in QrCodes)
@@ -113,7 +117,17 @@ namespace POSRestaurant.Service.PaymentService
                         var orderModel = OrderModel.FromEntity(order);
                         WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(orderModel));
 
-                        qrCodesToRemove.Add(qrCode.Key);       
+                        qrCodesToRemove.Add(qrCode.Key);
+
+                        string title = qrCode.Value.TableModelToUpdate != null ?
+                        $"Table #{qrCode.Value.TableModelToUpdate.TableNo} Payment Done of ₹{qrCode.Value.OrderTotal}" :
+                        $"Pickup #{orderModel.OrderNumber} Payment Done of ₹{qrCode.Value.OrderTotal}";
+
+                        new ToastContentBuilder()
+                        .AddArgument("action", "viewConversation")
+                        .AddArgument("conversationId", _rdm.Next(_min, _max))
+                        .AddText(title)
+                        .Show();
                     }
                 }
 

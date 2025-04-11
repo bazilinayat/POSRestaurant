@@ -13,13 +13,6 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
-            <Style TargetType="Entry" x:Key="txt">
-                <Setter Property="BackgroundColor" Value="Wheat" />
-                <Setter Property="PlaceholderColor" Value="Black" />
-            </Style>
-            <Style TargetType="Label" x:Key="lbl">
-                <Setter Property="FontSize" Value="16" />
-            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -55,7 +48,7 @@
                         BackgroundColor="{StaticResource AllBackground}">
                     <Grid ColumnDefinitions="0.50*, 0.50*" Margin="10">
                         <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
-                            <Label Text="Number of People" FontSize="16" VerticalOptions="Center"/>
+                            <Label Text="Number of People" VerticalOptions="Center" Style="{StaticResource LabelFeilds}"/>
                             <ImageButton 
                                          Source="minus_regular_24.png"
                                          BackgroundColor="LightYellow"
@@ -69,7 +62,7 @@
                                    HeightRequest="30"
                                    WidthRequest="60"
                                    Padding="5"
-                                   FontSize="18"
+                                   Style="{StaticResource LabelFeilds}"
                                    HorizontalOptions="Center"
                                    HorizontalTextAlignment="Center"
                                    VerticalTextAlignment="Center"/>
@@ -83,7 +76,7 @@
                                          Command="{Binding IncreaseNumberOfPeopleCommand}"/>
                         </HorizontalStackLayout>
                         <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
-                            <Label Text="Waiter" FontSize="16" VerticalOptions="Center"/>
+                            <Label Text="Waiter" VerticalOptions="Center" Style="{StaticResource LabelFeilds}"/>
                             <Picker ItemsSource="{Binding Waiters}"
                                     SelectedItem="{Binding SelectedWaiter, Mode=TwoWay}"
                                     ItemDisplayBinding="{Binding Name}"
@@ -114,12 +107,8 @@
             <VerticalStackLayout Grid.Row="0" 
                                  Spacing="5"
                                  Padding="10, 0">
-                    <Label Text="{Binding TableNumber, StringFormat='Table: {0}'}"
-                            FontSize="25"
-                            FontAttributes="Bold"/>
-                    <Label Text="Current Order Items"
-                       FontSize="25"
-                       FontAttributes="Bold"/>
+                    <Label Text="{Binding TableNumber, StringFormat='Table: {0}'}" Style="{StaticResource LabelPageHeader}"/>
+                    <Label Text="Current Order Items" Style="{StaticResource LabelPageHeader}"/>
                 <controls:CurrentDateTimeControl />
             </VerticalStackLayout>
             <Grid Grid.Row="1"
@@ -137,14 +126,11 @@
                                 <Border Padding="5"
                                         StrokeShape="RoundRectangle 10">
                                     <VerticalStackLayout Spacing="5">
-                                        <Label Text="{Binding Name}" 
-                                               FontSize="18"
-                                               FontAttributes="Bold"/>
+                                            <Label Text="{Binding Name}" Style="{StaticResource LabelFeilds}"/>
                                         <Grid ColumnDefinitions="Auto, *">
                                             <Label Grid.Column="0"
                                                    Text="{Binding Price, StringFormat='{0:C}'}"
-                                                   FontSize="18"
-                                                   FontAttributes="Bold"
+                                                   Style="{StaticResource LabelFeilds}"
                                                    TextColor="MediumSeaGreen"/>
                                             <Grid Grid.Column="1"
                                                   ColumnDefinitions="*, 2*, *"
@@ -164,7 +150,7 @@
                                                        HeightRequest="30"
                                                        WidthRequest="60"
                                                        Padding="5"
-                                                       FontSize="18"
+                                                       Style="{StaticResource LabelFeilds}"
                                                        HorizontalOptions="Center"
                                                        HorizontalTextAlignment="Center"
                                                        VerticalTextAlignment="Center"/>
