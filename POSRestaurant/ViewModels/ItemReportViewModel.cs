@@ -51,6 +51,8 @@ namespace POSRestaurant.ViewModels
         /// </summary>
         public ObservableCollection<ItemReportModel> ItemReportData { get; set; } = new();
 
+        public ObservableCollection<ItemGroup> ItemReportData1 { get; set; } = new();
+
         /// <summary>
         /// Item data to display
         /// </summary>
@@ -160,6 +162,7 @@ namespace POSRestaurant.ViewModels
             try
             {
                 ItemReportData.Clear();
+                ItemReportData1.Clear();
                 var kotItems = await _databaseService.GetAllKotItemsAsync(SelectedDate);
 
                 var groupedItems = kotItems.GroupBy(o => o.ItemId).ToDictionary(group => group.Key, group => group.ToArray());
@@ -188,18 +191,48 @@ namespace POSRestaurant.ViewModels
                         }
                     };
 
+                    var kotItemModelsList = new List<KOTItemModel>
+                    {
+                        new KOTItemModel
+                        {
+                            ItemId = kotItem.Key,
+                            Name = kotItem.Value.First().Name,
+                            Price = itemPrice,
+                            Quantity = totalQuantity,
+                        }
+                    };
+
                     var existingCategory = ItemReportData.FirstOrDefault(o => o.CategoryName == category.Name);
                     if (existingCategory != null)
                     {
-                        existingCategory.KOTItems.AddRange(kotItemsList);
+                        existingCategory.KOTItems.AddRange(kotItemModelsList);
                     }
                     else
                     {
                         ItemReportData.Add(new ItemReportModel
                         {
                             CategoryName = category.Name,
-                            KOTItems = kotItemsList
+                            KOTItems = kotItemModelsList
                         });
+                    }
+
+                    var existingCategory1 = ItemReportData1.FirstOrDefault(o => o.CategoryName == category.Name);
+                    if (existingCategory1 != null)
+                    {
+                        foreach(var item in kotItemModelsList)
+                        {
+                            existingCategory1.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        var category1 = new ItemGroup();
+                        category1.CategoryName = category.Name;
+                        foreach (var item in kotItemModelsList)
+                        {
+                            category1.Add(item);
+                        }
+                        ItemReportData1.Add(category1);
                     }
                 }
 

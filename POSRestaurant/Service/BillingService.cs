@@ -212,19 +212,23 @@ namespace POSRestaurant.Service
                 }
 
                 var (imageUrl, qrCodeId) = await _razorPayService.GenerateDynamicQR(OrderModel.Id, OrderModel.GrandTotal);
-
-                // var imageUrl = "https://rzp.io/i/BWcUVrLp";
-                var qrContent = await GetQRContent(imageUrl);
-                await PrintReceiptAsync(qrContent);
-
-                _paymentMonitoringService.QrCodes.TryAdd(qrCodeId, new PaymentNecessaryDetail
+                string qrContent = "";
+                if (!string.IsNullOrWhiteSpace(imageUrl))
                 {
-                    QrCodeId = qrCodeId,
-                    Orderid = OrderModel.Id,
-                    OrderTotal = OrderModel.GrandTotal,
-                    OrderType = OrderModel.OrderType,
-                    TableModelToUpdate = TableModel
-                });
+                    // var imageUrl = "https://rzp.io/i/BWcUVrLp";
+                    qrContent = await GetQRContent(imageUrl);
+
+                    _paymentMonitoringService.QrCodes.TryAdd(qrCodeId, new PaymentNecessaryDetail
+                    {
+                        QrCodeId = qrCodeId,
+                        Orderid = OrderModel.Id,
+                        OrderTotal = OrderModel.GrandTotal,
+                        OrderType = OrderModel.OrderType,
+                        TableModelToUpdate = TableModel
+                    });
+                }
+
+                await PrintReceiptAsync(qrContent);
             }
             catch (Exception ex)
             {
@@ -374,7 +378,7 @@ namespace POSRestaurant.Service
                     GrandTotal = OrderModel.GrandTotal,
 
                     FassaiNo = restaurantInfo.FSSAI,
-                    QRCode = qrContent != null ? qrContent : "Data"
+                    QRCode = !string.IsNullOrWhiteSpace(qrContent) ? qrContent : "Data"
                 };
 
                 var pdfData = await _receiptService.GenerateReceipt(billModel);

@@ -47,6 +47,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<AssemblyVersion>1.1.0</AssemblyVersion>
 		<FileVersion>1.1.0</FileVersion>
+		<Platforms>AnyCPU;x86</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -228,6 +229,10 @@
 	  <Reference Include="PaytmChecksum">
 	    <HintPath>References\PaytmChecksum.dll</HintPath>
 	  </Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="C:\Users\bazil\.nuget\packages\microsoft.windowsappsdk\1.6.250205002\buildTransitive\..\include\DeploymentManagerAutoInitializer.cs" />
 	</ItemGroup>
 
 </Project>

@@ -2,6 +2,7 @@
 using SQLite;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,12 @@ namespace POSRestaurant.Models
         /// <summary>
         /// KOT items under this category
         /// </summary>
-        public List<KOTItem> KOTItems { get; set; }
+        public List<KOTItemModel> KOTItems { get; set; }
     }
+
+    public class ItemGroup : ObservableCollection<KOTItemModel>
+    {
+        public string CategoryName { get; set; }
+    }
+
 }

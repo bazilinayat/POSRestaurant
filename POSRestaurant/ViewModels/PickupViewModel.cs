@@ -790,27 +790,7 @@ namespace POSRestaurant.ViewModels
                 }
 
                 //await SaveOrderPaymentAsync();
-
-                var (imageUrl, qrCodeId) = await _razorPayService.GenerateDynamicQR(orderModel.Id, orderModel.GrandTotal);
-
-                // var imageUrl = "https://rzp.io/i/BWcUVrLp";
-                var qrContent = await GetQRContent(imageUrl);
-
-                await PrintReceipt(orderModel, qrContent);
-
-                CartItems.Clear();
-
-                WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(orderModel));
-
-                IsLoading = false;
-
-                _paymentMonitoringService.QrCodes.TryAdd(qrCodeId, new PaymentNecessaryDetail
-                {
-                    QrCodeId = qrCodeId,
-                    Orderid = orderModel.Id,
-                    OrderTotal = orderModel.GrandTotal,
-                    OrderType = orderModel.OrderType,
-                });
+                await CreateQRAndPrint(orderModel);
 
                 await Application.Current.MainPage.Navigation.PopAsync();
             }
@@ -819,6 +799,30 @@ namespace POSRestaurant.ViewModels
                 _logger.LogError("PickupVM-PlaceOrderAsync Error", ex);
                 await Shell.Current.DisplayAlert("Fault", "Error in Placing Pickup Order", "OK");
             }
+        }
+
+        private async Task CreateQRAndPrint(OrderModel orderModel)
+        {
+            var (imageUrl, qrCodeId) = await _razorPayService.GenerateDynamicQR(orderModel.Id, orderModel.GrandTotal);
+
+            // var imageUrl = "https://rzp.io/i/BWcUVrLp";
+            var qrContent = await GetQRContent(imageUrl);
+
+            await PrintReceipt(orderModel, qrContent);
+
+            CartItems.Clear();
+
+            WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(orderModel));
+
+            IsLoading = false;
+
+            _paymentMonitoringService.QrCodes.TryAdd(qrCodeId, new PaymentNecessaryDetail
+            {
+                QrCodeId = qrCodeId,
+                Orderid = orderModel.Id,
+                OrderTotal = orderModel.GrandTotal,
+                OrderType = orderModel.OrderType,
+            });
         }
 
         /// <summary>

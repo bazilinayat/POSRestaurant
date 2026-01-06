@@ -1,10 +1,5 @@
 [
   {
-    "Id": 1,
-    "Name": "BREAKFAST",
-    "Icon": ""
-  },
-  {
     "Id": 2,
     "Name": "SANDWICHES",
     "Icon": ""
@@ -30,11 +25,6 @@
     "Icon": ""
   },
   {
-    "Id": 7,
-    "Name": "NATURAL JUICES",
-    "Icon": ""
-  },
-  {
     "Id": 8,
     "Name": "MASTANI",
     "Icon": ""
@@ -47,11 +37,6 @@
   {
     "Id": 10,
     "Name": "PREMIUM MILKSHAKES",
-    "Icon": ""
-  },
-  {
-    "Id": 11,
-    "Name": "ICE-CREAM",
     "Icon": ""
   },
   {

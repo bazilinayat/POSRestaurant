@@ -55,87 +55,91 @@ namespace POSRestaurant.Service.PaymentService
         /// The method to keep running continuously to monitor the qr code statuses
         /// </summary>
         /// <returns>Returns a task</returns>
-        public async Task CheckPaymentStatus()
+        public void CheckPaymentStatus()
         {
-            while (true)
+            Task.Run(async () =>
             {
-                int _min = 1000;
-                int _max = 9999;
-                Random _rdm = new Random();
-                List<string> qrCodesToRemove = new List<string>();
-
-                foreach(var qrCode in QrCodes)
+                while (true)
                 {
-                    var statusResult = await _razorPayService.SeeQRpaymentStatus(qrCode.Value.QrCodeId);
+                    int _min = 1000;
+                    int _max = 9999;
+                    Random _rdm = new Random();
+                    List<string> qrCodesToRemove = new List<string>();
 
-                    if (statusResult == OnlinePaymentStatus.Completed)
+                    foreach (var qrCode in QrCodes)
                     {
-                        var paymentDetail = await _databaseService.OrderPaymentOperations.GetOrderPaymentById(qrCode.Value.Orderid);
+                        var statusResult = await _razorPayService.SeeQRpaymentStatus(qrCode.Value.QrCodeId);
 
-                        var orderPayment = new OrderPayment
+                        if (statusResult == OnlinePaymentStatus.Completed)
                         {
-                            OrderId = qrCode.Value.Orderid,
-                            SettlementDate = DateTime.Now,
-                            PaymentMode = PaymentModes.Online,
-                            OrderType = OrderTypes.DineIn,
-                            Total = qrCode.Value.OrderTotal,
-                            IsCardForPart = false,
-                            IsCashForPart = false,
-                            IsOnlineForPart = false,
-                            PartPaidInCard = 0,
-                            PartPaidInCash = 0,
-                            PartPaidInOnline = 0,
-                        };
+                            var paymentDetail = await _databaseService.OrderPaymentOperations.GetOrderPaymentById(qrCode.Value.Orderid);
 
-                        var errorMessage = await _databaseService.OrderPaymentOperations.SaveOrderPaymentAsync(orderPayment);
+                            var orderPayment = new OrderPayment
+                            {
+                                OrderId = qrCode.Value.Orderid,
+                                SettlementDate = DateTime.Now,
+                                PaymentMode = PaymentModes.Online,
+                                OrderType = OrderTypes.DineIn,
+                                Total = qrCode.Value.OrderTotal,
+                                IsCardForPart = false,
+                                IsCashForPart = false,
+                                IsOnlineForPart = false,
+                                PartPaidInCard = 0,
+                                PartPaidInCash = 0,
+                                PartPaidInOnline = 0,
+                            };
 
-                        var onlineReference = await _databaseService.OrderPaymentOperations.GetOrderOnlineReferenceAsync(qrCode.Value.Orderid);
-                        onlineReference.OrderPayemntId = orderPayment.Id;
-                        await _databaseService.OrderPaymentOperations.SaveOrderOnlineReferenceAsync(onlineReference);
+                            var errorMessage = await _databaseService.OrderPaymentOperations.SaveOrderPaymentAsync(orderPayment);
 
-                        var order = await _databaseService.GetOrderById(qrCode.Value.Orderid);
-                        if (order != null)
-                        {
-                            order.OrderStatus = TableOrderStatus.Paid;
-                            order.PaymentMode = PaymentModes.Online;
-                            await _databaseService.UpdateOrder(order);
+                            var onlineReference = await _databaseService.OrderPaymentOperations.GetOrderOnlineReferenceAsync(qrCode.Value.Orderid);
+                            onlineReference.OrderPayemntId = orderPayment.Id;
+                            await _databaseService.OrderPaymentOperations.SaveOrderOnlineReferenceAsync(onlineReference);
+
+                            var order = await _databaseService.GetOrderById(qrCode.Value.Orderid);
+                            if (order != null)
+                            {
+                                order.OrderStatus = TableOrderStatus.Paid;
+                                order.PaymentMode = PaymentModes.Online;
+                                await _databaseService.UpdateOrder(order);
+                            }
+
+                            if (qrCode.Value.TableModelToUpdate != null)
+                            {
+                                qrCode.Value.TableModelToUpdate.Status = TableOrderStatus.NoOrder;
+                                qrCode.Value.TableModelToUpdate.Waiter = null;
+                                qrCode.Value.TableModelToUpdate.OrderTotal = 0;
+                                qrCode.Value.TableModelToUpdate.RunningOrderId = 0;
+                                qrCode.Value.TableModelToUpdate.NumberOfPeople = 0;
+
+                                WeakReferenceMessenger.Default.Send(TableStateChangedMessage.From(qrCode.Value.TableModelToUpdate));
+                                WeakReferenceMessenger.Default.Send(TableChangedMessage.From(qrCode.Value.TableModelToUpdate));
+                            }
+
+
+                            var orderModel = OrderModel.FromEntity(order);
+                            WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(orderModel));
+
+                            qrCodesToRemove.Add(qrCode.Key);
+
+                            string title = qrCode.Value.TableModelToUpdate != null ?
+                            $"Table #{qrCode.Value.TableModelToUpdate.TableNo} Payment Done of ₹{qrCode.Value.OrderTotal}" :
+                            $"Pickup #{orderModel.OrderNumber} Payment Done of ₹{qrCode.Value.OrderTotal}";
+
+                            new ToastContentBuilder()
+                            .AddArgument("action", "viewConversation")
+                            .AddArgument("conversationId", _rdm.Next(_min, _max))
+                            .AddText(title)
+                            .Show();
                         }
-
-                        if (qrCode.Value.TableModelToUpdate != null)
-                        {
-                            qrCode.Value.TableModelToUpdate.Status = TableOrderStatus.NoOrder;
-                            qrCode.Value.TableModelToUpdate.Waiter = null;
-                            qrCode.Value.TableModelToUpdate.OrderTotal = 0;
-                            qrCode.Value.TableModelToUpdate.RunningOrderId = 0;
-                            qrCode.Value.TableModelToUpdate.NumberOfPeople = 0;
-
-                            WeakReferenceMessenger.Default.Send(TableStateChangedMessage.From(qrCode.Value.TableModelToUpdate));
-                            WeakReferenceMessenger.Default.Send(TableChangedMessage.From(qrCode.Value.TableModelToUpdate));
-                        }
-
-
-                        var orderModel = OrderModel.FromEntity(order);
-                        WeakReferenceMessenger.Default.Send(OrderChangedMessage.From(orderModel));
-
-                        qrCodesToRemove.Add(qrCode.Key);
-
-                        string title = qrCode.Value.TableModelToUpdate != null ?
-                        $"Table #{qrCode.Value.TableModelToUpdate.TableNo} Payment Done of ₹{qrCode.Value.OrderTotal}" :
-                        $"Pickup #{orderModel.OrderNumber} Payment Done of ₹{qrCode.Value.OrderTotal}";
-
-                        new ToastContentBuilder()
-                        .AddArgument("action", "viewConversation")
-                        .AddArgument("conversationId", _rdm.Next(_min, _max))
-                        .AddText(title)
-                        .Show();
                     }
+
+                    foreach (var toRemove in qrCodesToRemove)
+                        QrCodes.TryRemove(toRemove, out PaymentNecessaryDetail value);
+
+                    Task.Delay(500);
                 }
-
-                foreach (var toRemove in qrCodesToRemove)
-                    QrCodes.TryRemove(toRemove, out PaymentNecessaryDetail value);
-
-                Task.Delay(1000);
-            }
+            });
+            
         }
     }
 }

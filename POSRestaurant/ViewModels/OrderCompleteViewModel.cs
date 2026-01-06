@@ -212,7 +212,7 @@ namespace POSRestaurant.ViewModels
                     OrderId = TableModel != null ? TableModel.RunningOrderId : OrderModel.Id,
                     SettlementDate = DateTime.Now,
                     PaymentMode = PaymentMode,
-                    OrderType = OrderTypes.DineIn,
+                    OrderType = OrderModel.OrderType,
                     Total = TableModel != null ? TableModel.OrderTotal : OrderModel.GrandTotal,
                     IsCardForPart = IsCardForPart,
                     IsCashForPart = IsCashForPart,
